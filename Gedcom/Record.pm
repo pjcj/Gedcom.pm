@@ -13,10 +13,10 @@ require 5.004;
 
 package Gedcom::Record;
 
-use Gedcom::Item 1.03;
+use Gedcom::Item 1.04;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.03";
+$VERSION = "1.04";
 @ISA     = qw( Gedcom::Item );
 
 sub parse
@@ -270,7 +270,7 @@ __END__
 
 Gedcom::Record - a class to manipulate Gedcom records
 
-Version 1.03 - 13th May 1999
+Version 1.04 - 29th May 1999
 
 =head1 SYNOPSIS
 

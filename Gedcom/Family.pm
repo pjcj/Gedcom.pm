@@ -13,10 +13,10 @@ require 5.004;
 
 package Gedcom::Family;
 
-use Gedcom::Record 1.03;
+use Gedcom::Record 1.04;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.03";
+$VERSION = "1.04";
 @ISA     = qw( Gedcom::Record );
 
 sub husband
@@ -57,7 +57,7 @@ __END__
 
 Gedcom::Family - a class to manipulate Gedcom families
 
-Version 1.03 - 13th May 1999
+Version 1.04 - 29th May 1999
 
 =head1 SYNOPSIS
 

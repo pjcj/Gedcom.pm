@@ -6,6 +6,7 @@ Makefile.PL
 ged
 tkged
 parse_grammar
+lines2perl
 Gedcom.pm
 Gedcom/Item.pm
 Gedcom/Grammar.pm

@@ -1,6 +1,6 @@
 Gedcom.pm history
 
-Release 1.00 - Initial release
+Release 1.00 - Initial release - 8th March 1999
 
 Release 1.01 - 27th April 1999
  - Add some documentation
@@ -41,3 +41,10 @@ Release 1.03 - 13th May 1999
  - Add min(), max() and children() to Gedcom::Grammar.pm
  - Add GEDC and SUBM to royal.ged to accomodate validate_syntax()
  - Fix bug which prevented writing of @s around xref values
+
+Release 1.04 - 29th May 1999
+ - Improve default sort subroutine
+ - Include mailing list information
+ - Add lines2perl
+ - Improve Makefile.PL environment tests
+ - Work around IO::Handle::input_line_number bug

@@ -14,7 +14,7 @@
 # Edit parse_grammar or Makefile.PL to increase the legibility of this file.
 # (Removal of the leading spaces nearly halves the size of the file.)
 
-# Version 1.03 - 13th May 1999
+# Version 1.04 - 29th May 1999
 
 use strict;
 
@@ -23,7 +23,7 @@ require 5.004;
 package Gedcom::Grammar_5_5;
 
 use vars qw($VERSION $grammar);
-$VERSION = "1.03";
+$VERSION = "1.04";
 
 $grammar = bless( {
 level => -1,

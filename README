@@ -1,7 +1,7 @@
 NAME
     Gedcom - a class to manipulate Gedcom genealogy files
 
-    Version 1.03 - 13th May 1999
+    Version 1.04 - 29th May 1999
 
 DESCRIPTION
     Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
@@ -32,13 +32,16 @@ DESCRIPTION
 
     The vice of laziness is also shining brightly - I need to document how
     to use this module in much greater detail. This is happening - this
-    release has more docuemntation than the previous ones - but if you would
+    release has more documentation than the previous ones - but if you would
     like information feel free to send me mail.
 
     This module provides some functions which work over the entire Gedcom
     file, such as reformatting dates, renumbering entries and ordering the
-    entries. It also allows acces to individuals, and then to relations of
+    entries. It also allows access to individuals, and then to relations of
     individuals, for example sons, siblings, spouse, parents and so forth.
+
+    This release includes the beginnings of a lines2perl program to convert
+    LifeLines programs to Perl.
 
     Note that this is an early release of this software - caveat emptor.
 
@@ -48,8 +51,14 @@ DESCRIPTION
     Apart from being of interest to me, this will guide my decisions when I
     feel the need to make changes to the interface.
 
-    I couldn't find a nice free program I could use to enter my genealogy,
-    and so I wrote a syntax file (ged.vim) and used vim (http://www.vim.org)
-    to enter the data, and Gedcom.pm to validate and manipulate it. I find
-    this to be a nice solution.
+    There is a low volume mailing list available for discussing the use of
+    Perl in conjunction with genealogical work. This is an appropriate forum
+    for discussing Gedcom.pm. To subscribe to the regular list, send a
+    message to majordomo@icomm.ca and put subscribe perl-gedcom as the body
+    of the message. To get on the digest version of the list, put subscribe
+    perl-gedcom-digest.
+
+    To store my genealogy I wrote a syntax file (ged.vim) and used vim
+    (http://www.vim.org) to enter the data, and Gedcom.pm to validate and
+    manipulate it. I find this to be a nice solution.
 

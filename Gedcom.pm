@@ -16,12 +16,12 @@ package Gedcom;
 use Data::Dumper;
 use FileHandle;
 
-use Gedcom::Grammar    1.03;
-use Gedcom::Individual 1.03;
-use Gedcom::Family     1.03;
+use Gedcom::Grammar    1.04;
+use Gedcom::Individual 1.04;
+use Gedcom::Family     1.04;
 
 use vars qw($VERSION);
-$VERSION = "1.03";
+$VERSION = "1.04";
 
 sub new
 {
@@ -159,6 +159,9 @@ sub renumber
 sub sort_sub
 {
   my $self = shift;
+
+  # subroutine to sort on tag order first, and then on xref
+
   my $tag_order =
   {
     HEAD => 1,
@@ -166,15 +169,31 @@ sub sort_sub
     INDI => 3,
     FAM  => 4,
     NOTE => 5,
-    TRLR => 6,
+    REPO => 6,
+    SOUR => 7,
+    TRLR => 8,
   };
 
-  # subroutine to sort on tag order first, and then on xref
+  my $t = sub
+  {
+    my ($r) = @_;
+    return -2 unless defined $r->{tag};
+    exists $tag_order->{$r->{tag}} ? $tag_order->{$r->{tag}} : -1
+  };
+
+  my $x = sub
+  {
+    my ($r) = @_;
+    return -2 unless defined $r->{xref};
+    $r->{xref} =~ /(\d+)/;
+    defined $1 ? $1 : -1
+  };
+
   sub
   {
-             $tag_order->{$a->{tag}} <=> $tag_order->{$b->{tag}}
-                                     ||
-    do { $a->{xref} =~ /(\d+)/; $1 } <=> do { $b->{xref} =~ /(\d+)/; $1 }
+    $t->($a) <=> $t->($b)
+              ||
+    $x->($a) <=> $x->($b)
   }
 }
 
@@ -260,7 +279,7 @@ __END__
 
 Gedcom - a class to manipulate Gedcom genealogy files
 
-Version 1.03 - 13th May 1999
+Version 1.04 - 29th May 1999
 
 =head1 SYNOPSIS
 
@@ -314,13 +333,16 @@ suppose this is the virtue of laziness shining through.
 
 The vice of laziness is also shining brightly - I need to document how
 to use this module in much greater detail.  This is happening - this
-release has more docuemntation than the previous ones - but if you would
+release has more documentation than the previous ones - but if you would
 like information feel free to send me mail.
 
 This module provides some functions which work over the entire Gedcom
 file, such as reformatting dates, renumbering entries and ordering the
-entries.  It also allows acces to individuals, and then to relations of
+entries.  It also allows access to individuals, and then to relations of
 individuals, for example sons, siblings, spouse, parents and so forth.
+
+This release includes the beginnings of a lines2perl program to convert
+LifeLines programs to Perl.
 
 Note that this is an early release of this software - caveat emptor.
 
@@ -330,10 +352,16 @@ would like to have some sort of an idea of the use this software is
 getting.  Apart from being of interest to me, this will guide my
 decisions when I feel the need to make changes to the interface.
 
-I couldn't find a nice free program I could use to enter my genealogy,
-and so I wrote a syntax file (ged.vim) and used vim (http://www.vim.org)
-to enter the data, and Gedcom.pm to validate and manipulate it.  I find
-this to be a nice solution.
+There is a low volume mailing list available for discussing the use of
+Perl in conjunction with genealogical work.  This is an appropriate
+forum for discussing Gedcom.pm.  To subscribe to the regular list, send
+a message to majordomo@icomm.ca and put subscribe S<perl-gedcom> as the
+body of the message. To get on the digest version of the list, put
+subscribe S<perl-gedcom-digest>.
+
+To store my genealogy I wrote a syntax file (ged.vim) and used vim
+(http://www.vim.org) to enter the data, and Gedcom.pm to validate and
+manipulate it.  I find this to be a nice solution.
 
 =head1 HASH MEMBERS
 

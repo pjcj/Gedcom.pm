@@ -14,7 +14,7 @@ require 5.004;
 package Gedcom::Item;
 
 use vars qw($VERSION);
-$VERSION = "1.03";
+$VERSION = "1.04";
 
 BEGIN { eval "use Date::Manip"; }            # We'll use this if it is available
 
@@ -130,11 +130,12 @@ sub next_record
   elsif ((!$rec || !$rec->{level}) && (my $line = $self->next_text_line))
   {
 #   print "line is $line";
+    my $line_number = eval { $self->{fh}->input_line_number } || $.;
     if (my ($structure) = $line =~ /^\s*(\w+): =\s*$/)
     {
       $rec = $self->new(level     => -1,
                         structure => $structure,
-                        line      => $self->{fh}->input_line_number);
+                        line      => $line_number);
 #     print "found structure $structure\n";
     }
     elsif (my ($level, $xref, $tag, $value, $min, $max) =
@@ -176,7 +177,7 @@ sub next_record
                 \*?                        # optional *
                 \s*$/x)                    # optional whitespace at end
     {
-      $rec = $self->new(line => $self->{fh}->input_line_number) unless $rec;
+      $rec = $self->new(line => $line_number) unless $rec;
       $rec->{level}  = ($level eq "n" ? 0 : $level) if defined $level;
       $rec->{xref}   = $xref  =~ /^\@(\w+\d+)\@$/ ? $1 : $xref
         if defined $xref;
@@ -203,8 +204,7 @@ sub next_record
     {
       chomp $line;
       my $file = $self->{file};
-      my $num = $self->{fh}->input_line_number;
-      die "\n$file:$num: Can't parse line: $line\n";
+      die "\n$file:$line_number: Can't parse line: $line\n";
     }
   }
 # print "comparing "; $record->print;
@@ -342,7 +342,7 @@ __END__
 
 Gedcom::Item - a base class for Gedcom::Grammar and Gedcom::Record
 
-Version 1.03 - 13th May 1999
+Version 1.04 - 29th May 1999
 
 =head1 SYNOPSIS
 

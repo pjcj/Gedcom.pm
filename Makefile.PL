@@ -13,8 +13,10 @@ require 5.004;
 
 use ExtUtils::MakeMaker;
 
-my $Version = "1.03";
-my $Date    = "13th May 1999";
+$| = 1;
+
+my $Version = "1.04";
+my $Date    = "29th May 1999";
 
 open(M, "MANIFEST") or die "Cannot open MANIFEST: $!";
 my @files    = map { split } <M>;
@@ -31,17 +33,81 @@ WriteMakefile
   depend  => { distdir => "@files" },
 );
 
+print "\n";
+print "checking for Date::Manip...";
+
 eval "use Date::Manip";
-unless ($INC{"Date/Manip.pm"})
+if (my $m = $INC{"Date/Manip.pm"})
+{
+  print "$m\n";
+}
+else
 {
   print  <<EOM;
+not found
 
-Date::Manip is required to use the Gedcom function normalise_dates().
-This function will be unavailable until you install this module,
-available from CPAN.  In the meantime, you may continue to use the rest
-of Gedcom.pm.
+Date::Manip is required to use the Gedcom function normalise_dates().  This
+function will be unavailable until you install this module, available from CPAN.
+In the meantime, you may continue to use the rest of Gedcom.pm.
+
 EOM
 }
+
+print "checking for Parse::RecDescent...";
+
+eval "use Parse::RecDescent";
+if (my $m = $INC{"Parse/RecDescent.pm"})
+{
+  print "$m\n";
+}
+else
+{
+  print  <<EOM;
+not found
+
+Parse::RecDescent is required to use the Gedcom program lines2perl.  This
+program will be unavailable until you install this module, available from CPAN.
+In the meantime, you may continue to use the rest of Gedcom.pm.
+
+I wouldn't worry too much about this just yet.  Although I've implemented the
+general purpose language constructs, I've yet to include any genealogical
+functions, so it's unlikely that the program will be of much use to you at the
+moment.
+
+EOM
+}
+
+print "checking for working IO::Handle...";
+
+eval <<'EOE';
+  use FileHandle;
+  my $fh = FileHandle->new("Makefile.PL");
+  $fh->getline;
+  $fh->input_line_number;
+EOE
+if ($@)
+{
+  print <<'EOM';
+broken
+
+You have a broken IO::Handle module.  In particular, the input_line_number
+method causes an error.  Gedcom.pm will work around the problem, but if you
+experience other problems with this function, or your use of $., you may wish to
+solve the problem.
+
+Perl 5.005_03 and (I believe) some developer releases have this problem, as does
+IO.pm version 1.20.  The problem is fixed as from 5.005_57.  If you would like
+to patch your Perl, my patch is available at
+http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1999-04/msg02366.html
+or send me mail.
+EOM
+}
+else
+{
+  print "working\n";
+}
+
+print "\n";
 
 sub MY::postamble
 {
@@ -79,11 +145,10 @@ my @command = ("perlbug", "-a", $author,
 my $command = join " ", map { / / ? "'$_'" : $_ } @command;
 
 my $message = <<EOM;
-
-I like to have some idea of the distribution of this software.  To that
-end I would be very grateful for mail from you.  This will be used only
-to satisfy my curiosity and to help me make decisions which may involve
-changes to the interface etc.
+I like to have some idea of the distribution of this software.  To that end I
+would be very grateful for mail from you.  This will be used only to satisfy my
+curiosity and to help me make decisions which may involve changes to the
+interface etc.
 
 The command: $command
 will provide all the information I need.
@@ -95,7 +160,6 @@ print $message;
 if (-t STDIN)
 {
   my $mess = <<EOM;
-
 May I send a message to the author, Paul Johnson ($author), using the
 above command, to indicate that you are using this module?   yes or no [yes] 
 EOM
@@ -107,8 +171,8 @@ EOM
   {
     print <<EOM;
 
-If you are able to send a message in the future, please do so with the
-command: $command
+If you are able to send a message in the future, please do so with the command:
+$command
 
 EOM
   }
@@ -119,3 +183,9 @@ EOM
       if $?;
   }
 }
+
+print <<EOM;
+If you have any questions or comments, mailing list details are available in the
+README file.
+
+EOM

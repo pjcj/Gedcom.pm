@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.transeda.com/pjcj
 
-# Version 1.03 - 13th May 1999
+# Version 1.04 - 29th May 1999
 
 use strict;
 use Test;
@@ -16,7 +16,7 @@ require 5.004;
 
 BEGIN { plan tests => 2930 }
 
-use Gedcom 1.03;
+use Gedcom 1.04;
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
