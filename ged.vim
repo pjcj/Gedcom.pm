@@ -10,7 +10,7 @@
 " The latest version of this software should be available from my homepage:
 " http://www.transeda.com/pjcj
 
-" Version 1.01 - 27th April 1999
+" Version 1.02 - 5th May 1999
 
 " Remove any old syntax stuff hanging around
 

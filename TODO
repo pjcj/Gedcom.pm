@@ -2,3 +2,5 @@
 - Beef up the testsuite.
 - Make ged into a real program, rather than just a little demo.
 - Finish tkged
+- Provide functions to add data
+- Provide functions to merge data

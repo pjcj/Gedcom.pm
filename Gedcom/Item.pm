@@ -13,12 +13,12 @@ require 5.004;
 
 package Gedcom::Item;
 
+use vars qw($VERSION);
+$VERSION = "1.02";
+
 BEGIN
 {
-  use vars qw($VERSION);
-  $VERSION = "1.01";
-
-  eval "use Date::Manip";
+  eval "use Date::Manip";                    # We'll use this if it is available
 }
 
 sub new
@@ -34,27 +34,33 @@ sub new
 sub read
 {
   my $self = shift;
-  my $callback = $self->{callback};;
+
   $self->{fh} = FileHandle->new($self->{file})
-    or die "Can't open file ", $self->{file}, ": $!";
+    or die "Can't open file $self->{file}: $!";
+
+  # find out how big the file is
   $self->{fh}->seek(0, 2);
   my $size = $self->{fh}->tell;
   $self->{fh}->seek(0, 0);
+
+  # initial callback
+  my $callback = $self->{callback};;
   my $title = "Reading";
-  my $txt1 = "Reading " . $self->{file};
+  my $txt1 = "Reading $self->{file}";
   my $count = 0;
   return undef
     if $callback &&
        !&$callback($title, $txt1, "Record $count", $self->{fh}->tell, $size);
-  $self->{level} = -1;
 
+  $self->{level} = -1;
+  my ($structures, %children);
+
+  # If we have a grammar, then we are reading a gedcom file and must use
+  # the grammar to verify what is being read.
+  # If we do not have a grammar, then that is what we are reading.
   my $grammar = $self->{grammar};
-  my ($t, $structures, %children);
   if ($grammar)
   {
-    my $t = $self->{tag};
-    my $g = $grammar->{tag};
-    warn "Can't match $t with $g" if $t && $t ne $g;
     $structures = $grammar->{structures};
     %children   = %{$grammar->{valid_children}};
 #   print "valid children are: ", join(", ", keys %children), "\n";
@@ -66,7 +72,7 @@ sub read
     if ($grammar)
     {
       my $tag = $structure->{tag};
-      if (defined $children{$tag})
+      if (defined $tag && exists $children{$tag})
       {
         if ($self->parse($structure,
                          $structures,
@@ -79,12 +85,14 @@ sub read
       }
       else
       {
+        $tag = "<empty tag>" unless defined $tag && length $tag;
         warn "$self->{file}:$structure->{line}: " .
-             "$tag does not appear to be a child of $t\n";
+             "$tag does not appear to be a top level tag\n";
       }
     }
     else
     {
+      # just add the grammar item
       push @{$self->{children}}, $structure;
       $count++;
     }
@@ -93,8 +101,7 @@ sub read
          !&$callback($title, $txt1, "Record $count line " . $structure->{line},
                      $self->{fh}->tell, $size);
   }
-  $self->{fh}->close()
-    or die "Can't close file ", $self->{file}, ": $!";
+  $self->{fh}->close or die "Can't close file $self->{file}: $!";
   delete $self->{fh};
   $self;
 }
@@ -103,8 +110,7 @@ sub add_children
 {
   my $self = shift;
   my ($record) = @_;
-# print "adding children to: "; $record->print();
-# print Dumper $record;
+# print "adding children to: "; $record->print;
   while (my $next = $self->next_record($record))
   {
     unless (ref $next)
@@ -114,10 +120,8 @@ sub add_children
     }
     my $level = $record->{level};
     my $next_level = $next->{level};
-#   print "levels are $level and $next_level\n";
     if (!defined $next_level || $next_level <= $level)
     {
-#     print "storing...\n";
       $self->{stored_record} = $next;
       return;
     }
@@ -141,8 +145,7 @@ sub next_record
   {
     $self->{stored_record} = undef;
   }
-  elsif ((!$rec || !$rec->{level}) &&
-         (my $line = $self->next_text_line()))
+  elsif ((!$rec || !$rec->{level}) && (my $line = $self->next_text_line))
   {
 #   print "line is $line";
     if (my ($structure) = $line =~ /^\s*(\w+): =\s*$/)
@@ -194,12 +197,14 @@ sub next_record
     {
       $rec = $self->new(line => $self->{fh}->input_line_number) unless $rec;
       $rec->{level}  = ($level eq "n" ? 0 : $level) if defined $level;
-      $rec->{xref}   = $xref                        if defined $xref;
+      $rec->{xref}   = $xref  =~ /^\@(\w+\d+)\@$/ ? $1 : $xref
+        if defined $xref;
       $rec->{tag}    = $tag                         if defined $tag;
-      $rec->{value}  = $value                       if defined $value;
+      $rec->{value}  = $value =~ /^\@(\w+\d+)\@$/ ? $1 : $value
+        if defined $value;
       $rec->{min}    = $min                         if defined $min;
       $rec->{max}    = $max                         if defined $max;
-      $rec->{gedcom} = $self->{gedcom};
+      $rec->{gedcom} = $self->{gedcom}              if defined $self->{gedcom};
       if (ref($self) !~ /Grammar/ and $_ = $rec->{tag})
       {
         my $class = /INDI/i ? "Individual" :
@@ -217,9 +222,9 @@ sub next_record
       die "no match for <$line>";
     }
   }
-# print "comparing "; $record->print();
+# print "comparing "; $record->print;
 # print Dumper($record);
-# print "with      "; $rec->print() if $rec;
+# print "with      "; $rec->print if $rec;
 # print Dumper($rec);
   $self->add_children($rec)
     if $rec && defined $rec->{level} && ($rec->{level} > $record->{level});
@@ -229,8 +234,7 @@ sub next_record
 sub next_line
 {
   my $self = shift;
-  my $line = $self->{fh}->getline();
-  # print "read $line" if defined $line;
+  my $line = $self->{fh}->getline;
   $line;
 }
 
@@ -238,10 +242,7 @@ sub next_text_line
 {
   my $self = shift;
   my $line = "";
-  until (!defined $line || $line =~ /\S/)
-  {
-    $line = $self->next_line()
-  }
+  $line = $self->next_line until !defined $line || $line =~ /\S/;
   $line;
 }
 
@@ -251,10 +252,10 @@ sub write
   my ($fh, $level) = @_;
   my @p;
   push(@p, $level . "  " x $level)    unless $level < 0;
-  push(@p, $self->{xref})             if     $self->{xref};
+  push(@p, "\@$self->{xref}\@")       if     $self->{xref};
   push(@p, $self->{tag})              if     $self->{tag};
   push(@p, ref $self->{value}
-           ? $self->{value}->{xref}
+           ? $self->{value}{xref}
            : $self->{value})          if     $self->{value};
   $fh->print("@p");
   $fh->print("\n")                    unless $level < 0;
@@ -283,18 +284,19 @@ sub normalise_dates
       my @dates = split / or /, $self->{value};
       for my $dt (@dates)
       {
-        my $date = ParseDate($dt);
-        my $d = UnixDate($date, $format);
-        $dt = $d if $d;
+        # don't change the date if it is just < 7 digits
+        if ($dt !~ /^\s*(\d+)\s*$/ || length $1 > 6)
+        {
+          my $date = ParseDate($dt);
+          my $d = UnixDate($date, $format);
+          $dt = $d if $d;
+        }
       }
       $self->{value} = join " or ", @dates;
       # print "date is  $self->{value}\n";
     }
   }
-  for my $child (@{$self->{children}})
-  {
-    $child->normalise_dates($format);
-  }
+  $_->normalise_dates($format) for (@{$self->{children}});
 }
 
 sub print
@@ -353,7 +355,7 @@ __END__
 
 Gedcom::Item - a base class for Gedcom::Grammar and Gedcom::Record
 
-Version 1.01 - 27th April 1999
+Version 1.02 - 5th May 1999
 
 =head1 SYNOPSIS
 
@@ -361,14 +363,14 @@ Version 1.01 - 27th April 1999
 
   $self->{grammar} = Gedcom::Grammar->new(file     => $self->{grammar_file},
                                           callback => $self->{callback});
-  $self->read() if $self->{file};
+  $self->read if $self->{file};
   $self->add_children($rec)
   while (my $next = $self->next_record($record))
-  $line = $self->next_line()
-  my $line = $self->next_text_line()
+  $line = $self->next_line
+  my $line = $self->next_text_line
   $record->>write($fh, $level)
   $record->normalise_dates($format)
-  $item->print()
+  $item->print
   my $child = get_child("CHIL2")
   my @children = get_children("CHIL")
 
@@ -434,7 +436,7 @@ read.
 
 =head2 read
 
-  $self->read() if $self->{file};
+  $self->read if $self->{file};
 
 Read a file into the object.  Called by the constructor.
 
@@ -453,13 +455,13 @@ cannot be read.
 
 =head2 next_line
 
-  $line = $self->next_line()
+  $line = $self->next_line
 
 Read the next line from the file, and return it or false.
 
 =head2 next_text_line
 
-  my $line = $self->next_text_line()
+  my $line = $self->next_text_line
 
 Read the next line of text from the file, and return it or false.
 
@@ -483,7 +485,7 @@ See the documentation for Gedcom::normalise_dates
 
 =head2 print
 
-  $item->print()
+  $item->print
 
 Print the item.  Used for debugging.  (What?  There are bugs?)
 

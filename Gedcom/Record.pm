@@ -13,14 +13,13 @@ require 5.004;
 
 package Gedcom::Record;
 
-use Gedcom::Item 1.01;
+use Data::Dumper;
 
-BEGIN
-{
-  use vars qw($VERSION @ISA);
-  $VERSION = "1.01";
-  @ISA = qw( Gedcom::Item );
-}
+use Gedcom::Item 1.02;
+
+use vars qw($VERSION @ISA);
+$VERSION = "1.02";
+@ISA     = qw( Gedcom::Item );
 
 sub parse
 {
@@ -30,7 +29,7 @@ sub parse
 # print "against ";  $grammar->print();
   my $t = $record->{tag};
   my $g = $grammar->{tag};
-  warn "Can't match $t with $g" if $t && $t ne $g;
+  die "Can't match $t with $g" if $t && $t ne $g;               # internal error
   $record->{grammar} = $grammar;
   my %children = map { $_->{tag} => $_ } $grammar->valid_children($structures);
 # print "valid children are: ", join(", ", keys %children), "\n";
@@ -47,9 +46,10 @@ sub parse
       warn "$self->{file}:$child->{line}: " .
            "$tag does not appear to be a child of $t\n"
         unless $tag eq "CONT" || $tag eq "CONC" || substr($tag, 0, 1) eq "_";
+        # TODO - should CONT and CONC be allowed anywhere?
     }
   }
-  1;
+  1;                                          # do we ever want to return false?
 }
 
 sub collect_xrefs
@@ -57,38 +57,12 @@ sub collect_xrefs
   my $self = shift;
   my ($callback) = @_;;
   $self->{gedcom}{xrefs}{$self->{xref}} = $self if defined $self->{xref};
-  # print "- xrefs are @{[keys %{$self->{gedcom}{xrefs}}]}\n";
-  for my $child (@{$self->{children}})
-  {
-    $child->collect_xrefs($callback);
-  }
-}
-
-sub resolve_xrefs
-{
-  my $self = shift;;
-  my ($callback) = @_;;
-  if (my $xref = $self->resolve_xref($self->{value}))
-  {
-    $self->{value} = $xref;
-  }
-  for my $child (@{$self->{children}})
-  {
-    $child->resolve_xrefs($callback);
-  }
+  $_->collect_xrefs($callback) for (@{$self->{children}})
 }
 
 sub resolve_xref
 {
-  my $self = shift;;
-  my ($value) = @_;
-  # print "resolving $value\n";
-  if (defined $value && defined(my $xref = $self->{gedcom}{xrefs}{$value}))
-  {
-    # print "to $xref\n";
-    return $xref;
-  }
-  undef;
+  shift->{gedcom}->resolve_xref(@_);
 }
 
 sub resolve
@@ -96,6 +70,30 @@ sub resolve
   my $self = shift;
   my @x = map { ref($_) ? $_ : $self->resolve_xref($_) } @_;
   wantarray ? @x : $x[0];
+}
+
+sub resolve_xrefs
+{
+  my $self = shift;;
+  my ($callback) = @_;
+  if (my $xref = $self->resolve_xref($self->{value}))
+  {
+    $self->{value} = $xref;
+  }
+  $_->resolve_xrefs($callback) for (@{$self->{children}});
+  $self;
+}
+
+sub unresolve_xrefs
+{
+  my $self = shift;;
+  my ($callback) = @_;
+  $self->{value} = $self->{value}{xref}
+    if defined $self->{value}
+       and UNIVERSAL::isa $self->{value}, "Gedcom::Record"
+       and exists $self->{value}{xref};
+  $_->unresolve_xrefs($callback) for (@{$self->{children}});
+  $self;
 }
 
 sub validate
@@ -170,28 +168,19 @@ sub validate
 sub renumber
 {
   my $self = shift;
-  my $f = \shift;
-  my $i = \shift;
-  my $callback = shift;
-  return unless $self->{tag} eq "FAM" || $self->{tag} eq "INDI";
-  return unless exists $self->{xref} and not exists $self->{new_xref};
-  # print "renumbering: "; $self->print; print $self->summary, "\n";
-  my ($type) = $self->{xref} =~ /^@(\w+?)\d+\@$/;
-  $self->{new_xref} = "\@$type" . ($self->{tag} eq "FAM" ? $$f++ : $$i++) . "@";
-  for my $fam ($self->resolve($self->child_values("FAMS"),
-                              $self->child_values("FAMC")))
+  my ($args, $recurse) = @_;
+  return if exists $self->{recursed} or not exists $self->{xref};
+  $self->{xref} = substr($self->{tag}, 0, 1). ++$args->{$self->{tag}}
+    unless exists $self->{renumbered};
+  $self->{renumbered} = 1;
+  return unless $recurse and not exists $self->{recursed};
+  $self->{recursed} = 1;
+  if ($self->{tag} eq "INDI")
   {
-    for my $child (qw( HUSB WIFE CHIL ))
-    {
-      # print "child $child\n";
-      for my $ch ($self->resolve($fam->child_values($child)))
-      {
-        # print "child is $ch\n";
-        $ch->renumber($$f, $$i, $callback);
-      }
-    }
+    my @r = map { $self->$_() } qw(fams famc spouse children parents siblings);
+    $_->renumber($args, 0) for (@r);
+    $_->renumber($args, 1) for (@r);
   }
-  $self->{xref} = $self->{new_xref};
 }
 
 sub child_value
@@ -212,9 +201,8 @@ sub child_values
 sub summary
 {
   my $self = shift;
-# print "summary of ", Dumper $self;
   my $s = "";
-  $s .= sprintf("%-5s", $self->{xref} =~ /@(.*)@/);
+  $s .= sprintf("%-5s", $self->{xref});
   my $child = $self->get_child("NAME");
   $s .= sprintf(" %-40s", $child ? $child->{value} : "");
   $child = $self->get_child("SEX");
@@ -237,7 +225,7 @@ __END__
 
 Gedcom::Record - a class to manipulate Gedcom records
 
-Version 1.01 - 27th April 1999
+Version 1.02 - 5th May 1999
 
 =head1 SYNOPSIS
 
@@ -245,11 +233,12 @@ Version 1.01 - 27th April 1999
 
   return 0 unless $self->parse($record, $structures, $grammar, $callback)
   $record->collect_xrefs($callback)
-  $record->resolve_xrefs($callback)
   my $xref = $self->resolve_xref($self->{value})
   my @famc = $self->resolve($self->child_values("FAMC"))
+  $record->resolve_xrefs($callback)
+  $record->unresolve_xrefs($callback)
   return 0 unless $child->validate($self->{record}, $callback);
-  $record->renumber($xrefs, $callback, $f, $i)
+  $record->renumber($args);
   my $child = $record->child_value("NAME");
   my @children = $record->child_values("CHIL");
   print $record->summary, "\n";
@@ -264,9 +253,13 @@ Derived from Gedcom::Item.
 
 Some of the more important hash members are:
 
-=head2 $record->{new_xref}
+=head2 $record->{renumbered}
 
-The new xref of the record.  Used by renumber().
+Used by renumber().
+
+=head2 $record->{recursed}
+
+Used by renumber().
 
 =head1 METHODS
 
@@ -287,19 +280,11 @@ $self->{grammar}.  Do this recursively.
 Recursively collect all the xrefs.  Called by Gedcom::collect_xrefs.
 $callback is not used yet.
 
-=head2 resolve_xrefs
-
-  $record->resolve_xrefs($callback)
-
-Recursively changes all xrefs to reference the record they are pointing
-to.  Like changing a soft link to a hard link on a Unix filesystem.
-Called by Gedcom::resolve_xrefs. $callback is not used yet.
-
 =head2 resolve_xref
 
   my $xref = $self->resolve_xref($value)
 
-Return the record $value points to, or undef.
+See Gedcom::resolve_xrefs()
 
 =head2 resolve
 
@@ -307,6 +292,18 @@ Return the record $value points to, or undef.
 
 For each argument, either return it or, if it an xref, return the
 referenced record.
+
+=head2 resolve_xrefs
+
+  $record->resolve_xrefs($callback)
+
+See Gedcom::resolve_xrefs()
+
+=head2 unresolve_xrefs
+
+  $record->unresolve_xrefs($callback)
+
+See Gedcom::unresolve_xrefs()
 
 =head2 validate
 
@@ -319,15 +316,11 @@ Returns true iff the Record is valid.
 
 =head2 renumber
 
-  $record->renumber($xrefs, $callback, $f, $i)
+  $record->renumber($args);
 
 Renumber the record.
 
-As a record is renumbered, it is assigned the next available number.
-Families start with the number $f.  Individuals are assigned the number
-$i.  $f and $i are passed by reference.  The husband, wife and children
-are then renumbered.  This helps to ensure that families are numerically
-close together.
+See Gedcom::renumber().
 
 =head2 child_value
 

@@ -13,14 +13,11 @@ require 5.004;
 
 package Gedcom::Individual;
 
-use Gedcom::Record 1.01;
+use Gedcom::Record 1.02;
 
-BEGIN
-{
-  use vars qw($VERSION @ISA);
-  $VERSION = "1.01";
-  @ISA = qw( Gedcom::Record );
-}
+use vars qw($VERSION @ISA);
+$VERSION = "1.02";
+@ISA     = qw( Gedcom::Record );
 
 sub famc
 {
@@ -37,13 +34,13 @@ sub fams
 sub father
 {
   my $self = shift;
-  $self->resolve(map { $_->child_values("HUSB") } $self->famc)
+  map { $_->husband } $self->famc
 }
 
 sub mother
 {
   my $self = shift;
-  $self->resolve(map { $_->child_values("WIFE") } $self->famc)
+  map { $_->wife } $self->famc
 }
 
 sub parents
@@ -55,15 +52,13 @@ sub parents
 sub husband
 {
   my $self = shift;
-  grep { $_->{xref} ne $self->{xref} }
-       $self->resolve(map { $_->child_values("HUSB") } $self->fams)
+  grep { $_->{xref} ne $self->{xref} } map { $_->husband } $self->fams
 }
 
 sub wife
 {
   my $self = shift;
-  grep { $_->{xref} ne $self->{xref} }
-       $self->resolve(map { $_->child_values("WIFE") } $self->fams)
+  grep { $_->{xref} ne $self->{xref} } map { $_->wife } $self->fams
 }
 
 sub spouse
@@ -75,8 +70,7 @@ sub spouse
 sub siblings
 {
   my $self = shift;
-  grep { $_->{xref} ne $self->{xref} }
-       $self->resolve(map { $_->child_values("CHIL") } $self->famc)
+  grep { $_->{xref} ne $self->{xref} } map { $_->children } $self->famc
 }
 
 sub brothers
@@ -94,8 +88,7 @@ sub sisters
 sub children
 {
   my $self = shift;
-  grep { $_->{xref} ne $self->{xref} }
-       $self->resolve(map { $_->child_values("CHIL") } $self->fams)
+  grep { $_->{xref} ne $self->{xref} } map { $_->children } $self->fams
 }
 
 sub sons
@@ -176,7 +169,7 @@ __END__
 
 Gedcom::Individual - a class to manipulate Gedcom individuals
 
-Version 1.01 - 27th April 1999
+Version 1.02 - 5th May 1999
 
 =head1 SYNOPSIS
 
@@ -222,7 +215,7 @@ Return a list of families to which $i belongs.
 famc() returns those families in which $i is a child.
 fams() returns those families in which $i is a spouse.
 
-=head2 Family functions
+=head2 Individual functions
 
   my @rel = $i->father;
   my @rel = $i->mother;

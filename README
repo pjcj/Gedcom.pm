@@ -1,7 +1,7 @@
 NAME
     Gedcom - a class to manipulate Gedcom genealogy files
 
-    Version 1.01 - 27th April 1999
+    Version 1.02 - 5th May 1999
 
 DESCRIPTION
     Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
@@ -32,8 +32,8 @@ DESCRIPTION
 
     The vice of laziness is also shining brightly - I need to document how
     to use this module in much greater detail. This is happening - this
-    release has more docuemntation than previously - but if you would like
-    information feel free to send me mail.
+    release has more docuemntation than the previous ones - but if you would
+    like information feel free to send me mail.
 
     This module provides some functions which work over the entire Gedcom
     file, such as reformatting dates, renumbering entries and ordering the

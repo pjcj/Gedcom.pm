@@ -13,13 +13,40 @@ require 5.004;
 
 package Gedcom::Family;
 
-use Gedcom::Record 1.01;
+use Gedcom::Record 1.02;
 
-BEGIN
+use vars qw($VERSION @ISA);
+$VERSION = "1.02";
+@ISA     = qw( Gedcom::Record );
+
+sub husband
 {
-  use vars qw($VERSION @ISA);
-  $VERSION = "1.01";
-  @ISA = qw( Gedcom::Record );
+  my $self = shift;
+  $self->resolve($self->child_values("HUSB"));
+}
+
+sub wife
+{
+  my $self = shift;
+  $self->resolve($self->child_values("WIFE"));
+}
+
+sub children
+{
+  my $self = shift;
+  $self->resolve($self->child_values("CHIL"));
+}
+
+sub boys
+{
+  my $self = shift;
+  grep { $_->child_value("SEX") !~ /^F/i } $self->children
+}
+
+sub girls
+{
+  my $self = shift;
+  grep { $_->child_value("SEX") !~ /^M/i } $self->children
 }
 
 1;
@@ -30,11 +57,17 @@ __END__
 
 Gedcom::Family - a class to manipulate Gedcom families
 
-Version 1.01 - 27th April 1999
+Version 1.02 - 5th May 1999
 
 =head1 SYNOPSIS
 
   use Gedcom::Family;
+
+  my @rel = $f->husband;
+  my @rel = $f->wife;
+  my @rel = $f->children;
+  my @rel = $f->boys;
+  my @rel = $f->girls;
 
 =head1 DESCRIPTION
 
@@ -49,5 +82,18 @@ None.
 =head1 METHODS
 
 None yet.
+
+=head2 Individual functions
+
+  my @rel = $f->husband;
+  my @rel = $f->wife;
+  my @rel = $f->children;
+  my @rel = $f->boys;
+  my @rel = $f->girls;
+
+Return a list of individuals from family $f.
+
+Each function, even those with a singular name such as husband(),
+returns a list of individuals holding that releation in $f.
 
 =cut

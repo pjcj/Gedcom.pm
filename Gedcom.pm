@@ -16,15 +16,12 @@ package Gedcom;
 use Data::Dumper;
 use FileHandle;
 
-use Gedcom::Grammar    1.01;
-use Gedcom::Individual 1.01;
-use Gedcom::Family     1.01;
+use Gedcom::Grammar    1.02;
+use Gedcom::Individual 1.02;
+use Gedcom::Family     1.02;
 
-BEGIN
-{
-  use vars qw($VERSION);
-  $VERSION = "1.01";
-}
+use vars qw($VERSION);
+$VERSION = "1.02";
 
 sub new
 {
@@ -34,10 +31,24 @@ sub new
   bless $self, $class;
 
   # first read in the grammar
-  return undef unless
-    my $grammar = $self->{grammar} =
-                  Gedcom::Grammar->new(file     => $self->{grammar_file},
-                                       callback => $self->{callback});
+  my $grammar;
+  if (defined $self->{grammar_file})
+  {
+    return undef unless
+      $grammar = Gedcom::Grammar->new(file     => $self->{grammar_file},
+                                      callback => $self->{callback});
+  }
+  else
+  {
+    $self->{grammar_version} = 5.5 unless defined $self->{grammar_version};
+    (my $v = $self->{grammar_version}) =~ tr/./_/;
+    my $g = "Gedcom::Grammar_$v";
+    eval "use $g $VERSION";
+    die $@ if $@;
+    no strict "refs";
+    return undef unless $grammar = ${$g . "::grammar"};
+  }
+  $self->{grammar} = $grammar;
 
   my $structures = $grammar->{structures} = $grammar->structures;
   my %children   = map { $_->{tag} => $_ }
@@ -70,7 +81,17 @@ sub collect_xrefs
 {
   my $self = shift;
   my ($callback) = @_;
+  $self->{gedcom}{xrefs} = [];
   $self->{record}->collect_xrefs($callback);
+}
+
+sub resolve_xref
+{
+  my $self = shift;;
+  my ($x) = @_;
+  my $xref;
+  $xref = $self->{xrefs}{$x =~ /^\@(.*)\@$/ ? $1 : $x} if defined $x;
+  $xref;
 }
 
 sub resolve_xrefs
@@ -78,6 +99,13 @@ sub resolve_xrefs
   my $self = shift;
   my ($callback) = @_;
   $self->{record}->resolve_xrefs($callback);
+}
+
+sub unresolve_xrefs
+{
+  my $self = shift;
+  my ($callback) = @_;
+  $self->{record}->unresolve_xrefs($callback);
 }
 
 sub validate
@@ -100,27 +128,25 @@ sub normalise_dates
 sub renumber
 {
   my $self = shift;
-  my ($callback) = @_;
+  my (%args) = @_;
   $self->resolve_xrefs;
 
-  # these variables are passed through by reference
-  my $f = 1;
-  my $i = 1;
-
   # initially, renumber any records passed in
-  for my $xref (@_)
+  for my $xref (@{$args{xrefs}})
   {
-    if (exists $self->{xrefs}{$xref})
-    {
-      $self->{xrefs}{$xref}->renumber($f, $i, $callback);
-    }
+    $self->{xrefs}{$xref}->renumber(\%args, 1) if exists $self->{xrefs}{$xref};
   }
 
   # now, renumber any records left over
-  for my $child (@{$self->{record}{children}})
-  {
-    $child->renumber($f, $i, $callback);
-  }
+  $_->renumber(\%args, 1) for (@{$self->{record}{children}});
+
+  # and remove new_xref so we can do it again
+  delete @$_{qw(renumbered recursed)} for (@{$self->{record}{children}});
+
+  # and update the xrefs
+  $self->collect_xrefs;
+
+  %args
 }
 
 sub sort_sub
@@ -206,6 +232,19 @@ sub get_individual
   ()
 }
 
+sub next_xref
+{
+  my $self = shift;
+  my ($type) = @_;
+  my $re = qr/^$type(\d+)$/;
+  my $last = 0;
+  for my $c (@{$self->{record}{children}})
+  {
+    $last = $1 if exists $c->{xref} and $c->{xref} =~ /$re/ and $1 > $last;
+  }
+  $type . ++$last
+}
+
 1;
 
 __END__
@@ -214,23 +253,30 @@ __END__
 
 Gedcom - a class to manipulate Gedcom genealogy files
 
-Version 1.01 - 27th April 1999
+Version 1.02 - 5th May 1999
 
 =head1 SYNOPSIS
 
   use Gedcom;
 
+  my $ged = Gedcom->new(gedcom_file => $gedcom_file);
+  my $ged = Gedcom->new(grammar_version => 5.5,
+                        gedcom_file     => $gedcom_file,
+                        callback        => $cb);
   my $ged = Gedcom->new(grammar_file => "gedcom-5.5.grammar",
                         gedcom_file  => $gedcom_file);
   return unless $ged->validate;
+  my $xref = $self->resolve_xref($value)
   $ged->resolve_xrefs;
+  $ged->unresolve_xrefs;
   $ged->normalise_dates;
-  $ged->renumber;
+  my %xrefs = $ged->renumber;
   $ged->order;
   $ged->write($new_gedcom_file);
   my @individuals = $ged->individuals;
   my @families = $ged->families;
   my ($me) = $ged->get_individual("Paul Johnson");
+  my $xref = $ged->next_xref("I");
 
 =head1 DESCRIPTION
 
@@ -261,8 +307,8 @@ suppose this is the virtue of laziness shining through.
 
 The vice of laziness is also shining brightly - I need to document how
 to use this module in much greater detail.  This is happening - this
-release has more docuemntation than previously - but if you would like
-information feel free to send me mail.
+release has more docuemntation than the previous ones - but if you would
+like information feel free to send me mail.
 
 This module provides some functions which work over the entire Gedcom
 file, such as reformatting dates, renumbering entries and ordering the
@@ -314,17 +360,40 @@ See Gedcom::Record.pm for more details.
 
 =head2 new
 
+  my $ged = Gedcom->new(gedcom_file => $gedcom_file);
+
+  my $ged = Gedcom->new(grammar_version => 5.5,
+                        gedcom_file     => $gedcom_file,
+                        callback        => $cb);
+
   my $ged = Gedcom->new(grammar_file => "gedcom-5.5.grammar",
                         gedcom_file  => $gedcom_file);
 
 Create a new gedcom object.
 
-grammar_file must be the name of a gedcom grammar file.  I have only
-used and tested with this 5.5 grammar.  You'll probably have to put the
-grammar file somewhere safe and hard code the path.  I'll look into
-doing something better later.
-
 gedcom_file is the name of the gedcom file to parse.
+
+You may optionally pass grammar_version as the version number of the
+gedcom grammar you want to use.  At the moment only version 5.5 is
+available.  If you do not specify a grammar version, you may specify a
+grammar file as grammar_file.  Usually, you will do neither of these,
+and in this case the grammar version will default to the latest
+available version, currently 5.5.
+
+callback is an optional reference to a subroutine which will be called
+at various times while the gedcom file (and the grammar file, ir
+applicable) is being read.  It's purpose is to provide feedback during
+potentially long operations.  The subroutine is called with five
+arguments:
+
+  my ($title, $txt1, $txt2, $current, $total) = @_;
+
+  $title is a brief description of the current operation
+  $txt1 and $txt2 provide more information on the current operation
+  $current is the number of operations performed
+  $total is the number of operations that need to be performed
+
+If the subroutine returns false, the operation is aborted.
 
 =head2 write
 
@@ -343,6 +412,12 @@ location.  $callback is not used yet.
 
 Called by new().
 
+=head2 resolve_xref
+
+  my $xref = $self->resolve_xref($value)
+
+Return the record $value points to, or undef.
+
 =head2 resolve_xrefs
 
   $ged->resolve_xrefs($callback)
@@ -350,6 +425,14 @@ Called by new().
 Changes all xrefs to reference the record they are pointing to.  Like
 changing a soft link to a hard link on a Unix filesystem.  $callback is
 not used yet.
+
+=head2 unresolve_xrefs
+
+  $ged->unresolve_xrefs($callback)
+
+Changes all xrefs to name the record they contained.  Like changing a
+hard link to a soft link on a Unix filesystem.  $callback is not used
+yet.
 
 =head2 validate
 
@@ -376,14 +459,21 @@ programs don't like that format.
 =head2 renumber
 
   $ged->renumber;
-  $ged->renumber($xref1, $xref2, ...);
+  my %xrefs = $ged->renumber(INDI => 34, FAM => 12, xrefs => [$xref1, $xref2]);
 
-Renumber all the records.  Optionally provide a list of records to start
-with.
+Renumber all the records.
+
+Optional parameters are:
+
+  tag name => last used number (defaults to 0)
+  xrefs    => list of xrefs to renumber first
 
 As a record is renumbered, it is assigned the next available number.
-The husband, wife and children are then renumbered.  This helps to
-ensure that families are numerically close together.
+The husband, wife, children parents and siblings are then renumbered in
+that order.  This helps to ensure that families are numerically close
+together.
+
+The hash returned is the updated hash that was passed in.
 
 =head2 sort_sub
 
@@ -439,5 +529,11 @@ The matches are:
    8 - Names in any order, anywhere
    9 - Names in any order, on word boundaries, case insensitive
   10 - Names in any order, anywhere, case insensitive
+
+=head2 next_xref
+
+  my $xref = $ged->next_xref("I");
+
+Return the next available xref with the specified prefix.
 
 =cut

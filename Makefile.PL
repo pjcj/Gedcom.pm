@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.transeda.com/pjcj
 
-# Version 1.01 - 27th April 1999
+# Version 1.011 - 28th April 1999
 
 use strict;
 
@@ -15,13 +15,22 @@ require 5.004;
 
 use ExtUtils::MakeMaker;
 
-my $Version = "1.01";
-my $Date    = "27th April 1999";
+my $Version = "1.02";
+my $Date    = "5th May 1999";
+
+open(M, "MANIFEST") or die "Cannot open MANIFEST: $!";
+my @files    = map { split } <M>;
+my @versions = grep { $_ ne "README" && $_ ne "Makefile.PL" } @files;
+close(M) or die "Cannot close MANIFEST: $!";
 
 WriteMakefile
 (
   NAME    => "Gedcom",
   VERSION => $Version,
+  DIR     => [],
+  dist    => { COMPRESS => "gzip --best --force" },
+  clean   => { FILES => join " ",  map { "$_.version" } @versions },
+  depend  => { distdir => "@files" },
 );
 
 eval "use Date::Manip";
@@ -38,31 +47,29 @@ EOM
 
 sub MY::postamble
 {
-  open(M, "MANIFEST") or die "Cannot open MANIFEST: $!";
-  my @files = map { split } <M>;
-  close(M) or die "Cannot close MANIFEST: $!";
-qq[
+  qq[
+SET_VERSION = \$(PERL) -pi.version \\
+  -e 's/(^\\s*\\\$\$VERSION = ")\\d+\\.\\d+(";)/\$\${1}$Version\$\$2/;' \\
+  -e 's/(Version )\\d+\\.\\d+( - ).*/\$\${1}$Version\$\${2}$Date/;' \\
+  -e 's/(^\\s*use Gedcom(?:::\\w+)*\\s+)\\d+\\.\\d+;/\$\${1}$Version;/;'
+
 tags : @files
 \t ptags @files
 
-version : Makefile.PL
-\t \$(PERL) -pi.version \\
-  -e 's/(^\\s*\\\$\$VERSION = ")\\d+\\.\\d+(";)/\$\${1}$Version\$\$2/;' \\
-  -e 's/(Version )\\d+\\.\\d+( - ).*/\$\${1}$Version\$\${2}$Date/;' \\
-  -e 's/(^\\s*use Gedcom(?:::\\w+)*\\s+)\\d+\\.\\d+;/\$\${1}$Version;/;' \\
-  @files
+grammar :
+\t \$(PERL) parse_grammar gedcom-5.5.grammar
+\t \$(SET_VERSION) -e 's/^ +//' Gedcom/Grammar_5_5.pm
 
-readme : Gedcom.pm
-\t TERMCAP= COLUMNS=80 pod2text Gedcom.pm |\\
+@versions : Makefile.PL
+\t \$(SET_VERSION) @versions
+
+README : Gedcom.pm
+\t TERMCAP= COLUMNS=80 pod2text Gedcom.pm | \\
   \$(PERL) -n \\
   -e 'print if (/NAME/ ... /^[A-Z ]+\$\$/) =~ /^\\d+\$\$/;' \\
   -e 'print if (/DESCRIPTION/ ... /^[A-Z ]+\$\$/) =~ /^\\d+\$\$/;' \\
   > README
-
-release : version readme dist
-\t zcat Gedcom-$Version.tar.gz | /bin/tar tvf -
-
-]
+  ]
 }
 
 my $author = 'pjcj@transeda.com';
@@ -95,7 +102,7 @@ EOM
 
   chomp $mess;
   print $mess;
-  my $rep = <>;
+  my $rep = <STDIN>;
   if ($rep =~ /^n/)
   {
     print <<EOM;

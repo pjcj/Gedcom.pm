@@ -16,14 +16,11 @@ package Gedcom::Grammar;
 use Carp;
 use Data::Dumper;
 
-use Gedcom::Item 1.01;
+use Gedcom::Item 1.02;
 
-BEGIN
-{
-  use vars qw($VERSION @ISA);
-  $VERSION = "1.01";
-  @ISA = qw( Gedcom::Item );
-}
+use vars qw($VERSION @ISA);
+$VERSION = "1.02";
+@ISA     = qw( Gedcom::Item );
 
 sub structures
 {
@@ -74,7 +71,7 @@ __END__
 
 Gedcom::Grammar - a class to manipulate Gedcom grammars
 
-Version 1.01 - 27th April 1999
+Version 1.02 - 5th May 1999
 
 =head1 SYNOPSIS
 

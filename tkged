@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.transeda.com/pjcj
 
-# Version 1.01 - 27th April 1999
+# Version 1.02 - 5th May 1999
 
 use strict;
 
@@ -24,10 +24,10 @@ use Tk;
 use Carp;
 use Data::Dumper;
 
-use Gedcom 1.01;
+use Gedcom 1.02;
 
 use vars qw( $VERSION );
-$VERSION = "1.01";
+$VERSION = "1.02";
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
@@ -133,7 +133,7 @@ sub load($)
                 ->pack(-expand => 0);
   $progress->Show;
   $Top->update;
-  $Ged = Gedcom->new(grammar_file => $Grammar_file,
+  $Ged = Gedcom->new( # grammar_file => $Grammar_file,
                      gedcom_file  => $gedcom_file,
                      callback     => sub
     {
@@ -398,8 +398,8 @@ sub create_person($$$)
 
               if (my ($fam, $person) = $tag =~ /^(_FAM[CS]\d*)_([^_]+)/)
               {
-                $canv->itemconfigure("${tag}_XREF1_change", -text => $1)
-                  if $ind->{xref} =~ /^\@(.*)\@$/;
+                $canv->itemconfigure("${tag}_XREF1_change",
+                                     -text => $ind->{xref});
                 $canv->itemconfigure("${tag}_NAME1_change",
                                      -text => $ind->child_value("NAME1"));
               }
@@ -440,9 +440,7 @@ sub create_person($$$)
           item     => "text",
           tags     => [ $tag, "${tag}_value" ],
           change   => 1,
-          options  => { -text => $me
-                                   ? do { $me->{xref} =~ /^\@(.*)\@$/; $1 }
-                                   : "" },
+          options  => { -text => $me ? $me->{xref} : "" },
           colour   => "blue",
           relwidth => 0.15,
         }
@@ -539,7 +537,7 @@ sub create_windows()
       }
     }
     $max++;
-    my $indi_id = "\@I$max\@";
+    my $indi_id = "I$max";
     my $rec = Gedcom::Record->new
     (
       tag     => "INDI",
@@ -570,7 +568,7 @@ sub create_windows()
       unless ($i < @{$Ged->{record}{children}})
       {
         box("Whoops",
-            "I can't find record " . do { $Rec->{xref} =~ /^\@(.*)\@$/; $1 },
+            "I can't find record $Rec->{xref}",
             -title   => "Unknown record id");
         return;
       }
@@ -667,8 +665,7 @@ sub set_entry($)
   my $t = $Top->{_canv}{_ged}{$entry};
   if (exists $t->{_Entry} && $t->{_Entry}->Exists)
   {
-    $t->{xref} =~ /^\@(.*)\@$/ if $t->{xref};
-    my $val = $t->{value} || $1;
+    my $val = $t->{value} || $t->{xref};
     $t->{_Entry}->delete(0, "end");
     $t->{_Entry}->insert(0, $val) if $val;
   }
@@ -692,7 +689,7 @@ sub record_changed()
     if (exists $t->{_Entry} && $t->{_Entry}->Exists)
     {
       my $val = "";
-      $val = $1 if (exists($t->{xref}) && $t->{xref} =~ /^\@(.*)\@$/);
+      $val = $t->{xref} if exists $t->{xref};
       $val = $t->{value} if (!$val && exists $t->{value});
       warn "no val for $tag" unless $val;
       $val = "" unless $val;
@@ -717,7 +714,7 @@ sub record_changed()
       my $pid = $Top->{_canv}->itemcget($item_tag, "-text");
       if ($pid)
       {
-        my $nid = '@' . $pid . '@';
+        my $nid = $pid;
         # print "changing from $pers->{value} to $nid\n";
         my $c = $pers->{value} ne $nid;
         $changed |= $c;
@@ -766,7 +763,7 @@ sub save_changes(;$)
           }
           elsif (exists $t->{xref})
           {
-            $t->{xref} = "@" . $t->{_Entry}->get . "@";
+            $t->{xref} = $t->{_Entry}->get;
           }
           else
           {
@@ -787,7 +784,7 @@ sub save_changes(;$)
           (my $item_tag = $t->{_canvas_text}) =~ s/value/XREF1_change/;
           my $nid = $Top->{_canv}->itemcget($item_tag, "-text");
           # print "changing from $pers->{value} to $nid\n";
-          my $xref = "\@$nid\@";
+          my $xref = $nid;
           if ($pers->{value} ne $xref)
           {
             $pers->{value} = $xref;
@@ -1077,7 +1074,7 @@ sub create_fams($$$)
       }
     }
     $max++;
-    $fams_id = "\@F$max\@";
+    $fams_id = "F$max";
     my $fam = Gedcom::Record->new
     (
       tag     => "FAM",
@@ -1244,7 +1241,7 @@ __END__
 
 tkged - an interactive program to manipulate Gedcom genealogy files
 
-Version 1.01 - 27th April 1999
+Version 1.02 - 5th May 1999
 
 =head1 SYNOPSIS
 
@@ -1261,6 +1258,9 @@ particularly proud of most of it.
 Much of the functionality has now been broken out into member functions,
 and a lot more should be.  In a way, I am using tkged to show me what
 member functions may be required.
+
+This should probably be mostly re-written.  I suspect that when I have a
+more clear idea of what I want, I will do just that.
 
 If that sounds like it was supposed to put you off, you are right.  I
 didn't even include this program until version 1.01, but under the
