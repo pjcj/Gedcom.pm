@@ -1,0 +1,54 @@
+NAME
+    Gedcom - a class to manipulate Gedcom genealogy files
+
+    Version 1.00 - 8th March 1999
+
+SYNOPSIS
+      use Gedcom;
+      my $ged = Gedcom->new(grammar_file => "gedcom-5.5.grammar",
+                            gedcom_file  => $gedcom_file);
+      return unless $ged->validate;
+      $ged->resolve_xrefs($ged->{xrefs});
+      $ged->normalise_dates;
+      $ged->renumber;
+      $ged->order;
+      $ged->write("$new_gedcom_file");
+
+
+DESCRIPTION
+    This module provides for manipulation of Gedcom files. Gedcom is a
+    format for storing genealogical information designed by The Church of
+    Jesus Christ of Latter-Day Saints (http://www.lds.org). Information
+    about Gedcom is available as a zip file at
+    ftp://gedcom.org/pub/genealogy/gedcom/gedcom55.zip. Unfortunately, this
+    is only usable if you can access a PC running Windows of some
+    description. Part of the reason I wrote this module is because I don't
+    do that.
+
+    The Gedcom format is specified in a grammar file (gedcom-5.5.grammar).
+    Gedcom.pm parses the grammar which is then used to validate and allow
+    manipulation of the Gedcom file. I have only used Gedcom.pm with version
+    5.5 of the Gedcom grammar, which I had to modify slightly to correct a
+    few errors. The advantage of this approach is that Gedcom.pm should be
+    useful if the Gedcom grammar is ever updated. It also made the software
+    easier to write, and probably more dependable too. I suppose this is the
+    virtue of laziness shining through.
+
+    The vice of laziness is also shining brightly - I need to document how
+    to use this module in much greater detail. This will happen sometime,
+    but if you would like information in the meantime, feel free to send me
+    mail.
+
+    Note that this is the first release of this software - caveat emptor.
+
+    Should you find this software useful, or if you make changes to it, or
+    if you would like me to make changes to it, please send me mail. I would
+    like to have some sort of an idea of the use this software is getting.
+    Apart from being of interest to me, this will guide my decisions when
+    (if :-?) I have to make changes to the interface.
+
+    I couldn't find a nice free program I could use to enter my genealogy,
+    and so I wrote a syntax file (ged.vim) and used vim (http://www.vim.org)
+    to enter the data, and Gedcom.pm to validate and manipulate it. I find
+    this to be a nice solution.
+

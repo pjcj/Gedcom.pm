@@ -1,0 +1,44 @@
+#!/usr/local/bin/perl -w
+
+# Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
+
+# This software is free.  It is licensed under the same terms as Perl itself.
+
+# The latest version of this software should be available from my homepage:
+# http://www.transeda.com/pjcj
+
+# Version 1.00 - 8th March 1999
+
+use strict;
+
+require 5.004;
+
+use diagnostics;
+
+use Gedcom 1.00;
+
+use vars qw( $VERSION );
+$VERSION = 1.00;
+
+main();
+
+sub main()
+{
+  my $gedcom_file = shift @ARGV;
+  $| = 1;
+  print "reading...\n";
+  my $ged = Gedcom->new(grammar_file => "gedcom-5.5.grammar",
+                        gedcom_file  => $gedcom_file);
+  print "validating...\n";
+  return unless $ged->validate;
+  print "resolving xrefs...\n";
+  $ged->resolve_xrefs($ged->{xrefs});
+# print "normalising dates...\n";
+# $ged->normalise_dates;
+  print "renumbering...\n";
+  $ged->renumber;
+# print "ordering...\n";
+# $ged->order;
+  print "writing...\n";
+  $ged->write("$gedcom_file.new");
+}
