@@ -149,12 +149,70 @@ Release 1.08 - 8th May 2000
  - Allow extra sub-items of a grammar structure.
 
 Release 1.09 - 12th February 2001
- - Improved XML output especially with respect to notes.
- - Quietened some spurious warnings.
- - Fixed some bugs reported by users that I don't recall at the moment.
+ - Improve XML output especially with respect to notes.
+ - Quieten some spurious warnings.
+ - Fix some bugs reported by users that I don't recall at the moment.
  - Add index file to speed up read_only option.
  - Read files with binmode - keeps Windows happy.
  - Correct line numbers of errors.
  - Use File::Spec so tests pass under Windows.
  - Allow for creation of ppms.
  - Added Gedcom::CGI and cgi-bin/gedcom.cgi.
+
+Release 1.10 - 5th March 2002
+ - Correct write_xml() documentation.
+ - Make Gedcom::Grammar::item() return a list of valid items, not just one.
+ - Pick the correct item from the list returned by Gedcom::Grammar::item().
+ - Make Gedcom::Individual::given_names() strip and normalise whitespace.
+ - Don't assume another file won't be read while we are reading files by
+   providing an argument to tell().
+ - Fix Gedcom::Lifelines::parents().
+ - Tidy Gedcom::get_individual() and return all matches from all
+   categories in list context.
+ - Let Gedcom::Item::write() output 0 values correctly.
+ - Let various functions in Gedcom::Record deal with 0 values correctly.
+ - Add a pointer flag to Gedcom::Item along with the corresponding function.
+ - Gedcom::new without a gedcom_file argument will create an empty
+   Gedcom object with mandatory fields filled in.
+ - Add methods to add, delete and change records.
+ - Add functions to:
+     Gedcom.pm:
+       add_record()
+       add_header()
+       add_submitter()
+       add_individual()
+       add_family()
+       add_note()
+       add_repository()
+       add_source()
+       add_trailer()
+     Item.pm:
+       parent()
+       delete()
+       pointer()
+     Record.pm:
+       add_record()
+       add()
+       set()
+       get_and_create()
+     Family.pm:
+       add_husband()
+       add_wife()
+       add_child()
+ - Add t/ged_create.t
+ - Change Gedcom::Record::resolve so that unresolved xrefs do not return
+   undef in list context.
+ - Establish the convention that SUBM xrefs start with SUBM to avoid
+   clashes with SOUR.
+ - Some reeorganisation of the AUTOLOAD functions.
+ - Add baptism and endowment information as default to Gedcom::CGI::indi().
+ - Ensure a grammar knows its version number.
+ - Always add headers and trailers to a Gedcom file if necessary.
+ - Change get_individual to return all matching individuals rather than
+   just those which match in the same category.
+ - A number of fixes to Gedcom::Lifelines.pm, some of which are based on
+   work by Tim Lanfear.
+ - Update copyright.
+ - A little work on the documentation.
+ - Some general tidying up.
+ - A couple of workarounds for bleadperl bugs.

@@ -1,4 +1,4 @@
-# Copyright 1998-2001, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -16,32 +16,21 @@ package Gedcom::Record;
 use Carp;
 BEGIN { eval "use Date::Manip" }             # We'll use this if it is available
 
-use Gedcom::Item 1.09;
+use Gedcom::Item 1.10;
 
 use vars qw($VERSION @ISA $AUTOLOAD);
-$VERSION = "1.09";
+$VERSION = "1.10";
 @ISA     = qw( Gedcom::Item );
 
-my %Funcs;
 BEGIN
 {
-  while (my($tag, $name) = each(%$Gedcom::Tags))
-  {
-    # print "looking at tag $tag <$name>\n";
-    $Funcs{$tag} = $Funcs{lc $tag} = $tag;
-    if ($name)
-    {
-      $name =~ s/ /_/g;
-      $Funcs{lc $name} = $tag;
-    }
-  }
-  # use Data::Dumper;
-  # print "Funcs are ", Dumper(\%Funcs);
-  use subs keys %Funcs;
+  use subs keys %Gedcom::Funcs;
   *tag_record    = \&Gedcom::Item::get_item;
   *delete_record = \&Gedcom::Item::delete_item;
   *get_record    = \&record;
 }
+
+sub DESTROY {}
 
 sub AUTOLOAD
 {
@@ -50,20 +39,25 @@ sub AUTOLOAD
   my $func = $AUTOLOAD;
   # print "autoloading $func\n";
   $func =~ s/^.*:://;
-  carp "Undefined subroutine $func called" unless $Funcs{lc $func};
+  carp "Undefined subroutine $func called" unless $Gedcom::Funcs{lc $func};
   no strict "refs";
   *$func = sub
   {
     my $self = shift;
     my ($count) = @_;
+    my $v;
+    # print "[[ $func ]]\n";
     if (wantarray)
     {
-      return map { $_ && $_->full_value || $_ } $self->record([$func, $count]);
+      return map
+      { $_ && do { $v = $_->full_value; defined $v && length $v ? $v : $_ } }
+      $self->record([$func, $count]);
     }
     else
     {
-      my $record = $self->record([$func, $count]);
-      return $record && $record->full_value || $record;
+      my $r = $self->record([$func, $count]);
+      # print "{$r}\n";
+      return $r && do { $v = $r->full_value; defined $v && length $v ? $v : $r }
     }
   };
   goto &$func
@@ -82,7 +76,7 @@ sub record
       warn "Invalid record of type ", ref $func, " requested";
       return undef;
     }
-    my $record = $Funcs{lc $func};
+    my $record = $Gedcom::Funcs{lc $func};
     unless ($record)
     {
       warn $func
@@ -100,26 +94,13 @@ sub record
   wantarray ? @records : $records[0]
 }
 
-sub set_record
-{
-  my $self = shift;
-  my $new_record = pop;
-  my $last_record = pop;
-  my $r = $self->record(@_);
-  unless ($r)
-  {
-    warn "no record found";
-    return;
-  }
-  my ($record, $count) = parse_func($last_record);
-}
-
 sub get_value
 {
   my $self = shift;
   if (wantarray)
   {
-    return map { $_->full_value || () } $self->record(@_);
+    return map { my $v = $_->full_value; defined $v and length $v ? $v : () }
+               $self->record(@_);
   }
   else
   {
@@ -133,7 +114,8 @@ sub tag_value
   my $self = shift;
   if (wantarray)
   {
-    return map { $_->full_value || () } $self->tag_record(@_);
+    return map { my $v = $_->full_value; defined $v and length $v ? $v : () }
+               $self->tag_record(@_);
   }
   else
   {
@@ -142,13 +124,142 @@ sub tag_value
   }
 }
 
+sub add_record
+{
+  my $self = shift;
+  my (%args) = @_;
+
+  die "No tag specified" unless defined $args{tag};
+
+  my $record = Gedcom::Record->new
+  (
+    gedcom   => $self->{gedcom},
+    callback => $self->{callback},
+    %args
+  );
+
+  if (!defined $self->{grammar})
+  {
+    warn "$self->{tag} has no grammar\n";
+  }
+  elsif (my @g = $self->{grammar}->item($args{tag}))
+  {
+    $self->parse($record, $g[0]);
+  }
+  else
+  {
+    warn "$args{tag} is not a sub-item of $self->{tag}\n";
+  }
+
+  push @{$self->{items}}, $record;
+
+  $record
+}
+
+sub add
+{
+  my $self = shift;
+  my $val;
+  $val = pop if @_ > 1 && ref $_[-1] ne "ARRAY";
+
+  my @funcs = map { ref() ? $_ : split } @_;
+  $funcs[-1] = [$funcs[-1], 0] unless ref $funcs[-1];
+  my $r = $self->get_and_create(@funcs);
+
+  if (defined $val)
+  {
+    if (UNIVERSAL::isa($val, "Gedcom::Record"))
+    {
+      $r->{value} = $val->{xref};
+      $self->{gedcom}{xrefs}{$val->{xref}} = $val;
+    }
+    else
+    {
+      $r->{value} = $val;
+    }
+  }
+
+  $r
+}
+
+sub set
+{
+  my $self = shift;
+  my $val = pop;
+
+  my @funcs = map { ref() ? $_ : split } @_;
+  my $r = $self->get_and_create(@funcs);
+
+  if (UNIVERSAL::isa($val, "Gedcom::Record"))
+  {
+    $r->{value} = $val->{xref};
+    $self->{gedcom}{xrefs}{$val->{xref}} = $val;
+  }
+  else
+  {
+    $r->{value} = $val;
+  }
+
+  $r
+}
+
+sub get_and_create
+{
+  my $self = shift;
+  my @funcs = @_;
+
+  my $rec = $self;
+  for my $f (0 .. $#funcs)
+  {
+    my ($func, $count) = ($funcs[$f], 1);
+    ($func, $count) = @$func if ref $func eq "ARRAY";
+    $count--;
+
+    if (ref $func)
+    {
+      warn "Invalid record of type ", ref $func, " requested";
+      return undef;
+    }
+
+    my $record = $Gedcom::Funcs{lc $func};
+    unless ($record)
+    {
+      warn $func
+      ? "Non standard record of type $func requested"
+      : "Record type not specified";
+      $record = $func;
+    }
+
+    # print "$func [$count]\n";
+
+    my @records = $rec->tag_record($record);
+
+    if ($count < 0)
+    {
+      $rec = $rec->add_record(tag => $record);
+    }
+    elsif ($#records < $count)
+    {
+      my $new;
+      $new = $rec->add_record(tag => $record) for (0 .. @records - $count);
+      $rec = $new;
+    }
+    else
+    {
+      $rec = $records[$count];
+    }
+  }
+
+  $rec
+}
+
 sub parse
 {
-# print "parsing\n";
+  # print "parsing\n";
   my $self = shift;
   my ($record, $grammar) = @_;
-# print "checking "; $self->print();
-# print "against ";  $grammar->print();
+  # print "checking "; $record->print();
+  # print "against ";  $grammar->print();
   my $t = $record->{tag};
   my $g = $grammar->{tag};
   die "Can't match $t with $g" if $t && $t ne $g;               # internal error
@@ -158,27 +269,53 @@ sub parse
   for my $r (@{$record->{items}})
   {
     my $tag = $r->{tag};
-    if (my $i = $grammar->item($tag))
+    my @i;
+    for my $i ($grammar->item($tag))
     {
-      $self->parse($r, $i);
+      # Try to get rid of matches we don't want because they only match
+      # in name.
+
+      # Check that the level is appropriate.
+      # print " - ", $i->level, "|", $r->level, "\n";
+      next unless $i->level =~ /^[+0]/ || $i->level == $r->level;
+
+      # Check we have a pointer iff we need one.
+      # print " + ", $i->value, "|", $r->value, "\n";
+      next if $i->value && $r->value && ($i->value =~ /^<XREF:/ ^ $r->pointer);
+
+      # print "pushing\n";
+      push @i, $i;
     }
-    else
+    # print "valid sub-items of $t are @{[keys %{$grammar->{_valid_items}}]}\n";
+    # print "<$tag> => <@i>\n";
+    unless (@i)
     {
       warn "$self->{file}:$r->{line}: $tag is not a sub-item of $t\n",
            "Valid sub-items are ",
-           join(", ", keys %{$grammar->{_valid_items}}), "\n"
+           join(", ", sort keys %{$grammar->{_valid_items}}), "\n"
         unless substr($tag, 0, 1) eq "_";
         # unless $tag eq "CONT" || $tag eq "CONC" || substr($tag, 0, 1) eq "_";
         # TODO - should CONT and CONC be allowed anywhere?
     }
+    if (@i > 1)
+    {
+      warn "$self->{file}:$r->{line}: Ambiguous tag $tag as sub-item of $t, ",
+           "found ", scalar @i, " matches.  Using first.\n";
+    }
+    for my $i (@i)
+    {
+      $self->parse($r, $i);
+      last;
+      # TODO - are there any cases in which ambiguous tags could be present?
+    }
   }
-# print "parsed\n";
+  # print "parsed\n";
 }
 
 sub collect_xrefs
 {
   my $self = shift;
-  my ($callback) = @_;;
+  my ($callback) = @_;
   $self->{gedcom}{xrefs}{$self->{xref}} = $self if defined $self->{xref};
   $_->collect_xrefs($callback) for @{$self->{items}};
   $self
@@ -192,7 +329,12 @@ sub resolve_xref
 sub resolve
 {
   my $self = shift;
-  my @x = map { ref($_) ? $_ : $self->resolve_xref($_) } @_;
+  my @x = map
+  {
+    ref($_)
+    ? $_
+    : do { my $x = $self->{gedcom}->resolve_xref($_); defined $x ? $x : () }
+  } @_;
   wantarray ? @x : $x[0];
 }
 
@@ -200,7 +342,7 @@ sub resolve_xrefs
 {
   my $self = shift;;
   my ($callback) = @_;
-  if (my $xref = $self->resolve_xref($self->{value}))
+  if (my $xref = $self->{gedcom}->resolve_xref($self->{value}))
   {
     $self->{value} = $xref;
   }
@@ -249,14 +391,16 @@ sub validate_syntax
   my $valid_items = $grammar->valid_items;
   for my $tag (sort keys %$valid_items)
   {
-    my $g = $valid_items->{$tag};
-    my $min = $g->{min};
-    my $max = $g->{max};
-    my $matches = delete $counts{$tag} || 0;
-    my $msg = "$here has $matches $tag" . ($matches == 1 ? "" : "s");
-    print "  " x $I . "$msg - min is $min max is $max\n" if $D;
-    $ok = 0, warn "$msg - minimum is $min\n" if $matches < $min;
-    $ok = 0, warn "$msg - maximum is $max\n" if $matches > $max && $max;
+    for my $g (@{$valid_items->{$tag}})
+    {
+      my $min = $g->{min};
+      my $max = $g->{max};
+      my $matches = delete $counts{$tag} || 0;
+      my $msg = "$here has $matches $tag" . ($matches == 1 ? "" : "s");
+      print "  " x $I . "$msg - min is $min max is $max\n" if $D;
+      $ok = 0, warn "$msg - minimum is $min\n" if $matches < $min;
+      $ok = 0, warn "$msg - maximum is $max\n" if $matches > $max && $max;
+    }
   }
   for my $tag (keys %counts)
   {
@@ -376,7 +520,8 @@ sub renumber
   # TODO - add the xref if there is supposed to be one
   return if exists $self->{recursed} or not defined $self->{xref};
   # we can't actaully change the xrefs until the end
-  $self->{new_xref} = substr($self->{tag}, 0, 1). ++$args->{$self->{tag}}
+  my $x = $self->{tag} eq "SUBM" ? "SUBM" : substr $self->{tag}, 0, 1;
+  $self->{new_xref} = $x . ++$args->{$self->{tag}}
     unless exists $self->{new_xref};
   return unless $recurse and not exists $self->{recursed};
   $self->{recursed} = 1;
@@ -428,7 +573,7 @@ __END__
 
 Gedcom::Record - a module to manipulate Gedcom records
 
-Version 1.09 - 12th February 2001
+Version 1.10 - 5th March 2002
 
 =head1 SYNOPSIS
 
@@ -446,6 +591,8 @@ Version 1.09 - 12th February 2001
   my @vals = $record->get_value("birth", "date");
   my $val  = $record->get_value("birth date");
   my $val  = $record->get_value(["birth", 2], "date");
+  my $rec  = $record->add("birth date", "1 Jan 2000");
+  my $rec  = $record->set("birth date", "2 Jan 2000");
   $self->parse($record, $grammar);
   $record->collect_xrefs($callback);
   my $xref = $record->resolve_xref($record->{value});
@@ -533,6 +680,31 @@ Retrieve a record's value.
 
 If arguments are specified, record() is first called with those
 arguments, and the values of those records are returned.
+
+=head2 add
+
+  my $rec  = $record->add("birth date", "1 Jan 2000");
+
+Add a new record.
+
+Add a new record ($rec) as a sub-item of $record.  Set its value to the
+last argument given.  The first arguments may be specified as for
+record().  A new record will always be created for the last argument,
+and for any arguments for which the count is explicitly set to zero.
+
+If the new record does not take a value then do not supply one.  This
+does mean that you cannot use the function with many arguments if the
+last one is a scalar, but not a value.  In this case either specify the
+last argument as ["arg", 0], or add undef as the last argument.
+
+=head2 set
+
+  my $rec  = $record->set("birth date", "2 Jan 2000");
+
+Set the value of a record.
+
+This is the same as add(), with the exception that a new record is not
+created for the last argument.
 
 =head2 parse
 

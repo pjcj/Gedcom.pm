@@ -1,4 +1,4 @@
-# Copyright 1998-2001, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -13,10 +13,10 @@ require 5.005;
 
 package Gedcom::Individual;
 
-use Gedcom::Record 1.09;
+use Gedcom::Record 1.10;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.09";
+$VERSION = "1.10";
 @ISA     = qw( Gedcom::Record );
 
 sub name
@@ -50,7 +50,10 @@ sub given_names
 {
   my $self = shift;
   my $name = $self->name;
-  $name =~ s|/([^/]*)/?||;
+  $name =~ s|/([^/]*)/?| |;
+  $name =~ s|^\s+||;
+  $name =~ s|\s+$||;
+  $name =~ s|\s+| |g;
   $name
 }
 
@@ -230,13 +233,13 @@ sub delete
         unless $fam->tag_value("HUSB") ||
                $fam->tag_value("WIFE") ||
                $fam->tag_value("CHIL");
-      # TODO - write Family::delete
+      # TODO - write Family::delete ?
       #      - delete associated notes?
     }
   }
   $ret = 0 unless $self->{gedcom}{record}->delete_record($self);
-  delete $self->{gedcom}{xrefs}{$xref};
-  $ret;
+  $_[0] = undef if $ret;                          # Can't reuse a deleted person
+  $ret
 }
 
 sub print
@@ -257,10 +260,14 @@ sub print_generations
   return unless $generations > 0;
   my $i = "  " x $indent;
   print "$i$self->{xref} (", $self->rin, ") ", $self->name, "\n" unless $indent;
+  $self->print;
   for my $fam ($self->fams)
   {
-    for my $spouse ($fam->husband, $fam->wife)
+    # $fam->print;
+    for my $spouse ($fam->parents)
     {
+      next unless $spouse;
+      # print "[$spouse]\n";
       next if $self->xref eq $spouse->xref;
       print "$i= $spouse->{xref} (", $spouse->rin, ") ", $spouse->name, "\n";
     }
@@ -294,7 +301,7 @@ __END__
 
 Gedcom::Individual - a module to manipulate Gedcom individuals
 
-Version 1.09 - 12th February 2001
+Version 1.10 - 5th March 2002
 
 =head1 SYNOPSIS
 
@@ -355,7 +362,7 @@ Return the surname of the individual.
 
   my $given_names = $i->given_names;
 
-Return the given names of the individual.
+Return the given names of the individual, with spaces normalised.
 
 =head2 soundex
 
@@ -404,6 +411,9 @@ eg:
   my $ok  = $i->delete;
 
 Delete $i from the data structure.
+
+This function will also set $i to undef.  This is to remind you that the
+individual cannot be used again.
 
 Returns true iff $i was successfully deleted.
 

@@ -1,4 +1,4 @@
-# Copyright 1998-2001, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -13,16 +13,20 @@ require 5.005;
 
 package Gedcom;
 
+use Carp;
 use Data::Dumper;
 use FileHandle;
 
 BEGIN { eval "use Text::Soundex" }           # We'll use this if it is available
 
-use vars qw($VERSION $Tags);
+use vars qw($VERSION $AUTOLOAD %Funcs);
+
+my $Tags;
+my %Top_tag_order;
 
 BEGIN
 {
-  $VERSION = "1.09";
+  $VERSION = "1.10";
 
   $Tags =
   {
@@ -156,12 +160,66 @@ BEGIN
     WIFE => "Wife",
     WILL => "Will",
   };
+
+  %Top_tag_order =
+  (
+    HEAD => 1,
+    SUBM => 2,
+    INDI => 3,
+    FAM  => 4,
+    NOTE => 5,
+    REPO => 6,
+    SOUR => 7,
+    TRLR => 8,
+  );
+
+  while (my ($tag, $name) = each (%$Tags))
+  {
+    # print "looking at tag $tag <$name>\n";
+    $Funcs{$tag} = $Funcs{lc $tag} = $tag;
+    if ($name)
+    {
+      $name =~ s/ /_/g;
+      $Funcs{lc $name} = $tag;
+    }
+  }
 }
 
-use Gedcom::Grammar    1.09;
-use Gedcom::Individual 1.09;
-use Gedcom::Family     1.09;
-use Gedcom::Event      1.09;
+sub AUTOLOAD
+{
+  my ($self) = @_;                         # don't change @_ because of the goto
+  return if $AUTOLOAD =~ /::DESTROY$/;
+  my $func = $AUTOLOAD;
+  # print "autoloading $func\n";
+  $func =~ s/^.*:://;
+  my $tag;
+  carp "Undefined subroutine $func called"
+    if $func !~ /^add_(.*)$/ ||
+       !($tag = $Funcs{lc $1}) ||
+       !exists $Top_tag_order{$tag};
+  no strict "refs";
+  *$func = sub
+  {
+    my $self = shift;
+    my $r = $self->add_record(tag => $tag);
+    unless ($tag =~ /^(HEAD|TRLR)$/)
+    {
+      my $x = @_ ? shift : $tag eq "SUBM" ? "SUBM" : substr $tag, 0, 1;
+      carp "Invalid xref $x requested in $func"
+        unless $x =~ /^[[:alpha:]]+(\d*)$/;
+      $x = $self->next_xref($x) unless length $1;
+      $r->{xref} = $x;
+      $self->{xrefs}{$r->{xref}} = $r;
+    }
+    $r
+  };
+  goto &$func
+}
+
+use Gedcom::Grammar    1.10;
+use Gedcom::Individual 1.10;
+use Gedcom::Family     1.10;
+use Gedcom::Event      1.10;
 
 sub new
 {
@@ -176,6 +234,7 @@ sub new
     xrefs     => {},
     @_
   };
+
   # TODO - find a way to do this nicely for different grammars
   $self->{types}{INDI} = "Individual";
   $self->{types}{FAM}  = "Family";
@@ -190,8 +249,19 @@ sub new
   my $grammar;
   if (defined $self->{grammar_file})
   {
+    my $version;
+    if (defined $self->{grammar_version})
+    {
+      $version = $self->{grammar_version};
+    }
+    else
+    {
+      ($version) = $self->{grammar_file} =~ /(\d+(\.\d+)*)/;
+    }
+    die "version must be a gedcom version number\n" unless $version;
     return undef unless
       $grammar = Gedcom::Grammar->new(file     => $self->{grammar_file},
+                                      version  => $version,
                                       callback => $self->{callback});
   }
   else
@@ -210,22 +280,79 @@ sub new
     @c = map { $_->{top} = $grammar; @{$_->{items}} } @c;
   }
 
-  # now read in the gedcom file
-  if (defined $self->{gedcom_file})
+  # now read in or create the gedcom file
+  return undef unless
+    my $r = $self->{record} = Gedcom::Record->new
+    (
+      defined $self->{gedcom_file} ? (file => $self->{gedcom_file}) : (),
+      line     => 0,
+      tag      => "GEDCOM",
+      grammar  => $grammar->structure("GEDCOM"),
+      gedcom   => $self,
+      callback => $self->{callback}
+    );
+
+  unless (defined $self->{gedcom_file})
   {
-    return undef unless
-      $self->{record} =
-        Gedcom::Record->new(file     => $self->{gedcom_file},
-                            line     => 0,
-                            tag      => "GEDCOM",
-                            grammar  => $grammar->structure("GEDCOM"),
-                            gedcom   => $self,
-                            callback => $self->{callback});
-    $self->{record}{items} = [ Gedcom::Record->new(tag => "TRLR") ]
-      unless @{$self->{record}{items}};
-    $self->collect_xrefs;
+
+    # Add the required elements, unless they are already there.
+
+    unless ($r->get_record("head"))
+    {
+      my $me = "Unknown user";
+      my $login = $me;
+      if ($login = getlogin || (getpwuid($<))[0] || $ENV{USER} || $ENV{LOGIN})
+      {
+        my $name;
+        eval { $name = (getpwnam($login))[6] };
+        $me = $name || $login;
+      }
+      my $date = localtime;
+
+      my ($l0, $l1, $l2, $l3);
+      $l0 = $self->add_header;
+        $l1 = $l0->add("SOUR", "Gedcom.pm");
+        $l1->add("NAME", "Gedcom.pm");
+        $l1->add("VERS", $VERSION);
+          $l2 = $l1->add("CORP", "Paul Johnson");
+          $l2->add("ADDR", "http://www.pjcj.net");
+          $l2 = $l1->add("DATA");
+            $l3 = $l2->add("COPR",
+                           'Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)');
+        $l1 = $l0->add("NOTE", "");
+      for (split /\n/, <<'EOH')
+This output was generated by Gedcom.pm.
+Gedcom.pm is Copyright 1999-2002, Paul Johnson (pjcj@cpan.org)
+Version 1.10 - 5th March 2002
+
+Gedcom.pm is free.  It is licensed under the same terms as Perl itself.
+
+The latest version of Gedcom.pm should be available from my homepage:
+http://www.pjcj.net
+EOH
+      {
+        $l1->add("CONT", $_);
+      };
+        $l1 = $l0->add("GEDC");
+        $l1->add("VERS", $self->{grammar}{version});
+        $l1->add("FORM", "LINEAGE-LINKED");
+      $l0->add("DATE", $date);
+      $l0->add("CHAR", "ANSEL");
+      my $s = $r->get_record("subm");
+      unless ($s)
+      {
+        $s = $self->add_submitter;
+        $s->add("NAME", $me);
+      }
+      $l0->add("SUBM", $s->xref);
+    }
+
+    $self->add_trailer unless $r->get_record("trlr");
   }
-  $self;
+
+  $self->collect_xrefs;
+
+  $self
 }
 
 sub write
@@ -247,8 +374,8 @@ sub write_xml
 <!--
 
 This output was generated by Gedcom.pm.
-Gedcom.pm is Copyright 1999-2001, Paul Johnson (pjcj@cpan.org)
-Version 1.09 - 12th February 2001
+Gedcom.pm is Copyright 1999-2002, Paul Johnson (pjcj@cpan.org)
+Version 1.10 - 5th March 2002
 
 Gedcom.pm is free.  It is licensed under the same terms as Perl itself.
 
@@ -261,11 +388,17 @@ EOH
   $self->{fh}->close or die "Can't close $file: $!";
 }
 
+sub add_record
+{
+  my $self = shift;
+  $self->{record}->add_record(@_);
+}
+
 sub collect_xrefs
 {
   my $self = shift;
   my ($callback) = @_;
-  $self->{gedcom}{xrefs} = [];
+  $self->{xrefs} = {};
   $self->{record}->collect_xrefs($callback);
 }
 
@@ -275,7 +408,7 @@ sub resolve_xref
   my ($x) = @_;
   my $xref;
   $xref = $self->{xrefs}{$x =~ /^\@(.+)\@$/ ? $1 : $x} if defined $x;
-  $xref;
+  $xref
 }
 
 sub resolve_xrefs
@@ -302,7 +435,7 @@ sub validate
   {
     $ok = 0 unless $item->validate_semantics;
   }
-  $ok;
+  $ok
 }
 
 sub normalise_dates
@@ -345,23 +478,11 @@ sub sort_sub
 
   # subroutine to sort on tag order first, and then on xref
 
-  my $tag_order =
-  {
-    HEAD => 1,
-    SUBM => 2,
-    INDI => 3,
-    FAM  => 4,
-    NOTE => 5,
-    REPO => 6,
-    SOUR => 7,
-    TRLR => 8,
-  };
-
   my $t = sub
   {
     my ($r) = @_;
     return -2 unless defined $r->{tag};
-    exists $tag_order->{$r->{tag}} ? $tag_order->{$r->{tag}} : -1
+    exists $Top_tag_order{$r->{tag}} ? $Top_tag_order{$r->{tag}} : -1
   };
 
   my $x = sub
@@ -384,8 +505,7 @@ sub order
 {
   my $self     = shift;
   my $sort_sub = shift || sort_sub;   # use default sort unless one is passed in
-  local *_ss = $sort_sub;
-  @{$self->{record}{items}} = sort _ss @{$self->{record}->_items}
+  @{$self->{record}{items}} = sort $sort_sub @{$self->{record}->_items}
 }
 
 sub individuals
@@ -404,9 +524,15 @@ sub get_individual
 {
   my $self = shift;
   my $name = "@_";
+  my $all = wantarray;
+  my @i;
 
   my $i = $self->resolve_xref($name) || $self->resolve_xref(uc $name);
-  return $i if $i;
+  if ($i)
+  {
+    return $i unless $all;
+    push @i, $i;
+  }
 
   # search for the name in the specified order
   my $ordered = sub
@@ -437,7 +563,6 @@ sub get_individual
 
   # look for various matches in decreasing order of exactitude
   my @individuals = $self->individuals;
-  my @i;
 
   # Store the name with the individual to avoid continually recalculating it.
   # This is a bit like a Schwartzian transform, with a grep instead of a sort.
@@ -447,7 +572,8 @@ sub get_individual
 
   for my $n ( map { qr/^$_$/, qr/\b$_\b/, $_ } map { $_, qr/$_/i } qr/\Q$name/ )
   {
-    return wantarray ? @i : $i[0] if @i = $ordered->($n, @ind)
+    push @i, $ordered->($n, @ind);
+    return $i[0] if !$all && @i;
   }
 
   # create an array with one element per name
@@ -456,18 +582,34 @@ sub get_individual
               split / /, $name;
   for my $t (0 .. $#{$names[0]})
   {
-    return wantarray ? @i : $i[0] if @i = $unordered->(\@names, $t, @ind)
+    push @i, $unordered->(\@names, $t, @ind);
+    return $i[0] if !$all && @i;
   }
 
   # check soundex
-  my @sdx = map { [ $_->soundex => $_ ] } @individuals;
+  my @sdx = map { my $s = $_->soundex; $s ? [ $s => $_ ] : () } @individuals;
 
-  for my $n ( map { qr/$_/ } $name, soundex($name) )
+  my $soundex = soundex($name);
+  for my $n ( map { qr/$_/ } $name, ($soundex || ()) )
   {
-    return wantarray ? @i : $i[0] if @i = $ordered->($n, @sdx)
+    push @i, $ordered->($n, @sdx);
+    return $i[0] if !$all && @i;
   }
 
-  return wantarray ? () : undef;
+  return undef unless $all;
+
+  my @s;
+  my %s;
+  for (@i)
+  {
+    unless (exists $s{$_->{xref}})
+    {
+      push @s, $_;
+      $s{$_->{xref}}++;
+    }
+  }
+
+  @s
 }
 
 sub next_xref
@@ -492,12 +634,13 @@ __END__
 
 Gedcom - a module to manipulate Gedcom genealogy files
 
-Version 1.09 - 12th February 2001
+Version 1.10 - 5th March 2002
 
 =head1 SYNOPSIS
 
   use Gedcom;
 
+  my $ged = Gedcom->new;
   my $ged = Gedcom->new(gedcom_file => $gedcom_file);
   my $ged = Gedcom->new(grammar_version => 5.5,
                         gedcom_file     => $gedcom_file,
@@ -514,15 +657,17 @@ Version 1.09 - 12th February 2001
   my %xrefs = $ged->renumber;
   $ged->order;
   $ged->write($new_gedcom_file, $flush);
-  $ged->write_xml($fh, $level);
+  $ged->write_xml($new_xml_file);
   my @individuals = $ged->individuals;
   my @families = $ged->families;
   my $me = $ged->get_individual("Paul Johnson");
   my $xref = $ged->next_xref("I");
 
+  my $record = $ged->add_header;
+
 =head1 DESCRIPTION
 
-Copyright 1998-2001, Paul Johnson (pjcj@cpan.org)
+Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
 
 This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -539,10 +684,12 @@ description.  Part of the reason I wrote this module is because I don't
 do that.  Well, I didn't.  I can now although I prefer not to...
 
 Requirements:
+
   Perl 5.005 or later
   ActivePerl5 Build Number 520 or later has been reported to work
 
 Optional Modules:
+
   Date::Manip.pm       to work with dates
   Text::Soundex.pm     to use soundex
   Parse::RecDescent.pm to use lines2perl
@@ -567,20 +714,20 @@ file, such as reformatting dates, renumbering entries and ordering the
 entries.  It also allows access to individuals, and then to relations of
 individuals, for example sons, siblings, spouse, parents and so forth.
 
-This release includes a lines2perl program to convert LifeLines programs
-to Perl.  The program works, but it has a few rough edges, and some
-missing functionality.  I'll be working on it when it hits the top of my
-TODO list.
+The distribution includes a lines2perl program to convert LifeLines
+programs to Perl.  The program works, but it has a few rough edges, and
+some missing functionality.  I'll be working on it when it hits the top
+of my TODO list.
 
-This release provides an option for read only access to the gedcom file.
+There is now an option for read only access to the gedcom file.
 Actually, this doesn't stop you changing or writing the file, but it
 does parse the gedcom file lazily, meaning that only those portions of
 the gedcom file which are needed will be read.  This can provide a
 substantial saving of time and memory providing that not too much of the
 gedcom file is read.  If you are going to read the whole gedcom file,
-this mode is less efficient.
+this mode is less efficient unless you do some manual housekeeping.
 
-Note that this is an early release of this software - caveat emptor.
+Note that this is still considered beta software - caveat emptor.
 
 Should you find this software useful, or if you make changes to it, or
 if you would like me to make changes to it, please send me mail.  I
@@ -590,10 +737,11 @@ decisions when I feel the need to make changes to the interface.
 
 There is a low volume mailing list available for discussing the use of
 Perl in conjunction with genealogical work.  This is an appropriate
-forum for discussing Gedcom.pm.  To subscribe to the regular list, send
-a message to majordomo@icomm.ca and put subscribe S<perl-gedcom> as the
-body of the message. To get on the digest version of the list, put
-subscribe S<perl-gedcom-digest>.
+forum for discussing Gedcom.pm and if you use or are interested in this
+module I would encourage you to join the list.  To subscribe to the
+regular list, send a message to majordomo@icomm.ca and put subscribe
+S<perl-gedcom> as the body of the message. To get on the digest version
+of the list, put subscribe S<perl-gedcom-digest>.
 
 To store my genealogy I wrote a syntax file (gedcom.vim) and used vim
 (http://www.vim.org) to enter the data, and Gedcom.pm to validate and
@@ -659,8 +807,8 @@ record within an individual.
   my $d = $b->date;
 
 Be aware that if you access a record in scalar context, but there is no
-such record, then undef is returned.  In this case, $b would be undef if
-$i had no birth record.  This is another reason why looping through
+such record, then undef is returned.  In this case, $d would be undef if
+$b had no date record.  This is another reason why looping through
 records is a nice solution, all else being equal.
 
 Access to values can also be gained through the get_value() function.
@@ -735,6 +883,8 @@ See Gedcom::Record.pm for more details.
 
 =head2 new
 
+  my $ged = Gedcom->new;
+
   my $ged = Gedcom->new(gedcom_file => $gedcom_file);
 
   my $ged = Gedcom->new(grammar_version => 5.5,
@@ -747,7 +897,9 @@ See Gedcom::Record.pm for more details.
 
 Create a new gedcom object.
 
-gedcom_file is the name of the gedcom file to parse.
+gedcom_file is the name of the gedcom file to parse.  If you do not
+supply a gedcom_file parameter then you will get an empty Gedcom object,
+empty that is apart from a few mandatory records.
 
 You may optionally pass grammar_version as the version number of the
 gedcom grammar you want to use.  At the moment only version 5.5 is
@@ -777,7 +929,8 @@ data will generally mean that the data will be written which means that
 the data will first be read, the read_only option is generally useful
 when the data will not be written and when not all the data will be
 read.  You may find it useful to experiment with this option and check
-the amount of CPU time and memory that your application uses.
+the amount of CPU time and memory that your application uses.  You may
+also need to read this paragraph a few times to understand it.  Sorry.
 
 callback is an optional reference to a subroutine which will be called
 at various times while the gedcom file (and the grammar file, if
@@ -806,9 +959,9 @@ but the new file name must be specified.
 
 =head2 write_xml
 
-  $ged->write_xml($fh);
+  $ged->write_xml($new_xml_file);
 
-Write the item to a FileHandle as XML.
+Write the gedcom file as XML.
 
 Takes the name of the new gedcom file.
 
@@ -867,8 +1020,8 @@ Returns true iff the gedcom object is valid.
   $ged->normalise_dates;
   $ged->normalise_dates("%A, %E %B %Y");
 
-Change all recognised dates into a consistent format.  This routine used
-Date::Manip to do the work, so you can look at it's documentation
+Change all recognised dates into a consistent format.  This routine uses
+Date::Manip to do the work, so you can look at its documentation
 regarding formats that are recognised and % sequences for the output.
 
 Optionally takes a format to use for the output.  The default is
@@ -888,7 +1041,7 @@ Optional parameters are:
   xrefs    => list of xrefs to renumber first
 
 As a record is renumbered, it is assigned the next available number.
-The husband, wife, children parents and siblings are then renumbered in
+The husband, wife, children, parents and siblings are then renumbered in
 that order.  This helps to ensure that families are numerically close
 together.
 
@@ -933,8 +1086,10 @@ Return a list of all the families.
 
 Return a list of all individuals matching the specified name.
 
-There are thirteen matches performed, and the results from the first
-successful match are returned.
+There are thirteen matches performed, in decreasing order of exactitude.
+This means that the more likely matches are at the head of the list.
+
+In scalar context return the first match found.
 
 The matches are:
 

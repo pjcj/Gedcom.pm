@@ -1,10 +1,10 @@
 NAME
     Gedcom - a module to manipulate Gedcom genealogy files
 
-    Version 1.09 - 12th February 2001
+    Version 1.10 - 5th March 2002
 
 DESCRIPTION
-    Copyright 1998-2001, Paul Johnson (pjcj@cpan.org)
+    Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
 
     This software is free. It is licensed under the same terms as Perl
     itself.
@@ -21,12 +21,17 @@ DESCRIPTION
     description. Part of the reason I wrote this module is because I don't
     do that. Well, I didn't. I can now although I prefer not to...
 
-    Requirements: Perl 5.005 or later ActivePerl5 Build Number 520 or later
-    has been reported to work
+    Requirements:
 
-    Optional Modules: Date::Manip.pm to work with dates Text::Soundex.pm to
-    use soundex Parse::RecDescent.pm to use lines2perl Roman.pm to use the
-    LifeLines function roman from lines2perl
+      Perl 5.005 or later
+      ActivePerl5 Build Number 520 or later has been reported to work
+
+    Optional Modules:
+
+      Date::Manip.pm       to work with dates
+      Text::Soundex.pm     to use soundex
+      Parse::RecDescent.pm to use lines2perl
+      Roman.pm             to use the LifeLines function roman from lines2perl
 
     The Gedcom format is specified in a grammar file (gedcom-5.5.grammar).
     Gedcom.pm parses the grammar which is then used to validate and allow
@@ -47,20 +52,20 @@ DESCRIPTION
     entries. It also allows access to individuals, and then to relations of
     individuals, for example sons, siblings, spouse, parents and so forth.
 
-    This release includes a lines2perl program to convert LifeLines programs
-    to Perl. The program works, but it has a few rough edges, and some
-    missing functionality. I'll be working on it when it hits the top of my
-    TODO list.
+    The distribution includes a lines2perl program to convert LifeLines
+    programs to Perl. The program works, but it has a few rough edges, and
+    some missing functionality. I'll be working on it when it hits the top
+    of my TODO list.
 
-    This release provides an option for read only access to the gedcom file.
+    There is now an option for read only access to the gedcom file.
     Actually, this doesn't stop you changing or writing the file, but it
     does parse the gedcom file lazily, meaning that only those portions of
     the gedcom file which are needed will be read. This can provide a
     substantial saving of time and memory providing that not too much of the
     gedcom file is read. If you are going to read the whole gedcom file,
-    this mode is less efficient.
+    this mode is less efficient unless you do some manual housekeeping.
 
-    Note that this is an early release of this software - caveat emptor.
+    Note that this is still considered beta software - caveat emptor.
 
     Should you find this software useful, or if you make changes to it, or
     if you would like me to make changes to it, please send me mail. I would
@@ -70,10 +75,11 @@ DESCRIPTION
 
     There is a low volume mailing list available for discussing the use of
     Perl in conjunction with genealogical work. This is an appropriate forum
-    for discussing Gedcom.pm. To subscribe to the regular list, send a
-    message to majordomo@icomm.ca and put subscribe perl-gedcom as the body
-    of the message. To get on the digest version of the list, put subscribe
-    perl-gedcom-digest.
+    for discussing Gedcom.pm and if you use or are interested in this module
+    I would encourage you to join the list. To subscribe to the regular
+    list, send a message to majordomo@icomm.ca and put subscribe perl-gedcom
+    as the body of the message. To get on the digest version of the list,
+    put subscribe perl-gedcom-digest.
 
     To store my genealogy I wrote a syntax file (gedcom.vim) and used vim
     (http://www.vim.org) to enter the data, and Gedcom.pm to validate and

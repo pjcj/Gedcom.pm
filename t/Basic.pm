@@ -1,13 +1,13 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1999-2001, Paul Johnson (pjcj@cpan.org)
+# Copyright 1999-2002, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.09 - 12th February 2001
+# Version 1.10 - 5th March 2002
 
 use strict;
 
@@ -16,11 +16,11 @@ require 5.005;
 package Basic;
 
 use vars qw($VERSION);
-$VERSION = "1.09";
+$VERSION = "1.10";
 
 use Test;
 
-use Gedcom 1.09;
+use Gedcom 1.10;
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
@@ -209,9 +209,9 @@ sub import
     (
       "B1 C1" => [ 82 ],                                           # exact match
       "B2 C2" => [ 83, 84, 85 ],                           # use word boundaries
-      "B3 C3" => [ 86, 87, 88 ],                                # match anywhere
+      "B3 C3" => [ 86, 87, 88, 89 ],                            # match anywhere
       "B3 c3" => [ 86, 87, 88, 89 ],                  # match anywhere, any case
-      "B4 C4" => [ 90 ],                                    # match in any order
+      "B4 C4" => [ 90, 91 ],                                # match in any order
       "B4 c4" => [ 90, 91 ],      # match in any order, any case (order correct)
       "c4 B4" => [ 90, 91 ],     # match in any order, any case (order reversed)
     );
@@ -219,7 +219,9 @@ sub import
     ok xrefs($ged->get_individual($_)), i(@{$individuals{$_}})
       for sort keys %individuals;
 
-    ok $ged->get_individual("I82")->note, "Line 1\nLine 2\nLine 3\nLine 4";
+    my $i = $ged->get_individual("I82");
+    ok $i->note, "Line 1\nLine 2\nLine 3\nLine 4";
+    ok scalar $i->get_value("birth age"), 0;
 
 #   ok $ged->validate;
 
@@ -236,7 +238,7 @@ sub import
     ok unlink $f1;
   };
 
-  my $tests = 1476;
+  my $tests = 1483;
   my $grammar;
   if ($grammar = delete $args{create_grammar})
   {
@@ -270,7 +272,7 @@ __DATA__
 1   GEDC
 2     VERS 5.5
 2     FORM LINEAGE-LINKED
-1   SUBM @S1@
+1   SUBM @SUBM1@
 1   NOTE This Gedcom file should only be used as part of the testsuite
 2     CONC for Gedcom.pm (http://www.pjcj.net).  I have removed a
 2     CONC lot of data from the original, and changed a few bits, so you
@@ -309,7 +311,7 @@ __DATA__
 2     CONC >>
 2     CONC >> Thanks for your interest.   Denis Reid
 
-0 @S1@ SUBM
+0 @SUBM1@ SUBM
 1   NAME Denis R. Reid
 1   ADDR 149 Kimrose Lane
 2     CONT Broadview Heights, Ohio 44147-1258
@@ -1216,6 +1218,7 @@ __DATA__
 1   NAME B1 C1
 1   BIRT
 2     DATE Saturday, 1st January 2000
+2     AGE 0
 1   BIRT
 2     DATE Sunday, 2nd January 2000
 1   RIN 83
@@ -1464,6 +1467,8 @@ __DATA__
 0 @F23@ FAM
 1   CHIL @I35@
 1   RIN 139
+1   SOUR @S1@
+2     PAGE 1
 
 0 @F24@ FAM
 1   HUSB @I37@
@@ -1635,5 +1640,8 @@ __DATA__
 1   MARR
 2     DATE Sunday, 19th September 1971
 1   RIN 124
+
+0 @S1@ SOUR
+1   TEXT Hello
 
 0 TRLR

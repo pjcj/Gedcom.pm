@@ -1,4 +1,6 @@
 proc main ()
 {
-  "test\n"
+  "te\"st1\n"
+  'te\'st2'
+  nl()
 }

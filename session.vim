@@ -1,4 +1,5 @@
 1,999bd
+e Makefile.PL
 e Gedcom.pm
 e Gedcom/Item.pm
 e Gedcom/Grammar.pm
@@ -8,7 +9,6 @@ e Gedcom/Family.pm
 e Gedcom/Event.pm
 e Gedcom/CGI.pm
 e Gedcom/LifeLines.pm
-e Makefile.PL
 e CHANGES
 e TODO
 e MANIFEST

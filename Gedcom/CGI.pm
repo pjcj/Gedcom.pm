@@ -1,4 +1,4 @@
-# Copyright 2001, Paul Johnson (pjcj@cpan.org)
+# Copyright 2001-2002, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -15,10 +15,10 @@ package Gedcom::CGI;
 
 use CGI qw(:cgi :html);
 
-use Gedcom 1.09;
+use Gedcom 1.10;
 
 use vars qw($VERSION);
-$VERSION = "1.09";
+$VERSION = "1.10";
 
 sub gedcom
 {
@@ -105,6 +105,9 @@ sub indi
               th([ "Event", "Date", "Place"]),
               event_row("Birth",       $i->birth),
               event_row("Christening", $i->christening),
+              event_row("Baptism",     $i->baptism),
+              event_row("Baptism",     $i->bapl),
+              event_row("Endowment",   $i->endowment),
               event_row("Death",       $i->death),
               event_row("Burial",      $i->burial),
               event_row("Marriage",    $i->get_record(qw(fams marriage))),
@@ -139,7 +142,7 @@ __END__
 
 Gedcom::CGI - Basic CGI routines for Gedcom.pm
 
-Version 1.09 - 12th February 2001
+Version 1.10 - 5th March 2002
 
 =head1 SYNOPSIS
 

@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1998-2001, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -15,9 +15,9 @@ use ExtUtils::MakeMaker;
 
 $| = 1;
 
-my $Version = "1.09";
-my $Date    = "12th February 2001";
-my $Author = 'pjcj@cpan.org';
+my $Version = "1.10";
+my $Date    = "5th March 2002";
+my $Author  = 'pjcj@cpan.org';
 
 my @perlbug = ("perlbug", "-a", $Author,
                           "-s", "Installation of Gedcom $Version");
@@ -25,10 +25,10 @@ my @perlbug = ("perlbug", "-a", $Author,
 my $Perlbug = join " ", map { / / ? "'$_'" : $_ } @perlbug;
 
 
-open(M, "MANIFEST") or die "Cannot open MANIFEST: $!";
+open M, "MANIFEST" or die "Cannot open MANIFEST: $!";
 my @files    = map { split } <M>;
 my @versions = grep { $_ ne "README" && $_ ne "Makefile.PL" } @files;
-close(M) or die "Cannot close MANIFEST: $!";
+close M or die "Cannot close MANIFEST: $!";
 
 $ExtUtils::MakeMaker::Verbose = 0;
 
@@ -153,7 +153,7 @@ else
   print "working\n";
 }
 
-print <<EOM;
+print <<EOM if 0;
 
 --------------------------------------------------------------------------------
 
@@ -165,8 +165,14 @@ module.
 If you can run perlbug you can send me a success report with "make ok".
 Failure reports with "make nok" are also appreciated.
 
-If you have any questions or comments, mailing list details are available in the
-README file, or send mail to me directly.
+EOM
+
+print <<EOM;
+
+--------------------------------------------------------------------------------
+
+If you have any questions or comments please send a message to the perl-gedcom
+mailing list, details of which are available in the README file.
 
 EOM
 

@@ -1,4 +1,4 @@
-# Copyright 1999-2001, Paul Johnson (pjcj@cpan.org)
+# Copyright 1999-2002, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -20,10 +20,10 @@ BEGIN
   eval "use Roman ()";
 }
 
-use Gedcom 1.09;
+use Gedcom 1.10;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = "1.09";
+$VERSION = "1.10";
 @ISA     = qw( Exporter );
 @EXPORT  = qw
 (
@@ -48,7 +48,7 @@ $VERSION = "1.09";
   menuchoose
   lower upper capitalize trim rjustify
   save strsave concat strconcat strlen
-  substring index substring
+  substring index
   d card ord alpha roman
   strsoundex
   strtoint atoi
@@ -118,7 +118,9 @@ sub name
 {
   my ($indi, $cased) = @_;
   return unless $indi;
-  !defined $cased || $cased ? $indi->cased_name : $indi->name
+  my $name = !defined $cased || $cased ? $indi->cased_name : $indi->name;
+  $name =~ s|/||g;
+  $name
 }
 
 sub fullname
@@ -260,8 +262,8 @@ sub parents
 {
   my ($indi) = @_;
   return unless $indi;
-  my @a = $indi->famc;
-  scalar @a
+  my $a = $indi->famc;
+  $a
 }
 
 sub title
@@ -450,7 +452,7 @@ sub parent
 {
   my ($record) = @_;
   return unless $record;
-  die "LifeLines parent function not yet implemented"
+  $record->parent
 }
 
 sub child
@@ -464,7 +466,21 @@ sub sibling
 {
   my ($record) = @_;
   return unless $record;
-  die "LifeLines sibling function not yet implemented"
+
+  my $parent = $record->parent;
+  return unless $parent;
+
+  my $r = "$record";
+  my $n = 0;
+  for (@{$parent->_items})
+  {
+    last if $r eq "$_";
+    $n++;
+  }
+
+  return unless $n < $#{$parent->{items}};
+
+  $parent->{items}[$n + 1]
 }
 
 sub savenode
@@ -512,14 +528,8 @@ sub short
 
 sub gettoday
 {
-  my $today = localtime;
-  $today =~ s/\d\d:\d\d:\d\d //;
-  my $date  = Gedcom::Record->new(gedcom => $Ged,
-                                  tag    => "DATE",
-                                  value  => $today);
-  my $event = Gedcom::Record->new(gedcom => $Ged,
-                                  items  => [$date]);
-  $event
+  my $event = Gedcom::Event->new(gedcom => $Ged);
+  $event->add("date", uc join " ", (localtime)[2, 1, 4])
 }
 
 sub dayformat
@@ -612,19 +622,15 @@ sub extractnames
   $$count = $$surname = 0;
   my $name = $record->tag eq "NAME" ? $record->full_value : $record->name;
   return unless $name;
-  $name =~ s|/\s+|/|;
-  $name =~ s|(/.*?)/s+/|$1/|;
-  $$names = [ split ' ', $name ];
-  $$count = scalar @$$names;
-  for ($$surname = $$count; $$surname--;)
-  {
-    if ($$names->[$$surname] =~ s|/||g)
-    {
-      $$surname++;
-      return;
-    }
-  }
-  $$surname = 0;
+
+  my ($before, $sn, $after) = split "/", $name;
+  my @bf    = split " ", $before;
+  my @af    = split " ", $after;
+  $$count   = @bf + @af; $$count++ if $sn;
+  $$names   = [@bf, $sn || (), @af];
+  $$surname = $sn ? @bf + 1 : 0;
+
+  # print "[$name] [", join("|", @$$names), "], $$count, $$surname, \n";
   return
 }
 
@@ -808,7 +814,7 @@ sub strlen
 sub substring
 {
   my ($string, $start, $end) = @_;
-  substr $string, $start - 1, $end - $start
+  substr $string, $start - 1, $end - $start + 1
 }
 
 sub index
@@ -816,7 +822,7 @@ sub index
   my ($string, $substring, $occurrence) = @_;
   my $pos = 0;
   while ($occurrence-- && ($pos = index $string, $substring, $pos) >= 0) {}
-  $pos
+  $pos + 1
 }
 
 sub d
@@ -828,13 +834,29 @@ sub d
 sub card
 {
   my ($number) = @_;
-  die "LifeLines card function not yet implemented"
+  my @cardinals = qw
+  (
+    zero one two three four five six seven eight nine ten eleven twelve
+  );
+
+  $number < 0 || $number > $#cardinals ? $number : $cardinals[$number]
 }
 
 sub ord
 {
   my ($number) = @_;
-  die "LifeLines ord function not yet implemented"
+  my @ordinals = qw
+  (
+    zeroth first second third fourth fifth sixth
+    seventh eighth ninth tenth eleventh twelfth
+  );
+  my @suffixes = qw( th st nd rd th th th th th th );
+
+  return if $number < 0;
+  return $ordinals[$number] if $number < @ordinals;
+  my $n = $number % 100;
+  return $number . "th" if $n < 10 && $n < 14;
+  return $number . $suffixes[$number % 10];
 }
 
 sub alpha
@@ -927,7 +949,11 @@ sub col
 sub row
 {
   my ($row) = @_;
-  $Row = $row - 1 unless $Line_mode;
+  unless ($Line_mode)
+  {
+    $Row = $row - 1;
+    $Column = 0;
+  }
   return
 }
 
@@ -962,15 +988,25 @@ sub qt
   '"'
 }
 
-sub newfile
 {
-  my ($file, $append) = @_;
-  die "LifeLines newfile function not yet implemented"
-}
+  my $Openfile;
 
-sub outfile
-{
-  die "LifeLines outfile function not yet implemented"
+  sub newfile
+  {
+    my ($filename, $append) = @_;
+
+    flush();
+    my $mode = $append ? ">>" : ">";
+    open LLOUT, "$mode$filename" or die "Cannot open $filename\n";
+    select LLOUT;
+    $Openfile = $filename;
+    return;
+  }
+
+  sub outfile
+  {
+    $Openfile
+  }
 }
 
 sub copyfile
@@ -1008,9 +1044,8 @@ sub deletefromset
     my $keep = ($count && !$all) || $_->[0] ne $indi;
     $count++ unless $keep;
     $keep
-  }
-  @$set;
-  $set = \@new;
+  } @$set;
+  $_[0] = \@new;
   return
 }
 
@@ -1226,7 +1261,7 @@ __END__
 
 Gedcom::LifeLines - functions for lines2perl
 
-Version 1.09 - 12th February 2001
+Version 1.10 - 5th March 2002
 
 =head1 SYNOPSIS
 
@@ -1243,7 +1278,6 @@ lines2perl program.  Anything in here that finds a more general use
 should probably be abstracted away to one of the more standard modules.
 
 Functions yet to be implemented include:
-  parent()
   sibling()
   getindiset()
   choosechild()
@@ -1251,10 +1285,6 @@ Functions yet to be implemented include:
   chooseindi()
   choosesubset()
   menuchoose()
-  card()
-  ord()
-  newfile()
-  outfile()
   gengedcom()
   createnode()
   addnode()

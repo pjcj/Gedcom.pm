@@ -1,4 +1,4 @@
-# Copyright 1998-2001, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -16,15 +16,22 @@ package Gedcom::Item;
 use Symbol;
 
 use vars qw($VERSION);
-$VERSION = "1.09";
+$VERSION = "1.10";
 
 sub new
 {
   my $proto = shift;
   my $class = ref($proto) || $proto;
-  my $self = { @_ };
+  my $self =
+  {
+    level => -3,
+    file  => "*",
+    line  => 0,
+    items => [],
+    @_
+  };
   bless $self, $class;
-  $self->read if $self->{file};
+  $self->read if $self->{file} && $self->{file} ne "*";
   $self;
 }
 
@@ -32,7 +39,7 @@ sub copy
 {
   my $self = shift;
   my $item  = $self->new;
-  for my $key (qw(level xref tag value min max gedcom))
+  for my $key (qw(level xref tag value pointer min max gedcom))
   {
     $item->{$key} = $self->{$key} if exists $self->{$key}
   }
@@ -46,12 +53,12 @@ sub read
 
 # $self->{fh} = FileHandle->new($self->{file})
   $self->{fh} = gensym;
-  open($self->{fh}, $self->{file}) or die "Can't open file $self->{file}: $!";
+  open $self->{fh}, $self->{file} or die "Can't open file $self->{file}: $!";
   binmode $self->{fh};
 
   # find out how big the file is
   seek($self->{fh}, 0, 2);
-  my $size = tell;
+  my $size = tell $self->{fh};
   seek($self->{fh}, 0, 0);
 
   # initial callback
@@ -61,7 +68,7 @@ sub read
   my $count = 0;
   return undef
     if $callback &&
-       !$callback->($title, $txt1, "Record $count", tell, $size);
+       !$callback->($title, $txt1, "Record $count", tell $self->{fh}, $size);
 
   $self->level($self->{grammar} ? -1 : -2);
 
@@ -99,7 +106,7 @@ sub read
     # print Dumper $self;
   }
 
-  unless ($self->{items})
+  unless (@{$self->{items}})
   {
     # use Data::Dumper;
     # print Dumper $self->{items};
@@ -113,9 +120,11 @@ sub read
       if ($self->{grammar})
       {
         my $tag = $item->{tag};
-        if (my $g = $self->{grammar}->item($tag))
+        my @g = $self->{grammar}->item($tag);
+        # print "<$tag> => <@g>\n";
+        if (@g)
         {
-          $self->parse($item, $g);
+          $self->parse($item, $g[0]);
           push @{$self->{items}}, $item;
           $count++;
         }
@@ -135,7 +144,7 @@ sub read
         if ref $item &&
            $callback &&
            !$callback->($title, $txt1, "Record $count line " . $item->{line},
-                        tell, $size);
+                        tell $self->{fh}, $size);
     }
   }
 
@@ -227,7 +236,7 @@ sub skip_items
   my $self = shift;
   my ($item) = @_;
   my $level = $item->{level};
-  my $cpos = $item->{cpos} = tell;
+  my $cpos = $item->{cpos} = tell $self->{fh};
 # print "skipping items to level $level at $item->{line}:$cpos\n";
   my $fh = $self->{fh};
   while (my $l = <$fh>)
@@ -244,16 +253,17 @@ sub skip_items
         last;
       }
     }
-    $cpos = tell;
+    $cpos = tell $self->{fh};
   }
 }
 
 sub next_item
 {
-  my $self = shift;
+  my $self   = shift;
   my ($item) = @_;
-  my $bpos = tell;
-  # print "At $bpos\n";
+  my $bpos   = tell $self->{fh};
+  my $bline  = $.;
+  # print "At $bpos:$bline\n";
   my $rec;
   my $fh = $self->{fh};
   if ($rec = $self->{stored_item})
@@ -263,8 +273,8 @@ sub next_item
   elsif ((!$rec || !$rec->{level}) && (my $line = $self->next_text_line))
   {
     # TODO - tidy this up
-    # print "line is <$line>";
     my $line_number = $.;
+    # print "line $line_number is <$line>";
     if (my ($structure) = $line =~ /^\s*(\w+): =\s*$/)
     {
       $rec = $self->new(level     => -1,
@@ -337,7 +347,7 @@ sub next_item
         $rec->{xref}  = $xref  =~ /^\@(.+)\@$/ ? $1 : $xref
           if defined $xref;
         $rec->{tag}   = $tag                         if defined $tag;
-        $rec->{value} = $value =~ /^\@(.+)\@$/ ? $1 : $value
+        $rec->{value} = ($rec->{pointer} = $value =~ /^\@(.+)\@$/) ? $1 : $value
           if defined $value;
         $rec->{min}   = $min                         if defined $min;
         $rec->{max}   = $max                         if defined $max;
@@ -346,12 +356,14 @@ sub next_item
       {
         # print " -- pushing back\n";
         seek($fh, $bpos, 0);
-        $.--;
+        # print "$.\n";
+        $. = $bline;
+        # print "$.\n";
       }
     }
     elsif ($line =~ /^\s*[\[\|\]]\s*(?:\/\*.*\*\/\s*)?$/)
     {
-      # The grammar requires a single selection from its items
+      # The grammar requires a single selection from its items.
       return "selection";
     }
     else
@@ -387,6 +399,7 @@ sub next_text_line
   my $line = "";
 # $line = $self->next_line until !defined $line || $line =~ /\S/;
   my $fh = $self->{fh};
+  # print "-- $.\n";
   $line = <$fh> until !defined $line || $line =~ /\S/;
   $line;
 }
@@ -397,13 +410,15 @@ sub write
   my ($fh, $level, $flush) = @_;
   my @p;
   push(@p, $level . "  " x $level)         unless $flush || $level < 0;
-  push(@p, "\@$self->{xref}\@")            if     $self->{xref};
-  push(@p, $self->{tag})                   if     $level >= 0 && $self->{tag};
+  push(@p, "\@$self->{xref}\@")            if     defined $self->{xref} &&
+                                                  length $self->{xref};
+  push(@p, $self->{tag})                   if     $level >= 0;
   push(@p, ref $self->{value}
            ? "\@$self->{value}{xref}\@"
            : $self->resolve_xref($self->{value})
              ? "\@$self->{value}\@"
-             : $self->{value})             if     $self->{value};
+             : $self->{value})             if     defined $self->{value} &&
+                                                  length $self->{value};
   $fh->print("@p");
   $fh->print("\n")                         unless $level < 0;
   for my $c (0 .. @{$self->_items} - 1)
@@ -508,24 +523,60 @@ sub get_children
   $self->get_item(@_)
 }
 
+sub parent
+{
+  my $self = shift;
+
+  my $i = "$self";
+  my @records = ($self->{gedcom}{record});
+
+  while (@records)
+  {
+    my $r = shift @records;
+    for (@{$r->_items})
+    {
+      return $r if $i eq "$_";
+      push @records, $r;
+    }
+  }
+
+  undef
+}
+
+sub delete
+{
+  my $self = shift;
+
+  my $parent = $self->parent;
+
+  return unless $parent;
+
+  $parent->delete_item($self);
+}
+
 sub delete_item
 {
   my $self = shift;
   my ($item) = @_;
+
   my $i = "$item";
   my $n = 0;
   for (@{$self->_items})
   {
-    my $it = "$_";
-    # print "matching $ch against $c\n";
-    last if $i eq $it;
+    last if $i eq "$_";
     $n++;
   }
+
+  return 0 unless $n < @{$self->{items}};
+
   # print "deleting item $n of $#{$self->{items}}\n";
   splice @{$self->{items}}, $n, 1;
+  delete $self->{gedcom}{xrefs}{$item->{xref}} if defined $item->{xref};
+
+  1
 }
 
-for my $func (qw(level xref tag value min max gedcom file line))
+for my $func (qw(level xref tag value pointer min max gedcom file line))
 {
   no strict "refs";
   *$func = sub
@@ -582,7 +633,7 @@ __END__
 
 Gedcom::Item - a base class for Gedcom::Grammar and Gedcom::Record
 
-Version 1.09 - 12th February 2001
+Version 1.10 - 5th March 2002
 
 =head1 SYNOPSIS
 
@@ -601,12 +652,15 @@ Version 1.09 - 12th February 2001
   $item->print;
   my $item  = $item->get_item("CHIL", 2);
   my @items = $item->get_item("CHIL");
+  my $parent = $item->parent;
+  my $success = $item->delete;
   $item->delete_item($sub_item);
   my $v = $item->level;
   $item->level(1);
   my $v = $item->xref;
   my $v = $item->tag;
   my $v = $item->value;
+  my $v = $item->pointer;
   my $v = $item->min;
   my $v = $item->max;
   my $v = $item->gedcom;
@@ -640,6 +694,10 @@ The name of the tag.
 =head2 $item->{value}
 
 The value of the item.
+
+=head2 $item->{pointer}
+
+True iff the value is a pointer to another item.
 
 =head2 $item->{min}
 
@@ -791,11 +849,36 @@ NOTE - This function is deprecated - use get_item instead
 
   my @children = get_children("CHIL");
 
+=head2 parent
+
+  my $parent = $item->parent;
+
+Returns the parent of the item or undef if there is none.
+
+Note that this is an expensive function.  A child does not know who its
+parent is, and so this function searches through all items looking for
+one with the appropriate child.
+
+=head2 delete
+
+  my $success = $item->delete;
+
+Deletes the item.
+
+Note that this is an expensive function.  It use parent() described
+above.  It is better to use $parent->delete_item($child), assuming that
+you know $parent.
+
+Note too that this function calls delete_item(), so its caveats apply.
+
 =head2 delete_item
 
   $item->delete_item($sub_item);
 
 Delete the specified sub-item from the item.
+
+Note that this function doesn't do any housekeeping.  It is up to you to
+ensure that you don't leave any dangling pointers.
 
 =head2 Access functions
 
@@ -804,6 +887,7 @@ Delete the specified sub-item from the item.
   my $v = $item->xref;
   my $v = $item->tag;
   my $v = $item->value;
+  my $v = $item->pointer;
   my $v = $item->min;
   my $v = $item->max;
   my $v = $item->gedcom;
@@ -852,6 +936,7 @@ items.
 Delete all the sub-items, allowing the memory to be reused.  If the
 sub-items are required again, they will be reread.
 
-It should not be necessary to use this function.
+It should not be necessary to use this function unless you are using
+read_only mode and need to reclaim your memory.
 
 =cut

@@ -1,4 +1,4 @@
-# Copyright 1998-2001, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -15,10 +15,10 @@ package Gedcom::Grammar;
 
 use Data::Dumper;
 
-use Gedcom::Item 1.09;
+use Gedcom::Item 1.10;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.09";
+$VERSION = "1.10";
 @ISA     = qw( Gedcom::Item );
 
 sub structure
@@ -31,6 +31,7 @@ sub structure
       { map { $_->{structure} ? ($_->{structure} => $_) : () }
             @{$self->{top}{items}} };
   }
+  # print Dumper $self->{top}{structures};
   $self->{top}{structures}{$struct}
 }
 
@@ -38,9 +39,9 @@ sub item
 {
   my $self = shift;
   my ($tag) = @_;
-  return undef unless defined $tag;
+  return unless defined $tag;
   my $valid_items = $self->valid_items;
-  exists $valid_items->{$tag} ? $valid_items->{$tag}{grammar} : undef
+  map { $_->{grammar} } @{$valid_items->{$tag}}
 }
 
 sub min
@@ -71,7 +72,7 @@ sub _valid_items
     my $max = $item->max;
     if ($item->{tag})
     {
-      $valid_items{$item->{tag}} =
+      push @{$valid_items{$item->{tag}}},
       {
         grammar => $item,
         min     => $min,
@@ -87,34 +88,38 @@ sub _valid_items
       $item->{structure} = $structure;
       while (my($tag, $g) = each %{$structure->valid_items})
       {
-        $valid_items{$tag} =
-        {
-          grammar => $g->{grammar},
-          # min and max can be calculated by multiplication because
-          # the grammar always permits multiple selection records, and
-          # selection records never have compulsory records.  This may
-          # change in future grammars, but I would not expect it to -
-          # such a grammar would seem to have little practical use.
-          min     => $g->{min} * $min,
-          max     => $g->{max} * $max
-        };
+        push @{$valid_items{$tag}},
+        map {
+              grammar => $_->{grammar},
+              # min and max can be calculated by multiplication because
+              # the grammar always permits multiple selection records, and
+              # selection records never have compulsory records.  This may
+              # change in future grammars, but I would not expect it to -
+              # such a grammar would seem to have little practical use.
+              min     => $_->{min} * $min,
+              max     => $_->{max} * $max
+            }, @$g;
       }
       if (exists $item->{items} && @{$item->{items}})
       {
         my $extra_items = $item->_valid_items;
-        while (my ($sub_item, $sub_grammar) = each %valid_items)
+        while (my ($sub_item, $sub_grammars) = each %valid_items)
         {
-          $sub_grammar->{grammar}->valid_items;
-          while (my ($i, $g) = each %$extra_items)
+          for my $sub_grammar (@$sub_grammars)
           {
-            # print "adding $i to $sub_item\n";
-            $sub_grammar->{grammar}{_valid_items}{$i} = $g;
+              $sub_grammar->{grammar}->valid_items;
+              while (my ($i, $g) = each %$extra_items)
+              {
+                # print "adding $i to $sub_item\n";
+                $sub_grammar->{grammar}{_valid_items}{$i} = $g;
+              }
           }
           # print "giving @{[keys %{$sub_grammar->{grammar}->valid_items}]}\n";
         }
       }
     }
   }
+  # print "valid items are @{[keys %valid_items]}\n";
   \%valid_items
 }
 
@@ -132,14 +137,14 @@ __END__
 
 Gedcom::Grammar - a module to manipulate Gedcom grammars
 
-Version 1.09 - 12th February 2001
+Version 1.10 - 5th March 2002
 
 =head1 SYNOPSIS
 
   use Gedcom::Grammar;
 
   my $st = $grammar->structure("GEDCOM");
-  my $sgr = $grammar->item("DATE");
+  my @sgr = $grammar->item("DATE");
   my @items = $grammar->valid_items;
   my $min = $grammar->min;
   my $max = $grammar->max;
@@ -174,9 +179,10 @@ Return the grammar item of the specified structure, if it exists, or undef.
 
 =head2 item
 
-  my $sgr = $grammar->item("DATE");
+  my @sgr = $grammar->item("DATE");
 
-Return the grammar item of the specified sub-item, if it exists, or undef.
+Return a list of the possible grammar items of the specified sub-item,
+if it exists.
 
 =head2 min
 
@@ -200,9 +206,9 @@ Return a list of tags of the grammar's sub-items
 
   my @items = $grammar->valid_items;
 
-Return a hash detailing all the valid sub-items of the grammar item.  The
-key is the tag of the sub-item and the value is another hash with three
-members:
+Return a hash detailing all the valid sub-items of the grammar item.
+The key is the tag of the sub-item and the value is an array of hashes
+with three members:
 
   grammar => the sub-item grammar
   min     => the minimum permissible number of these sub-items

@@ -1,4 +1,4 @@
-# Copyright 1998-2001, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -13,10 +13,10 @@ require 5.005;
 
 package Gedcom::Family;
 
-use Gedcom::Record 1.09;
+use Gedcom::Record 1.10;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.09";
+$VERSION = "1.10";
 @ISA     = qw( Gedcom::Record );
 
 sub husband
@@ -67,6 +67,36 @@ sub girls
   wantarray ? @a : $a[0]
 }
 
+sub add_husband
+{
+  my $self = shift;
+  my ($husband) = @_;
+  $husband = $self->{gedcom}->get_individual($husband)
+    unless UNIVERSAL::isa($husband, "Gedcom::Individual");
+  $self->add("husband", $husband);
+  $husband->add("fams", $self->{xref});
+}
+
+sub add_wife
+{
+  my $self = shift;
+  my ($wife) = @_;
+  $wife = $self->{gedcom}->get_individual($wife)
+    unless UNIVERSAL::isa($wife, "Gedcom::Individual");
+  $self->add("wife", $wife);
+  $wife->add("fams", $self->{xref});
+}
+
+sub add_child
+{
+  my $self = shift;
+  my ($child) = @_;
+  $child = $self->{gedcom}->get_individual($child)
+    unless UNIVERSAL::isa($child, "Gedcom::Individual");
+  $self->add("child", $child);
+  $child->add("famc", $self->{xref});
+}
+
 sub print
 {
   my $self = shift;
@@ -82,7 +112,7 @@ __END__
 
 Gedcom::Family - a module to manipulate Gedcom families
 
-Version 1.09 - 12th February 2001
+Version 1.10 - 5th March 2002
 
 =head1 SYNOPSIS
 
@@ -130,5 +160,17 @@ returns a list of individuals holding that releation in $f.
 
 Return the number of children in the family, as specified or from
 counting.
+
+=head2 Add functions
+
+  $f->add_husband($i);
+  $f->add_wife($i);
+  $f->add_child($i);
+
+Add the specified individual to the family in the appropriate position.
+
+These functions also take care of the references from the individual
+back to the family, and are to be prefered to the low level addition
+functions which do not do this.
 
 =cut

@@ -7,7 +7,7 @@
 1   GEDC
 2     VERS 5.5
 2     FORM LINEAGE-LINKED
-1   SUBM @S1@
+1   SUBM @SUBM1@
 1   NOTE This Gedcom file should only be used as part of the testsuite
 2     CONC for Gedcom.pm (http://www.pjcj.net).  I have removed a
 2     CONC lot of data from the original, and changed a few bits, so you
@@ -46,7 +46,7 @@
 2     CONC >>
 2     CONC >> Thanks for your interest.   Denis Reid
 
-0 @S1@ SUBM
+0 @SUBM1@ SUBM
 1   NAME Denis R. Reid
 1   ADDR 149 Kimrose Lane
 2     CONT Broadview Heights, Ohio 44147-1258
@@ -953,6 +953,7 @@
 1   NAME B1 C1
 1   BIRT
 2     DATE Saturday, 1st January 2000
+2     AGE 0
 1   BIRT
 2     DATE Sunday, 2nd January 2000
 1   RIN 83
@@ -1372,5 +1373,10 @@
 0 @F47@ FAM
 1   CHIL @I31@
 1   RIN 139
+1   SOUR @S1@
+2     PAGE 1
+
+0 @S1@ SOUR
+1   TEXT Hello
 
 0 TRLR
