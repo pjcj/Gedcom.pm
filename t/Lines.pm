@@ -1,13 +1,13 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1999-2000, Paul Johnson (pjcj@cpan.org)
+# Copyright 1999-2001, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.pjcj.fsnet.co.uk
+# http://www.pjcj.net
 
-# Version 1.08 - 8th May 2000
+# Version 1.09 - 12th February 2001
 
 use strict;
 
@@ -19,9 +19,9 @@ use File::Basename;
 use Test;
 
 use vars qw($VERSION);
-$VERSION = "1.08";
+$VERSION = "1.09";
 
-use Gedcom 1.08;
+use Gedcom 1.09;
 
 sub test
 {
@@ -35,6 +35,7 @@ sub test
     unless defined $args{gedcom_file};
 
   die "report not specified" unless defined $args{report};
+
   if (defined $args{report_command})
   {
     $args{lines} = "/home/pjcj/ged/other/lines/bin/lines302"
@@ -71,10 +72,10 @@ sub test
   $args{perl_report}  = "$args{report}.p" unless defined $args{perl_report};
 
   die "perl_command not specified" unless defined $args{perl_command};
-  open(P, "|$^X " . (-d "t" ? "" : "-I .. ") .
-          "$args{perl_program} -quiet -gedcom_file $args{gedcom_file}" .
-          "> $args{perl_report}")
-    or die "Can't run <$^X $args{perl_program}>";
+  my $command = "|$^X " . (-d "t" ? "" : "-I .. ") .
+                "$args{perl_program} -quiet -gedcom_file $args{gedcom_file} " .
+                "> $args{perl_report}";
+  open P, $command or die "Can't run <$command>";
   select P;
   $| = 1;
   print P $args{perl_command};

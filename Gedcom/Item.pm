@@ -1,9 +1,9 @@
-# Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2001, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.pjcj.fsnet.co.uk
+# http://www.pjcj.net
 
 # documentation at __END__
 
@@ -13,8 +13,10 @@ require 5.005;
 
 package Gedcom::Item;
 
+use Symbol;
+
 use vars qw($VERSION);
-$VERSION = "1.08";
+$VERSION = "1.09";
 
 sub new
 {
@@ -42,13 +44,15 @@ sub read
 {
   my $self = shift;
 
-  $self->{fh} = FileHandle->new($self->{file})
-    or die "Can't open file $self->{file}: $!";
+# $self->{fh} = FileHandle->new($self->{file})
+  $self->{fh} = gensym;
+  open($self->{fh}, $self->{file}) or die "Can't open file $self->{file}: $!";
+  binmode $self->{fh};
 
   # find out how big the file is
-  $self->{fh}->seek(0, 2);
-  my $size = $self->{fh}->tell;
-  $self->{fh}->seek(0, 0);
+  seek($self->{fh}, 0, 2);
+  my $size = tell;
+  seek($self->{fh}, 0, 0);
 
   # initial callback
   my $callback = $self->{callback};;
@@ -57,44 +61,111 @@ sub read
   my $count = 0;
   return undef
     if $callback &&
-       !$callback->($title, $txt1, "Record $count", $self->{fh}->tell, $size);
+       !$callback->($title, $txt1, "Record $count", tell, $size);
 
   $self->level($self->{grammar} ? -1 : -2);
 
-  # If we have a grammar, then we are reading a gedcom file and must use
-  # the grammar to verify what is being read.
-  # If we do not have a grammar, then that is what we are reading.
-  while (my $item = $self->next_item($self))
+  my $if = "$self->{file}.index";
+  my ($gf, $gc);
+  if ($self->{gedcom}{read_only} &&
+      defined ($gf = -M $self->{file}) && defined ($gc = -M $if) && $gc < $gf)
   {
-    if ($self->{grammar})
+    if (! open I, $if)
     {
-      my $tag = $item->{tag};
-      if (my $g = $self->{grammar}->item($tag))
-      {
-        $self->parse($item, $g);
-        push @{$self->{items}}, $item;
-        $count++;
-      }
-      else
-      {
-        $tag = "<empty tag>" unless defined $tag && length $tag;
-        warn "$self->{file}:$item->{line}: $tag is not a top level tag\n";
-      }
+      die "Can't open $if: $!";
     }
     else
     {
-      # just add the grammar item
-      push @{$self->{items}}, $item;
-      $count++;
+      my $g = $self->{gedcom}{grammar}->structure("GEDCOM");
+      while (<I>)
+      {
+        my @vals = split /\|/;
+        my $record =
+          Gedcom::Record->new(gedcom  => $self->{gedcom},
+                              tag     => $vals[0],
+                              line    => $vals[2],
+                              cpos    => $vals[3],
+                              grammar => $g->item($vals[0]),
+                              fh      => $self->{fh},
+                              level   => 0);
+        $record->{xref} = $vals[1] if length $vals[1];
+        my $class = $self->{gedcom}{types}{$vals[0]};
+        bless $record, "Gedcom::$class" if $class;
+        push @{$self->{items}}, $record;
+      }
+      close I or warn "Can't close $if";
     }
-    return undef
-      if ref $item &&
-         $callback &&
-         !$callback->($title, $txt1, "Record $count line " . $item->{line},
-                      $self->{fh}->tell, $size);
+    # use Data::Dumper;
+    # print Dumper $self;
   }
-# $self->{fh}->close or die "Can't close file $self->{file}: $!";
-# delete $self->{fh};
+
+  unless ($self->{items})
+  {
+    # use Data::Dumper;
+    # print Dumper $self->{items};
+    # $#{$self->{items}} = 20000;
+    # $#{$self->{items}} = -1;
+    # If we have a grammar, then we are reading a gedcom file and must use
+    # the grammar to verify what is being read.
+    # If we do not have a grammar, then that is what we are reading.
+    while (my $item = $self->next_item($self))
+    {
+      if ($self->{grammar})
+      {
+        my $tag = $item->{tag};
+        if (my $g = $self->{grammar}->item($tag))
+        {
+          $self->parse($item, $g);
+          push @{$self->{items}}, $item;
+          $count++;
+        }
+        else
+        {
+          $tag = "<empty tag>" unless defined $tag && length $tag;
+          warn "$self->{file}:$item->{line}: $tag is not a top level tag\n";
+        }
+      }
+      else
+      {
+        # just add the grammar item
+        push @{$self->{items}}, $item;
+        $count++;
+      }
+      return undef
+        if ref $item &&
+           $callback &&
+           !$callback->($title, $txt1, "Record $count line " . $item->{line},
+                        tell, $size);
+    }
+  }
+
+# unless ($self->{gedcom}{read_only})
+# {
+#   $self->{fh}->close or die "Can't close file $self->{file}: $!";
+#   delete $self->{fh};
+# }
+
+  if ($self->{gedcom}{read_only} && defined $gf && (! defined $gc || $gc > $gf))
+  {
+    # print Dumper $self;
+    # $self->{gedcom}->individuals;
+    if (! open I, ">$if")
+    {
+      warn "Can't open $if";
+    }
+    else
+    {
+      for my $item (@{$self->{items}})
+      {
+        print I join("|", map { $item->{$_} || "" } qw(tag xref line cpos));
+        # my $n = $item->tag_value("NAME");
+        # print I "|$n" if defined $n;
+        print I "\n";
+      }
+      close I or warn "Can't close $if";
+    }
+  }
+
   $self;
 }
 
@@ -118,7 +189,8 @@ sub add_items
 #     print "reading items\n";
       if (defined $item->{cpos})
       {
-        $self->{fh}->seek($item->{cpos}, 0);
+        seek($self->{fh}, $item->{cpos}, 0);
+        $. = $item->{line};
       }
     }
     $item->{items} = [];
@@ -155,9 +227,10 @@ sub skip_items
   my $self = shift;
   my ($item) = @_;
   my $level = $item->{level};
-  my $cpos = $item->{cpos} = $self->{fh}->tell;
+  my $cpos = $item->{cpos} = tell;
 # print "skipping items to level $level at $item->{line}:$cpos\n";
-  while (my $l = $self->next_text_line)
+  my $fh = $self->{fh};
+  while (my $l = <$fh>)
   {
     chomp $l;
 #   print "parsing <$l>\n";
@@ -166,11 +239,12 @@ sub skip_items
       if ($lev <= $level)
       {
 #       print "pushing <$l>\n";
-        $self->{fh}->seek($cpos, 0);
+        seek($self->{fh}, $cpos, 0);
+        $.--;
         last;
       }
     }
-    $cpos = $self->{fh}->tell;
+    $cpos = tell;
   }
 }
 
@@ -178,8 +252,10 @@ sub next_item
 {
   my $self = shift;
   my ($item) = @_;
-  my $bpos = $self->{fh}->tell;
+  my $bpos = tell;
+  # print "At $bpos\n";
   my $rec;
+  my $fh = $self->{fh};
   if ($rec = $self->{stored_item})
   {
     $self->{stored_item} = undef;
@@ -187,8 +263,8 @@ sub next_item
   elsif ((!$rec || !$rec->{level}) && (my $line = $self->next_text_line))
   {
     # TODO - tidy this up
-#   print "line is $line";
-    my $line_number = eval { $self->{fh}->input_line_number } || $.;
+    # print "line is <$line>";
+    my $line_number = $.;
     if (my ($structure) = $line =~ /^\s*(\w+): =\s*$/)
     {
       $rec = $self->new(level     => -1,
@@ -234,8 +310,22 @@ sub next_item
                 )?                         # optional
                 \*?                        # optional *
                 \s*$/x)                    # optional whitespace at end
+#     $line =~ /^\s*                       # optional whitespace at start
+#               (\d+)                      # start level
+#               \s*                        # optional whitespace
+#               (?:                        # xref
+#                 (@.*@)                   # text in @@
+#                 \s+                      # whitespace
+#               )?                         # optional
+#               (\w+)                      # tag
+#               \s*                        # whitespace
+#               (?:                        # value
+#                 (@?.*?@?)                # text element - non greedy
+#                 \s+                      # whitespace
+#               )??                        # optional - non greedy
+#               \s*$/x)                    # optional whitespace at end
     {
-#     print "found $level below $item->{level}\n";
+      # print "found $level below $item->{level}\n";
       if ($level eq "n" || $level > $item->{level})
       {
         unless ($rec)
@@ -254,8 +344,9 @@ sub next_item
       }
       else
       {
-#       print " -- pushing back\n";
-        $self->{fh}->seek($bpos, 0);
+        # print " -- pushing back\n";
+        seek($fh, $bpos, 0);
+        $.--;
       }
     }
     elsif ($line =~ /^\s*[\[\|\]]\s*(?:\/\*.*\*\/\s*)?$/)
@@ -284,7 +375,8 @@ sub next_item
 sub next_line
 {
   my $self = shift;
-  my $line = $self->{fh}->getline;
+  my $fh = $self->{fh};
+  my $line = <$fh>;
 # print "read $line";
   $line;
 }
@@ -293,7 +385,9 @@ sub next_text_line
 {
   my $self = shift;
   my $line = "";
-  $line = $self->next_line until !defined $line || $line =~ /\S/;
+# $line = $self->next_line until !defined $line || $line =~ /\S/;
+  my $fh = $self->{fh};
+  $line = <$fh> until !defined $line || $line =~ /\S/;
   $line;
 }
 
@@ -488,7 +582,7 @@ __END__
 
 Gedcom::Item - a base class for Gedcom::Grammar and Gedcom::Record
 
-Version 1.08 - 8th May 2000
+Version 1.09 - 12th February 2001
 
 =head1 SYNOPSIS
 

@@ -130,7 +130,7 @@ Release 1.06 - 13th February 2000
           Gedcom::Grammar::child()             Gedcom::Grammar::item()
           Gedcom::Grammar::children()          Gedcom::Grammar::items()
           Gedcom::Grammar::valid_children()    Gedcom::Grammar::valid_items()
- - Allow has accessor functions in Gedcom::Item to set data too.
+ - Allow accessor functions in Gedcom::Item to set data too.
  - Bless appropriate objects into Gedcom::Event.
  - Add an experimental write_xml().
  - Add tutorial section to documentation.
@@ -147,3 +147,14 @@ Release 1.08 - 8th May 2000
  - Allow xrefs to match .+ instead of \w+\d+
  - Make XML output valid.
  - Allow extra sub-items of a grammar structure.
+
+Release 1.09 - 12th February 2001
+ - Improved XML output especially with respect to notes.
+ - Quietened some spurious warnings.
+ - Fixed some bugs reported by users that I don't recall at the moment.
+ - Add index file to speed up read_only option.
+ - Read files with binmode - keeps Windows happy.
+ - Correct line numbers of errors.
+ - Use File::Spec so tests pass under Windows.
+ - Allow for creation of ppms.
+ - Added Gedcom::CGI and cgi-bin/gedcom.cgi.

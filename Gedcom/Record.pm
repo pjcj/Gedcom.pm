@@ -1,9 +1,9 @@
-# Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2001, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.pjcj.fsnet.co.uk
+# http://www.pjcj.net
 
 # documentation at __END__
 
@@ -16,10 +16,10 @@ package Gedcom::Record;
 use Carp;
 BEGIN { eval "use Date::Manip" }             # We'll use this if it is available
 
-use Gedcom::Item 1.08;
+use Gedcom::Item 1.09;
 
 use vars qw($VERSION @ISA $AUTOLOAD);
-$VERSION = "1.08";
+$VERSION = "1.09";
 @ISA     = qw( Gedcom::Item );
 
 my %Funcs;
@@ -90,7 +90,12 @@ sub record
       : "Record type not specified";
       $record = $func;
     }
+
     @records = map { $_->tag_record($record, $count) } @records;
+
+    # fams and famc need to be resolved
+    @records = map { $self->resolve($_->{value}) } @records
+      if $record eq "FAMS" || $record eq "FAMC";
   }
   wantarray ? @records : $records[0]
 }
@@ -159,9 +164,9 @@ sub parse
     }
     else
     {
-      print "Valid sub-items are ",
-            join(", ", keys %{$grammar->{_valid_items}}), "\n";
-      warn "$self->{file}:$r->{line}: $tag is not a sub-item of $t\n"
+      warn "$self->{file}:$r->{line}: $tag is not a sub-item of $t\n",
+           "Valid sub-items are ",
+           join(", ", keys %{$grammar->{_valid_items}}), "\n"
         unless substr($tag, 0, 1) eq "_";
         # unless $tag eq "CONT" || $tag eq "CONC" || substr($tag, 0, 1) eq "_";
         # TODO - should CONT and CONC be allowed anywhere?
@@ -423,7 +428,7 @@ __END__
 
 Gedcom::Record - a module to manipulate Gedcom records
 
-Version 1.08 - 8th May 2000
+Version 1.09 - 12th February 2001
 
 =head1 SYNOPSIS
 
@@ -676,6 +681,7 @@ sub validate_grammar
   }
   else
   {
+    # TODO - require Data::Dumper
     die "What's a " . Data::Dumper->new([$grammar], ["grammar"])
       unless ($value) = $grammar->{value} =~ /<<(.*)>>/;
     die "Can't find $value in gedcom structures"

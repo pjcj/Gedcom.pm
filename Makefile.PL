@@ -1,11 +1,11 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2001, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.pjcj.fsnet.co.uk
+# http://www.pjcj.net
 
 use strict;
 
@@ -15,22 +15,34 @@ use ExtUtils::MakeMaker;
 
 $| = 1;
 
-my $Version = "1.08";
-my $Date    = "8th May 2000";
+my $Version = "1.09";
+my $Date    = "12th February 2001";
+my $Author = 'pjcj@cpan.org';
+
+my @perlbug = ("perlbug", "-a", $Author,
+                          "-s", "Installation of Gedcom $Version");
+
+my $Perlbug = join " ", map { / / ? "'$_'" : $_ } @perlbug;
+
 
 open(M, "MANIFEST") or die "Cannot open MANIFEST: $!";
 my @files    = map { split } <M>;
 my @versions = grep { $_ ne "README" && $_ ne "Makefile.PL" } @files;
 close(M) or die "Cannot close MANIFEST: $!";
 
+$ExtUtils::MakeMaker::Verbose = 0;
+
 WriteMakefile
 (
-  NAME    => "Gedcom",
-  VERSION => $Version,
-  DIR     => [],
-  dist    => { COMPRESS => "gzip --best --force" },
-  clean   => { FILES => join " ",  map { "$_.version" } @versions },
-  depend  => { distdir => "@files" },
+  NAME     => "Gedcom",
+  VERSION  => $Version,
+  AUTHOR   => 'Paul Johnson (pjcj@cpan.org)',
+  ABSTRACT => "Interface to genealogy GEDCOM files",
+  DIR      => [],
+  PM       => { map {($_ => '$(INST_LIBDIR)/' . $_)} grep { /\.pm/ } @files },
+  dist     => { COMPRESS => "gzip --best --force" },
+  clean    => { FILES => join " ",  map { "$_.version" } @versions },
+  depend   => { distdir => "@files" },
 );
 
 print "\n";
@@ -141,7 +153,22 @@ else
   print "working\n";
 }
 
-print "\n";
+print <<EOM;
+
+--------------------------------------------------------------------------------
+
+I like to have some idea of the distribution of this software.  To that end I
+would be very grateful for mail from you.  This will be used only to satisfy my
+curiosity and to help me make decisions which may involve changes to the
+module.
+
+If you can run perlbug you can send me a success report with "make ok".
+Failure reports with "make nok" are also appreciated.
+
+If you have any questions or comments, mailing list details are available in the
+README file, or send mail to me directly.
+
+EOM
 
 sub MY::postamble
 {
@@ -167,59 +194,20 @@ README : Gedcom.pm
   -e 'print if (/NAME/ ... /^[A-Z ]+\$\$/) =~ /^\\d+\$\$/;' \\
   -e 'print if (/DESCRIPTION/ ... /^[A-Z ]+\$\$/) =~ /^\\d+\$\$/;' \\
   > README
+
+ppm : ppd pure_all
+\t tar cf Gedcom.tar blib
+\t gzip --best --force Gedcom.tar
+\t \$(PERL) -pi.bak \\
+  -e 's/(OS NAME=")[^"]*/\$\$1MSWin32/;' \\
+  -e 's/(ARCHITECTURE NAME=")[^"]*/\$\$1MSWin32-x86-multi-thread/;' \\
+  -e 's/(CODEBASE HREF=")[^"]*/\$\$1Gedcom.tar.gz/;' \\
+  Gedcom.ppd
+
+ok :
+\t \@$Perlbug -okay  || echo "Please send your report manually to $Author"
+
+nok :
+\t \@$Perlbug -nokay || echo "Please send your report manually to $Author"
   ]
 }
-
-my $author = 'pjcj@cpan.org';
-
-my @command = ("perlbug", "-a", $author,
-                          "-s", "Installation of Gedcom $Version",
-                          "-okay");
-
-my $command = join " ", map { / / ? "'$_'" : $_ } @command;
-
-my $message = <<EOM;
-I like to have some idea of the distribution of this software.  To that end I
-would be very grateful for mail from you.  This will be used only to satisfy my
-curiosity and to help me make decisions which may involve changes to the
-interface etc.
-
-The command: $command
-will provide all the information I need.
-
-EOM
-
-print $message;
-
-if (-t STDIN)
-{
-  my $mess = <<EOM;
-May I send a message to the author, Paul Johnson ($author), using the
-above command, to indicate that you are using this module?   yes or no [yes] 
-EOM
-
-  chomp $mess;
-  print $mess;
-  my $rep = <STDIN>;
-  if ($rep =~ /^n/)
-  {
-    print <<EOM;
-
-If you are able to send a message in the future, please do so with the command:
-$command
-
-EOM
-  }
-  else
-  {
-    system @command;
-    print "\n$command failed: status $?\n\nPlease send a message manually\n\n"
-      if $?;
-  }
-}
-
-print <<EOM;
-If you have any questions or comments, mailing list details are available in the
-README file, or send mail to me directly.
-
-EOM

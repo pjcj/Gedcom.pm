@@ -1,9 +1,9 @@
-# Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2001, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.pjcj.fsnet.co.uk
+# http://www.pjcj.net
 
 # documentation at __END__
 
@@ -13,10 +13,10 @@ require 5.005;
 
 package Gedcom::Family;
 
-use Gedcom::Record 1.08;
+use Gedcom::Record 1.09;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.08";
+$VERSION = "1.09";
 @ISA     = qw( Gedcom::Record );
 
 sub husband
@@ -82,7 +82,7 @@ __END__
 
 Gedcom::Family - a module to manipulate Gedcom families
 
-Version 1.08 - 8th May 2000
+Version 1.09 - 12th February 2001
 
 =head1 SYNOPSIS
 

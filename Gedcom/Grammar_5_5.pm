@@ -1,9 +1,9 @@
-# Copyright 1999-2000, Paul Johnson (pjcj@cpan.org)
+# Copyright 1999-2001, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.pjcj.fsnet.co.uk
+# http://www.pjcj.net
 
 # This file was automatically generated from gedcom-5.5.grammar
 # by Paul Johnson
@@ -14,7 +14,7 @@
 # Edit parse_grammar or Makefile.PL to increase the legibility of this file.
 # (Removal of the leading spaces nearly halves the size of the file.)
 
-# Version 1.08 - 8th May 2000
+# Version 1.09 - 12th February 2001
 
 use strict;
 
@@ -23,7 +23,7 @@ require 5.005;
 package Gedcom::Grammar_5_5;
 
 use vars qw($VERSION $grammar);
-$VERSION = "1.08";
+$VERSION = "1.09";
 
 $grammar = bless( {
 level => -1,

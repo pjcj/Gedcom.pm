@@ -1,13 +1,13 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1999-2000, Paul Johnson (pjcj@cpan.org)
+# Copyright 1999-2001, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.pjcj.fsnet.co.uk
+# http://www.pjcj.net
 
-# Version 1.08 - 8th May 2000
+# Version 1.09 - 12th February 2001
 
 use strict;
 
@@ -16,11 +16,11 @@ require 5.005;
 package Basic;
 
 use vars qw($VERSION);
-$VERSION = "1.08";
+$VERSION = "1.09";
 
 use Test;
 
-use Gedcom 1.08;
+use Gedcom 1.09;
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
@@ -272,7 +272,7 @@ __DATA__
 2     FORM LINEAGE-LINKED
 1   SUBM @S1@
 1   NOTE This Gedcom file should only be used as part of the testsuite
-2     CONC for Gedcom.pm (http://www.pjcj.fsnet.co.uk).  I have removed a
+2     CONC for Gedcom.pm (http://www.pjcj.net).  I have removed a
 2     CONC lot of data from the original, and changed a few bits, so you
 2     CONC should use the original if you want royal genealogy.  Contact me
 2     CONC if you cannot locate the original.

@@ -1,9 +1,9 @@
-# Copyright 1999-2000, Paul Johnson (pjcj@cpan.org)
+# Copyright 1999-2001, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.pjcj.fsnet.co.uk
+# http://www.pjcj.net
 
 # documentation at __END__
 
@@ -20,10 +20,10 @@ BEGIN
   eval "use Roman ()";
 }
 
-use Gedcom 1.08;
+use Gedcom 1.09;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = "1.08";
+$VERSION = "1.09";
 @ISA     = qw( Exporter );
 @EXPORT  = qw
 (
@@ -1226,7 +1226,7 @@ __END__
 
 Gedcom::LifeLines - functions for lines2perl
 
-Version 1.08 - 8th May 2000
+Version 1.09 - 12th February 2001
 
 =head1 SYNOPSIS
 
