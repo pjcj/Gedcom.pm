@@ -14,7 +14,7 @@
 2     CONC should use the original if you want royal genealogy.  Contact me
 2     CONC if you cannot locate the original.
 2     CONC
-2     CONC Paul Johnson (pjcj@transeda.com)
+2     CONC Paul Johnson (pjcj@cpan.org)
 2     CONC
 2     CONC >> In a message to Cliff Manis (cmanis@csoftec.csf.com)
 2     CONC >> Denis Reid wrote the following:
@@ -951,6 +951,10 @@
 
 0 @I82@ INDI
 1   NAME B1 C1
+1   BIRT
+2     DATE Saturday, 1st January 2000
+1   BIRT
+2     DATE Sunday, 2nd January 2000
 1   RIN 83
 
 0 @I83@ INDI

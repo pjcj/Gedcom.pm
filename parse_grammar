@@ -1,13 +1,13 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
+# Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
 # http://www.transeda.com/pjcj
 
-# Version 1.05 - 20th July 1999
+# Version 1.06 - 13th February 2000
 
 use strict;
 
@@ -15,10 +15,10 @@ require 5.005;
 
 use Data::Dumper;
 
-use Gedcom 1.05;
+use Gedcom 1.06;
 
 use vars qw( $VERSION );
-$VERSION = "1.05";
+$VERSION = "1.06";
 
 $SIG{__WARN__} = sub { print "\n@_" };
 
@@ -55,7 +55,7 @@ sub main()
   open(G, ">$gpm") or die "Can't open $gpm: $!";
 
   print G <<EOT;
-# Copyright 1998-1999, Paul Johnson (pjcj\@transeda.com)
+# Copyright 1998-2000, Paul Johnson (pjcj\@transeda.com)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 

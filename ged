@@ -1,24 +1,24 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
+# Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
 # http://www.transeda.com/pjcj
 
-# Version 1.05 - 20th July 1999
+# Version 1.06 - 13th February 2000
 
 use strict;
 
 require 5.005;
 
-# use diagnostics;
+use diagnostics;
 
-use Gedcom 1.05;
+use Gedcom 1.06;
 
 use vars qw( $VERSION );
-$VERSION = "1.05";
+$VERSION = "1.06";
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
@@ -36,37 +36,47 @@ sub main()
   (
     gedcom_file  => $gedcom_file,
 #   grammar_file => "gedcom-5.5.grammar",
-    callback     => sub { print "." }
+    callback     => sub { print "." },
+    read_only    => 0,
   );
-  print "\nvalidating...";
-  my %x;
-  my $vcb = sub
-  {
-   my ($r) = @_;
-   my $t = $r->{xref};
-   print "." if $t && !$x{$t}++;
-  };
-  $ged->validate($vcb);
-  print "\nnormalising dates...";
-  $ged->normalise_dates("%E %b %Y");
-# $ged->normalise_dates;
-  print "\nrenumbering...";
-  $ged->renumber;
-  print "\nordering...";
-  $ged->order;
+# print "\nnormalising dates...";
+# $ged->normalise_dates("%E %b %Y");
+# sleep 6000;
+  print "\nwriting xml...";
+  $ged->write_xml("$gedcom_file.xml");
+  return;
   if (0)
   {
-    print "\nadding rins...";
-    my $rin = 1;
-    for (@{$ged->{record}{children}})
+    print "\nvalidating...";
+    my %x;
+    my $vcb = sub
     {
-      push @{$_->{children}}, $_->new(tag => "RIN", value => $rin++)
-        unless $_->{tag} eq "HEAD" || $_->{tag} eq "TRLR";
+      my ($r) = @_;
+      my $t = $r->{xref};
+      print "." if $t && !$x{$t}++;
+    };
+    $ged->validate($vcb);
+    print "\nnormalising dates...";
+    $ged->normalise_dates("%E %b %Y");
+#   $ged->normalise_dates;
+    print "\nrenumbering...";
+    $ged->renumber;
+    print "\nordering...";
+    $ged->order;
+    if (0)
+    {
+      print "\nadding rins...";
+      my $rin = 1;
+      for (@{$ged->{record}->_items})
+      {
+        push @{$_->{items}}, $_->new(tag => "RIN", value => $rin++)
+          unless $_->{tag} eq "HEAD" || $_->{tag} eq "TRLR";
+      }
     }
+    $ged->unresolve_xrefs;
+    print "\nvalidating...";
+    $ged->validate;
+    print "\nwriting...";
+    $ged->write("$gedcom_file.new");
   }
-  $ged->unresolve_xrefs;
-  print "\nvalidating...";
-  $ged->validate;
-  print "\nwriting...";
-  $ged->write("$gedcom_file.new");
 }

@@ -1,4 +1,4 @@
-# Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
+# Copyright 1999-2000, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -14,12 +14,16 @@ require 5.005;
 package Gedcom::LifeLines;
 
 use Exporter;
-BEGIN { eval "use Date::Manip" }             # We'll use this if it is available
+BEGIN
+{                                        # We'll use these if they are available
+  eval "use Date::Manip";
+  eval "use Roman ()";
+}
 
-use Gedcom 1.05;
+use Gedcom 1.06;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = "1.05";
+$VERSION = "1.06";
 @ISA     = qw( Exporter );
 @EXPORT  = qw
 (
@@ -153,30 +157,30 @@ sub birth
 {
   my ($indi) = @_;
   return unless $indi;
-  $indi->get_child("BIRT")
+  $indi->tag_record("BIRT")
 }
 
 sub death
 {
   my ($indi) = @_;
   return unless $indi;
-  $indi->get_child("DEAT")
+  $indi->tag_record("DEAT")
 }
 
 sub baptism
 {
   my ($indi) = @_;
   return unless $indi;
-  $indi->get_child("BAPM") ||
-  $indi->get_child("BAPL") ||
-  $indi->get_child("CHR")
+  $indi->tag_record("BAPM") ||
+  $indi->tag_record("BAPL") ||
+  $indi->tag_record("CHR")
 }
 
 sub burial
 {
   my ($indi) = @_;
   return unless $indi;
-  $indi->get_child("BURI")
+  $indi->tag_record("BURI")
 }
 
 sub father
@@ -263,7 +267,7 @@ sub title
 {
   my ($indi) = @_;
   return unless $indi;
-  $indi->child_value("TITL")
+  $indi->tag_value("TITL")
 }
 
 sub key
@@ -452,7 +456,7 @@ sub child
 {
   my ($record) = @_;
   return unless $record;
-  $record->{children}[0]
+  $record->_items()->[0]
 }
 
 sub sibling
@@ -510,7 +514,7 @@ sub gettoday
   my $today = localtime;
   $today =~ s/\d\d:\d\d:\d\d //;
   my $date  = Gedcom::Record->new(tag => "DATE", value => $today);
-  my $event = Gedcom::Record->new(children => [$date]);
+  my $event = Gedcom::Record->new(items => [$date]);
   $event
 }
 
@@ -539,7 +543,7 @@ sub stddate
   return "" unless $date;
   unless ($INC{"Date/Manip.pm"})
   {
-    warn "Date::Manip is required to use normalise_dates()";
+    warn "Date::Manip.pm is required to use stddate()";
     return $date;
   }
   my $dt = ParseDate($date);
@@ -583,7 +587,7 @@ sub extractdate
   return unless $date;
   unless ($INC{"Date/Manip.pm"})
   {
-    warn "Date::Manip is required to use normalise_dates()";
+    warn "Date::Manip.pm is required to use extractdate()";
     return;
   }
   my $dt = ParseDate($date);
@@ -610,7 +614,11 @@ sub extractnames
   $$count = scalar @$$names;
   for ($$surname = $$count; $$surname--;)
   {
-    return if $$names->[$$surname] =~ s|/||g
+    if ($$names->[$$surname] =~ s|/||g)
+    {
+      $$surname++;
+      return;
+    }
   }
   $$surname = 0;
   return
@@ -825,7 +833,12 @@ sub alpha
 sub roman
 {
   my ($number) = @_;
-  die "LifeLines roman function not yet implemented"
+  unless ($INC{"Roman.pm"})
+  {
+    warn "Roman.pm is required to use roman()";
+    return $number;
+  }
+  Roman::roman($number)
 }
 
 sub strsoundex
@@ -1193,7 +1206,7 @@ __END__
 
 Gedcom::LifeLines - functions for lines2perl
 
-Version 1.05 - 20th July 1999
+Version 1.06 - 13th February 2000
 
 =head1 SYNOPSIS
 
@@ -1221,7 +1234,6 @@ Functions yet to be implemented include:
   menuchoose()
   card()
   ord()
-  roman()
   newfile()
   outfile()
   copyfile()

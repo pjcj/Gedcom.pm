@@ -1,9 +1,11 @@
-- Beef up the documentation.
-- Beef up the testsuite, including LifeLines tests.
+- Beef up the documentation including a more indepth tutorial.
+- Beef up the testsuite, including more LifeLines tests.
 - Make ged into a real program, rather than just a little demo.
-- Rewrite tkged
-- Provide functions to add data
-- Provide functions to merge data
-- Make constructors better
-- Finish LifeLines.pm
-- Fill in missing tag descriptions in Gedcom.pm
+- Rewrite tkged.
+- Provide functions to add data.
+- Provide functions to merge data.
+- Make constructors better.
+- Finish LifeLines.pm.
+- Speed ups.
+- Add a test for parse_grammar.
+- Turn children from an array iuto a hash: key is tag, value is array of items.

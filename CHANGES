@@ -3,55 +3,55 @@ Gedcom.pm history
 Release 1.00 - Initial release - 8th March 1999
 
 Release 1.01 - 27th April 1999
- - Add some documentation
- - Add Individual.pm and Family.pm
- - Remove get_records() - use get_children() instead
+ - Add some documentation.
+ - Add Individual.pm and Family.pm.
+ - Remove get_records() - use get_children() instead.
  - Change get_children() and children() to return a list, rather than a
-   reference to one
- - Add resolve_xref() and resolve()
- - Change the profile of collect_xrefs(), resolve_xrefs() and validate()
- - Add get_individual()
- - Remove redundant Gedcom::Item::renumber()
- - Rename child() to child_value() and children() to child_values()
- - Improve testsuite
- - Make Date::Manip optional
+   reference to one.
+ - Add resolve_xref() and resolve().
+ - Change the profile of collect_xrefs(), resolve_xrefs() and validate().
+ - Add get_individual().
+ - Remove redundant Gedcom::Item::renumber().
+ - Rename child() to child_value() and children() to child_values().
+ - Improve testsuite.
+ - Make Date::Manip.pm optional.
 
 Release 1.02 - 5th May 1999
- - Add RIN numbers to royal.ged
- - Move test.pl to t/basic.t
- - Make basic.t "use Test"
- - Add many tests to basic.t
- - Add pre-parsed grammar files
- - Add grammar target to Makefile.PL
- - Add functions to Family.pm and change Individual.pm to use them
- - Improve error messages reading top level children
- - Change the profile of renumber()
- - Internally, remove leading and trailing @ in xrefs
- - Change order of renumber() to match documentation
- - Get renumber() to call collect_xrefs()
- - Add resolve_xref() to Gedcom.pm
- - Add next_xref() to Gedcom.pm
- - Add unresolve_xrefs() to compliment resolve_xrefs()
+ - Add RIN numbers to royal.ged.
+ - Move test.pl to t/basic.t.
+ - Make basic.t "use Test".
+ - Add many tests to basic.t.
+ - Add pre-parsed grammar files.
+ - Add grammar target to Makefile.PL.
+ - Add functions to Family.pm and change Individual.pm to use them.
+ - Improve error messages reading top level children.
+ - Change the profile of renumber().
+ - Internally, remove leading and trailing @ in xrefs.
+ - Change order of renumber() to match documentation.
+ - Get renumber() to call collect_xrefs().
+ - Add resolve_xref() to Gedcom.pm.
+ - Add next_xref() to Gedcom.pm.
+ - Add unresolve_xrefs() to compliment resolve_xrefs().
 
 Release 1.03 - 13th May 1999
- - Add Grammar::child() and Grammar::structure()
- - Make valid_children more efficient and include min and max information
- - Add validate_syntax() to Gedcom::Record.pm
- - Rename Record::validate() to Record::validate_semantics()
- - Add min(), max() and children() to Gedcom::Grammar.pm
- - Add GEDC and SUBM to royal.ged to accomodate validate_syntax()
- - Fix bug which prevented writing of @s around xref values
+ - Add Grammar::child() and Grammar::structure().
+ - Make valid_children more efficient and include min and max information.
+ - Add validate_syntax() to Gedcom::Record.pm.
+ - Rename Record::validate() to Record::validate_semantics().
+ - Add min(), max() and children() to Gedcom::Grammar.pm.
+ - Add GEDC and SUBM to royal.ged to accomodate validate_syntax().
+ - Fix bug which prevented writing of @s around xref values.
 
 Release 1.04 - 29th May 1999
- - Improve default sort subroutine
- - Include mailing list information
- - Add lines2perl
- - Improve Makefile.PL environment tests
- - Work around IO::Handle::input_line_number bug
+ - Improve default sort subroutine.
+ - Include mailing list information.
+ - Add lines2perl.
+ - Improve Makefile.PL environment tests.
+ - Work around IO::Handle::input_line_number bug.
 
-Release 1.05
- - Add LifeLines.pm
- - Add Event.pm
+Release 1.05 - 20th July 1999
+ - Add LifeLines.pm.
+ - Add Event.pm.
  - Add functions to:
      Gedcom.pm:
        soundex()
@@ -77,14 +77,60 @@ Release 1.05
      Family.pm:
        parents()
        number_of_children()
- - Change most functions in Individual and Family to check wantarray
- - Have get_individual check xrefs and soundex
- - Fix renumber error - xrefs are now calculated and then changed
- - Change basic.t to reflect renumber fix
- - Move normalise_dates from Item.pm to Record.pm
+ - Change most functions in Individual and Family to check wantarray.
+ - Have get_individual check xrefs and soundex.
+ - Fix renumber error - xrefs are now calculated and then changed.
+ - Change basic.t to reflect renumber fix.
+ - Move normalise_dates from Item.pm to Record.pm.
  - Add AUTOLOAD function to Record.pm to provide access based on tag
-   name or description
- - Change lines2perl to use references to arrays and hashes
- - Other major changes to lines2perl to increase functionality
- - Change require 5.004 to require 5.005
- - Add check for Text/Soundex to Makefile.PL
+   name or description.
+ - Change lines2perl to use references to arrays and hashes.
+ - Other major changes to lines2perl to increase functionality.
+ - Change require 5.004 to require 5.005.
+ - Add check for Text/Soundex.pm to Makefile.PL.
+
+Release 1.06 - 13th February 2000
+ - Add functions to:
+     Item.pm:
+       get_item()
+     Record.pm:
+       record()
+       get_record()
+       get_value()
+       tag_record()
+       tag_value()
+       delete_record()
+ - Deprecate use of Item::get_child()      - use Item::get_item()    instead.
+ - Deprecate use of Item::get_children()   - use Item::get_item()    instead.
+ - Deprecate use of Record::child_value()  - use Record::tag_value() instead.
+ - Deprecate use of Record::child_values() - use Record::tag_value() instead.
+ - Complete Lifelines::roman() using Roman.pm.
+ - Add check for Roman.pm to Makefile.PL.
+ - Add read_only option for lazy parsing.
+ - Rename ged.vim to gedcom.vim and package it up for inclusion with Vim.
+ - Restructure and abstract away some of the basic tests.
+ - Add tests:
+     t/Engine.pm
+     t/Basic.pm
+     t/read_only.t
+     t/resolve.t
+     t/resolve_read_only.t
+     t/birthdates.t
+     t/Lines.pm
+     t/lines.t
+     t/lines/lines.ll
+     t/bias.t
+     t/lines/bias.ll
+ - Use "item" instaed of "child" to represent Gedcom hierarchies.
+ - Raname Gedcom::Item::add_children()      to Gedcom::Item::add_items()
+          Gedcom::Item::skip_children()        Gedcom::Item::skip_items()
+          Gedcom::Item::delete_child()         Gedcom::Item::delete_item()
+          Gedcom::Item::delete_children()      Gedcom::Item::delete_items()
+          Gedcom::Item::next_record()          Gedcom::Item::next_item()
+          Gedcom::Grammar::child()             Gedcom::Grammar::item()
+          Gedcom::Grammar::children()          Gedcom::Grammar::items()
+          Gedcom::Grammar::valid_children()    Gedcom::Grammar::valid_items()
+ - Allow has accessor functions in Gedcom::Item to set data too.
+ - Bless appropriate objects into Gedcom::Event.
+ - Add an experimental write_xml().
+ - Add tutorial section to documentation.

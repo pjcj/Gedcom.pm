@@ -1,4 +1,4 @@
-# Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
+# Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -15,10 +15,10 @@ package Gedcom::Grammar;
 
 use Data::Dumper;
 
-use Gedcom::Item 1.05;
+use Gedcom::Item 1.06;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.05";
+$VERSION = "1.06";
 @ISA     = qw( Gedcom::Item );
 
 sub structure
@@ -29,18 +29,18 @@ sub structure
   {
     $self->{top}{structures} =
       { map { $_->{structure} ? ($_->{structure} => $_) : () }
-            @{$self->{top}{children}} };
+            @{$self->{top}{items}} };
   }
   $self->{top}{structures}{$struct}
 }
 
-sub child
+sub item
 {
   my $self = shift;
   my ($tag) = @_;
   return undef unless defined $tag;
-  my $valid_children = $self->valid_children;
-  exists $valid_children->{$tag} ? $valid_children->{$tag}{grammar} : undef
+  my $valid_items = $self->valid_items;
+  exists $valid_items->{$tag} ? $valid_items->{$tag}{grammar} : undef
 }
 
 sub min
@@ -55,41 +55,41 @@ sub max
   exists $self->{max} ? $self->{max} eq "M" ? 0 : $self->{max} : 1
 }
 
-sub children
+sub items
 {
   my $self = shift;
-  keys %{$self->valid_children}
+  keys %{$self->valid_items}
 }
 
-sub valid_children
+sub valid_items
 {
   my $self = shift;
-  unless (exists $self->{_valid_children})
+  unless (exists $self->{_valid_items})
   {
-    my %valid_children;
-    for my $child (@{$self->{children}})
+    my %valid_items;
+    for my $item (@{$self->{items}})
     {
-      my $min = $child->min;
-      my $max = $child->max;
-      if ($child->{tag})
+      my $min = $item->min;
+      my $max = $item->max;
+      if ($item->{tag})
       {
-        $valid_children{$child->{tag}} =
+        $valid_items{$item->{tag}} =
         {
-          grammar => $child,
+          grammar => $item,
           min     => $min,
           max     => $max
         };
       }
       else
       {
-        die "What's a " . Data::Dumper->new([$child], ["grammar"])
-          unless my ($value) = $child->{value} =~ /<<(.*)>>/;
+        die "What's a " . Data::Dumper->new([$item], ["grammar"])
+          unless my ($value) = $item->{value} =~ /<<(.*)>>/;
         die "Can't find $value in gedcom structures"
           unless my $structure = $self->structure($value);
-        $child->{structure} = $structure;
-        while (my($tag, $g) = each %{$structure->valid_children})
+        $item->{structure} = $structure;
+        while (my($tag, $g) = each %{$structure->valid_items})
         {
-          $valid_children{$tag} =
+          $valid_items{$tag} =
           {
             grammar => $g->{grammar},
             # min and max can be calculated by multiplication because
@@ -103,9 +103,9 @@ sub valid_children
         }
       }
     }
-    $self->{_valid_children} = \%valid_children;
+    $self->{_valid_items} = \%valid_items;
   }
-  $self->{_valid_children}
+  $self->{_valid_items}
 }
 
 1;
@@ -114,17 +114,20 @@ __END__
 
 =head1 NAME
 
-Gedcom::Grammar - a class to manipulate Gedcom grammars
+Gedcom::Grammar - a module to manipulate Gedcom grammars
 
-Version 1.05 - 20th July 1999
+Version 1.06 - 13th February 2000
 
 =head1 SYNOPSIS
 
   use Gedcom::Grammar;
 
-  my $st = $grammar->structures("GEDCOM")
-  my $sgr = $grammar->child("DATE")
-  my @children = $grammar->valid_children
+  my $st = $grammar->structures("GEDCOM");
+  my $sgr = $grammar->item("DATE");
+  my @items = $grammar->valid_items;
+  my $min = $grammar->min;
+  my $max = $grammar->max;
+  my @items = $grammar->items;
 
 =head1 DESCRIPTION
 
@@ -149,44 +152,44 @@ objects.
 
 =head2 structures
 
-  my $st = $grammar->structures("GEDCOM")
+  my $st = $grammar->structures("GEDCOM");
 
 Return the grammar item of the specified structure, if it exists, or undef.
 
-=head2 child
+=head2 item
 
-  my $sgr = $grammar->child("DATE")
+  my $sgr = $grammar->item("DATE");
 
-Return the grammar item of the specified child, if it exists, or undef.
+Return the grammar item of the specified sub-item, if it exists, or undef.
 
 =head2 min
 
-  my $min = $grammar->min
+  my $min = $grammar->min;
 
 Return the minimum permissible number of $grammar items
 
 =head2 max
 
-  my $max = $grammar->max
+  my $max = $grammar->max;
 
 Return the maximum permissible number of $grammar items
 
-=head2 children
+=head2 items
 
-  my @children = $grammar->children
+  my @items = $grammar->items;
 
-Return a list of tags of the grammar's children
+Return a list of tags of the grammar's sub-items
 
-=head2 valid_children
+=head2 valid_items
 
-  my @children = $grammar->valid_children
+  my @items = $grammar->valid_items;
 
-Return a hash detailing all the valid children of the grammar item.  The
-key is the tag of the child and the value is another hash with three
+Return a hash detailing all the valid sub-items of the grammar item.  The
+key is the tag of the sub-item and the value is another hash with three
 members:
 
-  grammar => the child grammar
-  min     => the minimum permissible number of these children
-  max     => the maximum permissible number of these children
+  grammar => the sub-item grammar
+  min     => the minimum permissible number of these sub-items
+  max     => the maximum permissible number of these sub-items
 
 =cut

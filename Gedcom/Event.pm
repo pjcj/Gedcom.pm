@@ -1,4 +1,4 @@
-# Copyright 1999, Paul Johnson (pjcj@transeda.com)
+# Copyright 1999-2000, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -13,29 +13,29 @@ require 5.005;
 
 package Gedcom::Event;
 
-use Gedcom::Record 1.05;
+use Gedcom::Record 1.06;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.05";
+$VERSION = "1.06";
 @ISA     = qw( Gedcom::Record );
 
-sub type
-{
-  my $self = shift;
-  $self->child_value("TYPE")
-}
+# sub type
+# {
+#   my $self = shift;
+#   $self->tag_value("TYPE")
+# }
 
-sub date
-{
-  my $self = shift;
-  $self->child_value("DATE")
-}
+# sub date
+# {
+#   my $self = shift;
+#   $self->tag_value("DATE")
+# }
 
-sub place
-{
-  my $self = shift;
-  $self->child_value("PLAC")
-}
+# sub place
+# {
+#   my $self = shift;
+#   $self->tag_value("PLAC")
+# }
 
 1;
 
@@ -43,9 +43,9 @@ __END__
 
 =head1 NAME
 
-Gedcom::Event - a class to manipulate Gedcom events
+Gedcom::Event - a module to manipulate Gedcom events
 
-Version 1.05 - 20th July 1999
+Version 1.06 - 13th February 2000
 
 =head1 SYNOPSIS
 

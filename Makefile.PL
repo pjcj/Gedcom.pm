@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
+# Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -15,8 +15,8 @@ use ExtUtils::MakeMaker;
 
 $| = 1;
 
-my $Version = "1.05";
-my $Date    = "20th July 1999";
+my $Version = "1.06";
+my $Date    = "13th February 2000";
 
 open(M, "MANIFEST") or die "Cannot open MANIFEST: $!";
 my @files    = map { split } <M>;
@@ -34,7 +34,7 @@ WriteMakefile
 );
 
 print "\n";
-print "checking for Date::Manip..........";
+print "checking for Date::Manip.pm........ ";
 
 eval "use Date::Manip";
 if (my $m = $INC{"Date/Manip.pm"})
@@ -46,14 +46,14 @@ else
   print  <<EOM;
 not found
 
-Date::Manip is required to use the Gedcom function normalise_dates().  This
+Date::Manip.pm is required to use the Gedcom function normalise_dates().  This
 function will be unavailable until you install this module, available from CPAN.
 In the meantime, you may continue to use the rest of Gedcom.pm.
 
 EOM
 }
 
-print "checking for Text::Soundex........";
+print "checking for Text::Soundex.pm...... ";
 
 eval "use Text::Soundex";
 if (my $m = $INC{"Text/Soundex.pm"})
@@ -65,14 +65,14 @@ else
   print  <<EOM;
 not found
 
-Text::Soundex is required to use the Gedcom function soundex().  This function
-will be unavailable until you install this module, available from CPAN.  In the
-meantime, you may continue to use the rest of Gedcom.pm.
+Text::Soundex.pm is required to use the Gedcom function soundex().  This
+function will be unavailable until you install this module, available from CPAN.
+In the meantime, you may continue to use the rest of Gedcom.pm.
 
 EOM
 }
 
-print "checking for Parse::RecDescent....";
+print "checking for Parse::RecDescent.pm.. ";
 
 eval "use Parse::RecDescent";
 if (my $m = $INC{"Parse/RecDescent.pm"})
@@ -84,14 +84,34 @@ else
   print  <<EOM;
 not found
 
-Parse::RecDescent is required to use the Gedcom program lines2perl.  This
+Parse::RecDescent.pm is required to use the Gedcom program lines2perl.  This
 program will be unavailable until you install this module, available from CPAN.
 In the meantime, you may continue to use the rest of Gedcom.pm.
 
 EOM
 }
 
-print "checking for working IO::Handle...";
+print "checking for Roman.pm.............. ";
+
+eval "use Roman";
+if (my $m = $INC{"Roman.pm"})
+{
+  print "$m\n";
+}
+else
+{
+  print  <<EOM;
+not found
+
+Roman.pm is required to use the Gedcom function roman().  This function may be
+called from lines2perl if your LifeLines program calls roman().  This function
+will be unavailable until you install this module, available from CPAN.  In the
+meantime, you may continue to use the rest of Gedcom.pm.
+
+EOM
+}
+
+print "checking for working IO::Handle.... ";
 
 eval <<'EOE';
   use FileHandle;
@@ -150,7 +170,7 @@ README : Gedcom.pm
   ]
 }
 
-my $author = 'pjcj@transeda.com';
+my $author = 'pjcj@cpan.org';
 
 my @command = ("perlbug", "-a", $author,
                           "-s", "Installation of Gedcom $Version",

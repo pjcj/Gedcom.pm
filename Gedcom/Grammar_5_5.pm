@@ -1,4 +1,4 @@
-# Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
+# Copyright 1999-2000, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -14,7 +14,7 @@
 # Edit parse_grammar or Makefile.PL to increase the legibility of this file.
 # (Removal of the leading spaces nearly halves the size of the file.)
 
-# Version 1.05 - 20th July 1999
+# Version 1.06 - 13th February 2000
 
 use strict;
 
@@ -23,20 +23,20 @@ require 5.005;
 package Gedcom::Grammar_5_5;
 
 use vars qw($VERSION $grammar);
-$VERSION = "1.05";
+$VERSION = "1.06";
 
 $grammar = bless( {
 level => -1,
-children => [
+items => [
 bless( {
 level => -1,
 line => 1,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 3,
-children => [],
+items => [],
 max => 1,
 value => '<<HEADER>>'
 }, 'Gedcom::Grammar' ),
@@ -44,7 +44,7 @@ bless( {
 level => '0',
 min => '0',
 line => 4,
-children => [],
+items => [],
 max => 1,
 value => '<<SUBMISSION_RECORD>>'
 }, 'Gedcom::Grammar' ),
@@ -52,7 +52,7 @@ bless( {
 level => '0',
 min => '0',
 line => 5,
-children => [],
+items => [],
 max => 'M',
 value => '<<RECORD>>'
 }, 'Gedcom::Grammar' ),
@@ -60,7 +60,7 @@ bless( {
 level => '0',
 min => 1,
 line => 6,
-children => [],
+items => [],
 max => 1,
 tag => 'TRLR'
 }, 'Gedcom::Grammar' )
@@ -70,22 +70,22 @@ structure => 'GEDCOM'
 bless( {
 level => -1,
 line => 8,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 10,
-children => [
+items => [
 bless( {
 level => '+1',
 min => 1,
 line => 11,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 12,
-children => [],
+items => [],
 max => 1,
 value => '<VERSION_NUMBER>',
 tag => 'VERS'
@@ -94,7 +94,7 @@ bless( {
 level => '+2',
 min => '0',
 line => 13,
-children => [],
+items => [],
 max => 1,
 value => '<NAME_OF_PRODUCT>',
 tag => 'NAME'
@@ -103,12 +103,12 @@ bless( {
 level => '+2',
 min => '0',
 line => 14,
-children => [
+items => [
 bless( {
 level => '+3',
 min => '0',
 line => 15,
-children => [],
+items => [],
 max => 1,
 value => '<<ADDRESS_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -121,12 +121,12 @@ bless( {
 level => '+2',
 min => '0',
 line => 16,
-children => [
+items => [
 bless( {
 level => '+3',
 min => '0',
 line => 17,
-children => [],
+items => [],
 max => 1,
 value => '<PUBLICATION_DATE>',
 tag => 'DATE'
@@ -135,7 +135,7 @@ bless( {
 level => '+3',
 min => '0',
 line => 18,
-children => [],
+items => [],
 max => 1,
 value => '<COPYRIGHT_SOURCE_DATA>',
 tag => 'COPR'
@@ -154,7 +154,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 19,
-children => [],
+items => [],
 max => 1,
 value => '<RECEIVING_SYSTEM_NAME>',
 tag => 'DEST'
@@ -163,12 +163,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 20,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 21,
-children => [],
+items => [],
 max => 1,
 value => '<TIME_VALUE>',
 tag => 'TIME'
@@ -182,7 +182,7 @@ bless( {
 level => '+1',
 min => 1,
 line => 22,
-children => [],
+items => [],
 max => 1,
 value => '@<XREF:SUBM>@',
 tag => 'SUBM'
@@ -191,7 +191,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 23,
-children => [],
+items => [],
 max => 1,
 value => '@<XREF:SUBN>@',
 tag => 'SUBN'
@@ -200,7 +200,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 24,
-children => [],
+items => [],
 max => 1,
 value => '<FILE_NAME>',
 tag => 'FILE'
@@ -209,7 +209,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 25,
-children => [],
+items => [],
 max => 1,
 value => '<COPYRIGHT_GEDCOM_FILE>',
 tag => 'COPR'
@@ -218,12 +218,12 @@ bless( {
 level => '+1',
 min => 1,
 line => 26,
-children => [
+items => [
 bless( {
 level => '+2',
 min => 1,
 line => 27,
-children => [],
+items => [],
 max => 1,
 value => '<VERSION_NUMBER>',
 tag => 'VERS'
@@ -232,7 +232,7 @@ bless( {
 level => '+2',
 min => 1,
 line => 28,
-children => [],
+items => [],
 max => 1,
 value => '<GEDCOM_FORM>',
 tag => 'FORM'
@@ -245,12 +245,12 @@ bless( {
 level => '+1',
 min => 1,
 line => 29,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 30,
-children => [],
+items => [],
 max => 1,
 value => '<VERSION_NUMBER>',
 tag => 'VERS'
@@ -264,7 +264,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 31,
-children => [],
+items => [],
 max => 1,
 value => '<LANGUAGE_OF_TEXT>',
 tag => 'LANG'
@@ -273,12 +273,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 32,
-children => [
+items => [
 bless( {
 level => '+2',
 min => 1,
 line => 33,
-children => [],
+items => [],
 max => 1,
 value => '<PLACE_HIERARCHY>',
 tag => 'FORM'
@@ -291,12 +291,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 34,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 35,
-children => [],
+items => [],
 max => 'M',
 value => '<GEDCOM_CONTENT_DESCRIPTION>',
 tag => 'CONT'
@@ -305,7 +305,7 @@ bless( {
 level => '+2',
 min => '0',
 line => 36,
-children => [],
+items => [],
 max => 'M',
 value => '<GEDCOM_CONTENT_DESCRIPTION>',
 tag => 'CONC'
@@ -326,13 +326,13 @@ bless( {
 level => -1,
 selection => 1,
 line => 39,
-children => [
+items => [
 bless( {
 level => '0',
 selection => 1,
 min => 1,
 line => 41,
-children => [],
+items => [],
 max => 1,
 value => '<<FAM_RECORD>>'
 }, 'Gedcom::Grammar' ),
@@ -341,7 +341,7 @@ level => '0',
 selection => 1,
 min => 1,
 line => 43,
-children => [],
+items => [],
 max => 1,
 value => '<<INDIVIDUAL_RECORD>>'
 }, 'Gedcom::Grammar' ),
@@ -350,7 +350,7 @@ level => '0',
 selection => 1,
 min => 1,
 line => 45,
-children => [],
+items => [],
 max => 'M',
 value => '<<MULTIMEDIA_RECORD>>'
 }, 'Gedcom::Grammar' ),
@@ -359,7 +359,7 @@ level => '0',
 selection => 1,
 min => 1,
 line => 47,
-children => [],
+items => [],
 max => 1,
 value => '<<NOTE_RECORD>>'
 }, 'Gedcom::Grammar' ),
@@ -368,7 +368,7 @@ level => '0',
 selection => 1,
 min => 1,
 line => 49,
-children => [],
+items => [],
 max => 1,
 value => '<<REPOSITORY_RECORD>>'
 }, 'Gedcom::Grammar' ),
@@ -377,7 +377,7 @@ level => '0',
 selection => 1,
 min => 1,
 line => 51,
-children => [],
+items => [],
 max => 1,
 value => '<<SOURCE_RECORD>>'
 }, 'Gedcom::Grammar' ),
@@ -386,7 +386,7 @@ level => '0',
 selection => 1,
 min => 1,
 line => 53,
-children => [],
+items => [],
 max => 1,
 value => '<<SUBMITTER_RECORD>>'
 }, 'Gedcom::Grammar' )
@@ -396,27 +396,27 @@ structure => 'RECORD'
 bless( {
 level => -1,
 line => 56,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 58,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 59,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 60,
-children => [
+items => [
 bless( {
 level => '+3',
 min => 1,
 line => 61,
-children => [],
+items => [],
 max => 1,
 value => '<AGE_AT_EVENT>',
 tag => 'AGE'
@@ -429,12 +429,12 @@ bless( {
 level => '+2',
 min => '0',
 line => 62,
-children => [
+items => [
 bless( {
 level => '+3',
 min => 1,
 line => 63,
-children => [],
+items => [],
 max => 1,
 value => '<AGE_AT_EVENT>',
 tag => 'AGE'
@@ -451,7 +451,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 64,
-children => [],
+items => [],
 max => 1,
 value => '@<XREF:INDI>@',
 tag => 'HUSB'
@@ -460,7 +460,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 65,
-children => [],
+items => [],
 max => 1,
 value => '@<XREF:INDI>@',
 tag => 'WIFE'
@@ -469,7 +469,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 66,
-children => [],
+items => [],
 max => 'M',
 value => '@<XREF:INDI>@',
 tag => 'CHIL'
@@ -478,7 +478,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 67,
-children => [],
+items => [],
 max => 1,
 value => '<COUNT_OF_CHILDREN>',
 tag => 'NCHI'
@@ -487,7 +487,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 68,
-children => [],
+items => [],
 max => 'M',
 value => '@<XREF:SUBM>@',
 tag => 'SUBM'
@@ -496,7 +496,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 69,
-children => [],
+items => [],
 max => 'M',
 value => '<<LDS_SPOUSE_SEALING>>'
 }, 'Gedcom::Grammar' ),
@@ -504,7 +504,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 70,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' ),
@@ -512,7 +512,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 71,
-children => [],
+items => [],
 max => 'M',
 value => '<<MULTIMEDIA_LINK>>'
 }, 'Gedcom::Grammar' ),
@@ -520,7 +520,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 72,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -528,12 +528,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 73,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 74,
-children => [],
+items => [],
 max => 1,
 value => '<USER_REFERENCE_TYPE>',
 tag => 'TYPE'
@@ -547,7 +547,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 75,
-children => [],
+items => [],
 max => 1,
 value => '<AUTOMATED_RECORD_ID>',
 tag => 'RIN'
@@ -556,7 +556,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 76,
-children => [],
+items => [],
 max => 1,
 value => '<<CHANGE_DATE>>'
 }, 'Gedcom::Grammar' )
@@ -571,17 +571,17 @@ structure => 'FAM_RECORD'
 bless( {
 level => -1,
 line => 79,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 81,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 82,
-children => [],
+items => [],
 max => 1,
 value => '<RESTRICTION_NOTICE>',
 tag => 'RESN'
@@ -590,7 +590,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 83,
-children => [],
+items => [],
 max => 'M',
 value => '<<PERSONAL_NAME_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -598,7 +598,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 84,
-children => [],
+items => [],
 max => 1,
 value => '<SEX_VALUE>',
 tag => 'SEX'
@@ -607,7 +607,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 85,
-children => [],
+items => [],
 max => 'M',
 value => '<<INDIVIDUAL_EVENT_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -615,7 +615,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 86,
-children => [],
+items => [],
 max => 'M',
 value => '<<INDIVIDUAL_ATTRIBUTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -623,7 +623,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 87,
-children => [],
+items => [],
 max => 'M',
 value => '<<LDS_INDIVIDUAL_ORDINANCE>>'
 }, 'Gedcom::Grammar' ),
@@ -631,7 +631,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 88,
-children => [],
+items => [],
 max => 'M',
 value => '<<CHILD_TO_FAMILY_LINK>>'
 }, 'Gedcom::Grammar' ),
@@ -639,7 +639,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 89,
-children => [],
+items => [],
 max => 'M',
 value => '<<SPOUSE_TO_FAMILY_LINK>>'
 }, 'Gedcom::Grammar' ),
@@ -647,7 +647,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 90,
-children => [],
+items => [],
 max => 'M',
 value => '@<XREF:SUBM>@',
 tag => 'SUBM'
@@ -656,7 +656,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 91,
-children => [],
+items => [],
 max => 'M',
 value => '<<ASSOCIATION_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -664,7 +664,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 92,
-children => [],
+items => [],
 max => 'M',
 value => '@<XREF:INDI>@',
 tag => 'ALIA'
@@ -673,7 +673,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 93,
-children => [],
+items => [],
 max => 'M',
 value => '@<XREF:SUBM>@',
 tag => 'ANCI'
@@ -682,7 +682,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 94,
-children => [],
+items => [],
 max => 'M',
 value => '@<XREF:SUBM>@',
 tag => 'DESI'
@@ -691,7 +691,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 95,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' ),
@@ -699,7 +699,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 96,
-children => [],
+items => [],
 max => 'M',
 value => '<<MULTIMEDIA_LINK>>'
 }, 'Gedcom::Grammar' ),
@@ -707,7 +707,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 97,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -715,7 +715,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 98,
-children => [],
+items => [],
 max => 1,
 value => '<PERMANENT_RECORD_FILE_NUMBER>',
 tag => 'RFN'
@@ -724,7 +724,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 99,
-children => [],
+items => [],
 max => 1,
 value => '<ANCESTRAL_FILE_NUMBER>',
 tag => 'AFN'
@@ -733,12 +733,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 100,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 101,
-children => [],
+items => [],
 max => 1,
 value => '<USER_REFERENCE_TYPE>',
 tag => 'TYPE'
@@ -752,7 +752,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 102,
-children => [],
+items => [],
 max => 1,
 value => '<AUTOMATED_RECORD_ID>',
 tag => 'RIN'
@@ -761,7 +761,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 103,
-children => [],
+items => [],
 max => 1,
 value => '<<CHANGE_DATE>>'
 }, 'Gedcom::Grammar' )
@@ -776,17 +776,17 @@ structure => 'INDIVIDUAL_RECORD'
 bless( {
 level => -1,
 line => 106,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 108,
-children => [
+items => [
 bless( {
 level => '+1',
 min => 1,
 line => 109,
-children => [],
+items => [],
 max => 1,
 value => '<MULTIMEDIA_FORMAT>',
 tag => 'FORM'
@@ -795,7 +795,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 110,
-children => [],
+items => [],
 max => 1,
 value => '<DESCRIPTIVE_TITLE>',
 tag => 'TITL'
@@ -804,7 +804,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 111,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -812,12 +812,12 @@ bless( {
 level => '+1',
 min => 1,
 line => 112,
-children => [
+items => [
 bless( {
 level => '+2',
 min => 1,
 line => 113,
-children => [],
+items => [],
 max => 'M',
 value => '<ENCODED_MULTIMEDIA_LINE>',
 tag => 'CONT'
@@ -830,7 +830,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 114,
-children => [],
+items => [],
 max => 1,
 value => '@<XREF:OBJE>@',
 tag => 'OBJE'
@@ -839,12 +839,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 115,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 116,
-children => [],
+items => [],
 max => 1,
 value => '<USER_REFERENCE_TYPE>',
 tag => 'TYPE'
@@ -858,7 +858,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 117,
-children => [],
+items => [],
 max => 1,
 value => '<AUTOMATED_RECORD_ID>',
 tag => 'RIN'
@@ -867,7 +867,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 118,
-children => [],
+items => [],
 max => 1,
 value => '<<CHANGE_DATE>>'
 }, 'Gedcom::Grammar' )
@@ -882,17 +882,17 @@ structure => 'MULTIMEDIA_RECORD'
 bless( {
 level => -1,
 line => 121,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 123,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 124,
-children => [],
+items => [],
 max => 'M',
 value => '<SUBMITTER_TEXT>',
 tag => 'CONC'
@@ -901,7 +901,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 125,
-children => [],
+items => [],
 max => 'M',
 value => '<SUBMITTER_TEXT>',
 tag => 'CONT'
@@ -910,7 +910,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 126,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' ),
@@ -918,12 +918,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 127,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 128,
-children => [],
+items => [],
 max => 1,
 value => '<USER_REFERENCE_TYPE>',
 tag => 'TYPE'
@@ -937,7 +937,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 129,
-children => [],
+items => [],
 max => 1,
 value => '<AUTOMATED_RECORD_ID>',
 tag => 'RIN'
@@ -946,7 +946,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 130,
-children => [],
+items => [],
 max => 1,
 value => '<<CHANGE_DATE>>'
 }, 'Gedcom::Grammar' )
@@ -962,17 +962,17 @@ structure => 'NOTE_RECORD'
 bless( {
 level => -1,
 line => 133,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 135,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 136,
-children => [],
+items => [],
 max => 1,
 value => '<NAME_OF_REPOSITORY>',
 tag => 'NAME'
@@ -981,7 +981,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 137,
-children => [],
+items => [],
 max => 1,
 value => '<<ADDRESS_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -989,7 +989,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 138,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -997,12 +997,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 139,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 140,
-children => [],
+items => [],
 max => 1,
 value => '<USER_REFERENCE_TYPE>',
 tag => 'TYPE'
@@ -1016,7 +1016,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 141,
-children => [],
+items => [],
 max => 1,
 value => '<AUTOMATED_RECORD_ID>',
 tag => 'RIN'
@@ -1025,7 +1025,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 142,
-children => [],
+items => [],
 max => 1,
 value => '<<CHANGE_DATE>>'
 }, 'Gedcom::Grammar' )
@@ -1040,27 +1040,27 @@ structure => 'REPOSITORY_RECORD'
 bless( {
 level => -1,
 line => 145,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 147,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 148,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 149,
-children => [
+items => [
 bless( {
 level => '+3',
 min => '0',
 line => 150,
-children => [],
+items => [],
 max => 1,
 value => '<DATE_PERIOD>',
 tag => 'DATE'
@@ -1069,7 +1069,7 @@ bless( {
 level => '+3',
 min => '0',
 line => 151,
-children => [],
+items => [],
 max => 1,
 value => '<SOURCE_JURISDICTION_PLACE>',
 tag => 'PLAC'
@@ -1083,7 +1083,7 @@ bless( {
 level => '+2',
 min => '0',
 line => 152,
-children => [],
+items => [],
 max => 1,
 value => '<RESPONSIBLE_AGENCY>',
 tag => 'AGNC'
@@ -1092,7 +1092,7 @@ bless( {
 level => '+2',
 min => '0',
 line => 153,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -1104,12 +1104,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 154,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 155,
-children => [],
+items => [],
 max => 'M',
 value => '<SOURCE_ORIGINATOR>',
 tag => 'CONT'
@@ -1118,7 +1118,7 @@ bless( {
 level => '+2',
 min => '0',
 line => 156,
-children => [],
+items => [],
 max => 'M',
 value => '<SOURCE_ORIGINATOR>',
 tag => 'CONC'
@@ -1132,12 +1132,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 157,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 158,
-children => [],
+items => [],
 max => 'M',
 value => '<SOURCE_DESCRIPTIVE_TITLE>',
 tag => 'CONT'
@@ -1146,7 +1146,7 @@ bless( {
 level => '+2',
 min => '0',
 line => 159,
-children => [],
+items => [],
 max => 'M',
 value => '<SOURCE_DESCRIPTIVE_TITLE>',
 tag => 'CONC'
@@ -1160,7 +1160,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 160,
-children => [],
+items => [],
 max => 1,
 value => '<SOURCE_FILED_BY_ENTRY>',
 tag => 'ABBR'
@@ -1169,12 +1169,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 161,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 162,
-children => [],
+items => [],
 max => 'M',
 value => '<SOURCE_PUBLICATION_FACTS>',
 tag => 'CONT'
@@ -1183,7 +1183,7 @@ bless( {
 level => '+2',
 min => '0',
 line => 163,
-children => [],
+items => [],
 max => 'M',
 value => '<SOURCE_PUBLICATION_FACTS>',
 tag => 'CONC'
@@ -1197,12 +1197,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 164,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 165,
-children => [],
+items => [],
 max => 'M',
 value => '<TEXT_FROM_SOURCE>',
 tag => 'CONT'
@@ -1211,7 +1211,7 @@ bless( {
 level => '+2',
 min => '0',
 line => 166,
-children => [],
+items => [],
 max => 'M',
 value => '<TEXT_FROM_SOURCE>',
 tag => 'CONC'
@@ -1225,7 +1225,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 167,
-children => [],
+items => [],
 max => 1,
 value => '<<SOURCE_REPOSITORY_CITATION>>'
 }, 'Gedcom::Grammar' ),
@@ -1233,7 +1233,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 168,
-children => [],
+items => [],
 max => 'M',
 value => '<<MULTIMEDIA_LINK>>'
 }, 'Gedcom::Grammar' ),
@@ -1241,7 +1241,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 169,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -1249,12 +1249,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 170,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 171,
-children => [],
+items => [],
 max => 1,
 value => '<USER_REFERENCE_TYPE>',
 tag => 'TYPE'
@@ -1268,7 +1268,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 172,
-children => [],
+items => [],
 max => 1,
 value => '<AUTOMATED_RECORD_ID>',
 tag => 'RIN'
@@ -1277,7 +1277,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 173,
-children => [],
+items => [],
 max => 1,
 value => '<<CHANGE_DATE>>'
 }, 'Gedcom::Grammar' )
@@ -1292,17 +1292,17 @@ structure => 'SOURCE_RECORD'
 bless( {
 level => -1,
 line => 176,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 178,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 179,
-children => [],
+items => [],
 max => 1,
 value => '@<XREF:SUBM>@',
 tag => 'SUBM'
@@ -1311,7 +1311,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 180,
-children => [],
+items => [],
 max => 1,
 value => '<NAME_OF_FAMILY_FILE>',
 tag => 'FAMF'
@@ -1320,7 +1320,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 181,
-children => [],
+items => [],
 max => 1,
 value => '<TEMPLE_CODE>',
 tag => 'TEMP'
@@ -1329,7 +1329,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 182,
-children => [],
+items => [],
 max => 1,
 value => '<GENERATIONS_OF_ANCESTORS>',
 tag => 'ANCE'
@@ -1338,7 +1338,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 183,
-children => [],
+items => [],
 max => 1,
 value => '<GENERATIONS_OF_DESCENDANTS>',
 tag => 'DESC'
@@ -1347,7 +1347,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 184,
-children => [],
+items => [],
 max => 1,
 value => '<ORDINANCE_PROCESS_FLAG>',
 tag => 'ORDI'
@@ -1356,7 +1356,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 185,
-children => [],
+items => [],
 max => 1,
 value => '<AUTOMATED_RECORD_ID>',
 tag => 'RIN'
@@ -1372,17 +1372,17 @@ structure => 'SUBMISSION_RECORD'
 bless( {
 level => -1,
 line => 188,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 190,
-children => [
+items => [
 bless( {
 level => '+1',
 min => 1,
 line => 191,
-children => [],
+items => [],
 max => 1,
 value => '<SUBMITTER_NAME>',
 tag => 'NAME'
@@ -1391,7 +1391,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 192,
-children => [],
+items => [],
 max => 1,
 value => '<<ADDRESS_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -1399,7 +1399,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 193,
-children => [],
+items => [],
 max => 'M',
 value => '<<MULTIMEDIA_LINK>>'
 }, 'Gedcom::Grammar' ),
@@ -1407,7 +1407,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 194,
-children => [],
+items => [],
 max => 3,
 value => '<LANGUAGE_PREFERENCE>',
 tag => 'LANG'
@@ -1416,7 +1416,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 195,
-children => [],
+items => [],
 max => 1,
 value => '<SUBMITTER_REGISTERED_RFN>',
 tag => 'RFN'
@@ -1425,7 +1425,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 196,
-children => [],
+items => [],
 max => 1,
 value => '<AUTOMATED_RECORD_ID>',
 tag => 'RIN'
@@ -1434,7 +1434,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 197,
-children => [],
+items => [],
 max => 1,
 value => '<<CHANGE_DATE>>'
 }, 'Gedcom::Grammar' )
@@ -1449,17 +1449,17 @@ structure => 'SUBMITTER_RECORD'
 bless( {
 level => -1,
 line => 200,
-children => [
+items => [
 bless( {
 level => '0',
 min => '0',
 line => 202,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 203,
-children => [],
+items => [],
 max => 'M',
 value => '<ADDRESS_LINE>',
 tag => 'CONT'
@@ -1468,7 +1468,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 204,
-children => [],
+items => [],
 max => 1,
 value => '<ADDRESS_LINE1>',
 tag => 'ADR1'
@@ -1477,7 +1477,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 205,
-children => [],
+items => [],
 max => 1,
 value => '<ADDRESS_LINE2>',
 tag => 'ADR2'
@@ -1486,7 +1486,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 206,
-children => [],
+items => [],
 max => 1,
 value => '<ADDRESS_CITY>',
 tag => 'CITY'
@@ -1495,7 +1495,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 207,
-children => [],
+items => [],
 max => 1,
 value => '<ADDRESS_STATE>',
 tag => 'STAE'
@@ -1504,7 +1504,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 208,
-children => [],
+items => [],
 max => 1,
 value => '<ADDRESS_POSTAL_CODE>',
 tag => 'POST'
@@ -1513,7 +1513,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 209,
-children => [],
+items => [],
 max => 1,
 value => '<ADDRESS_COUNTRY>',
 tag => 'CTRY'
@@ -1527,7 +1527,7 @@ bless( {
 level => '0',
 min => '0',
 line => 210,
-children => [],
+items => [],
 max => 3,
 value => '<PHONE_NUMBER>',
 tag => 'PHON'
@@ -1538,17 +1538,17 @@ structure => 'ADDRESS_STRUCTURE'
 bless( {
 level => -1,
 line => 213,
-children => [
+items => [
 bless( {
 level => '0',
 min => '0',
 line => 215,
-children => [
+items => [
 bless( {
 level => '+1',
 min => 1,
 line => 216,
-children => [],
+items => [],
 max => 1,
 value => '<RECORD_TYPE>',
 tag => 'TYPE'
@@ -1557,7 +1557,7 @@ bless( {
 level => '+1',
 min => 1,
 line => 217,
-children => [],
+items => [],
 max => 1,
 value => '<RELATION_IS_DESCRIPTOR>',
 tag => 'RELA'
@@ -1566,7 +1566,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 218,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -1574,7 +1574,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 219,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' )
@@ -1589,22 +1589,22 @@ structure => 'ASSOCIATION_STRUCTURE'
 bless( {
 level => -1,
 line => 222,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 224,
-children => [
+items => [
 bless( {
 level => '+1',
 min => 1,
 line => 225,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 226,
-children => [],
+items => [],
 max => 1,
 value => '<TIME_VALUE>',
 tag => 'TIME'
@@ -1618,7 +1618,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 227,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -1632,17 +1632,17 @@ structure => 'CHANGE_DATE'
 bless( {
 level => -1,
 line => 230,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 232,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 233,
-children => [],
+items => [],
 max => 'M',
 value => '<PEDIGREE_LINKAGE_TYPE>',
 tag => 'PEDI'
@@ -1651,7 +1651,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 234,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -1666,12 +1666,12 @@ structure => 'CHILD_TO_FAMILY_LINK'
 bless( {
 level => -1,
 line => 237,
-children => [
+items => [
 bless( {
 level => '0',
 min => '0',
 line => 239,
-children => [],
+items => [],
 max => 1,
 value => '<EVENT_DESCRIPTOR>',
 tag => 'TYPE'
@@ -1680,7 +1680,7 @@ bless( {
 level => '0',
 min => '0',
 line => 240,
-children => [],
+items => [],
 max => 1,
 value => '<DATE_VALUE>',
 tag => 'DATE'
@@ -1689,7 +1689,7 @@ bless( {
 level => '0',
 min => '0',
 line => 241,
-children => [],
+items => [],
 max => 1,
 value => '<<PLACE_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -1697,7 +1697,7 @@ bless( {
 level => '0',
 min => '0',
 line => 242,
-children => [],
+items => [],
 max => 1,
 value => '<<ADDRESS_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -1705,7 +1705,7 @@ bless( {
 level => '0',
 min => '0',
 line => 243,
-children => [],
+items => [],
 max => 1,
 value => '<AGE_AT_EVENT>',
 tag => 'AGE'
@@ -1714,7 +1714,7 @@ bless( {
 level => '0',
 min => '0',
 line => 244,
-children => [],
+items => [],
 max => 1,
 value => '<RESPONSIBLE_AGENCY>',
 tag => 'AGNC'
@@ -1723,7 +1723,7 @@ bless( {
 level => '0',
 min => '0',
 line => 245,
-children => [],
+items => [],
 max => 1,
 value => '<CAUSE_OF_EVENT>',
 tag => 'CAUS'
@@ -1732,7 +1732,7 @@ bless( {
 level => '0',
 min => '0',
 line => 246,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' ),
@@ -1740,7 +1740,7 @@ bless( {
 level => '0',
 min => '0',
 line => 247,
-children => [],
+items => [],
 max => 'M',
 value => '<<MULTIMEDIA_LINK>>'
 }, 'Gedcom::Grammar' ),
@@ -1748,7 +1748,7 @@ bless( {
 level => '0',
 min => '0',
 line => 248,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -1759,18 +1759,18 @@ bless( {
 level => -1,
 selection => 1,
 line => 252,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 255,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 256,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -1782,13 +1782,13 @@ bless( {
 level => '0',
 min => 1,
 line => 258,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 259,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -1800,13 +1800,13 @@ bless( {
 level => '0',
 min => 1,
 line => 261,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 262,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -1818,13 +1818,13 @@ bless( {
 level => '0',
 min => 1,
 line => 264,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 265,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -1836,13 +1836,13 @@ bless( {
 level => '0',
 min => 1,
 line => 267,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 268,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -1854,13 +1854,13 @@ bless( {
 level => '0',
 min => 1,
 line => 270,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 271,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -1872,13 +1872,13 @@ bless( {
 level => '0',
 min => 1,
 line => 273,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 274,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -1890,13 +1890,13 @@ bless( {
 level => '0',
 min => 1,
 line => 276,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 277,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -1908,13 +1908,13 @@ bless( {
 level => '0',
 min => 1,
 line => 279,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 280,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -1926,13 +1926,13 @@ bless( {
 level => '0',
 min => 1,
 line => 282,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 283,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -1944,13 +1944,13 @@ bless( {
 level => '0',
 min => 1,
 line => 285,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 286,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -1965,18 +1965,18 @@ bless( {
 level => -1,
 selection => 1,
 line => 291,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 294,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 295,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -1989,13 +1989,13 @@ bless( {
 level => '0',
 min => 1,
 line => 297,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 298,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2008,13 +2008,13 @@ bless( {
 level => '0',
 min => 1,
 line => 300,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 301,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2027,13 +2027,13 @@ bless( {
 level => '0',
 min => 1,
 line => 303,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 304,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2046,13 +2046,13 @@ bless( {
 level => '0',
 min => 1,
 line => 306,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 307,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2065,13 +2065,13 @@ bless( {
 level => '0',
 min => 1,
 line => 309,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 310,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2084,13 +2084,13 @@ bless( {
 level => '0',
 min => 1,
 line => 312,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 313,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2103,13 +2103,13 @@ bless( {
 level => '0',
 min => 1,
 line => 315,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 316,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2122,13 +2122,13 @@ bless( {
 level => '0',
 min => 1,
 line => 318,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 319,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2141,13 +2141,13 @@ bless( {
 level => '0',
 min => 1,
 line => 321,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 322,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2160,13 +2160,13 @@ bless( {
 level => '0',
 min => 1,
 line => 324,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 325,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2178,13 +2178,13 @@ bless( {
 level => '0',
 min => '0',
 line => 327,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 328,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2197,13 +2197,13 @@ bless( {
 level => '0',
 min => 1,
 line => 330,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 331,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2219,17 +2219,17 @@ bless( {
 level => -1,
 selection => 1,
 line => 335,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 338,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 339,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' ),
@@ -2238,7 +2238,7 @@ level => '+1',
 selection => 1,
 min => '0',
 line => 340,
-children => [],
+items => [],
 max => 1,
 value => '@<XREF:FAM>@',
 tag => 'FAMC'
@@ -2251,12 +2251,12 @@ bless( {
 level => '0',
 min => 1,
 line => 342,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 343,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' ),
@@ -2265,7 +2265,7 @@ level => '+1',
 selection => 1,
 min => '0',
 line => 344,
-children => [],
+items => [],
 max => 1,
 value => '@<XREF:FAM>@',
 tag => 'FAMC'
@@ -2278,13 +2278,13 @@ bless( {
 level => '0',
 min => 1,
 line => 346,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 347,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2296,13 +2296,13 @@ bless( {
 level => '0',
 min => 1,
 line => 349,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 350,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2314,13 +2314,13 @@ bless( {
 level => '0',
 min => 1,
 line => 352,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 353,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2332,12 +2332,12 @@ bless( {
 level => '0',
 min => 1,
 line => 355,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 356,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' ),
@@ -2345,13 +2345,13 @@ bless( {
 level => '+1',
 min => '0',
 line => 357,
-children => [
+items => [
 bless( {
 level => '+2',
 selection => 1,
 min => '0',
 line => 358,
-children => [],
+items => [],
 max => 1,
 value => '<ADOPTED_BY_WHICH_PARENT>',
 tag => 'ADOP'
@@ -2369,13 +2369,13 @@ bless( {
 level => '0',
 min => 1,
 line => 360,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 361,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2387,13 +2387,13 @@ bless( {
 level => '0',
 min => 1,
 line => 363,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 364,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2405,13 +2405,13 @@ bless( {
 level => '0',
 min => 1,
 line => 366,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 367,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2423,13 +2423,13 @@ bless( {
 level => '0',
 min => 1,
 line => 369,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 370,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2441,13 +2441,13 @@ bless( {
 level => '0',
 min => 1,
 line => 372,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 373,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2459,13 +2459,13 @@ bless( {
 level => '0',
 min => 1,
 line => 375,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 376,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2477,13 +2477,13 @@ bless( {
 level => '0',
 min => 1,
 line => 378,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 379,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2495,13 +2495,13 @@ bless( {
 level => '0',
 min => 1,
 line => 381,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 382,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2513,13 +2513,13 @@ bless( {
 level => '0',
 min => 1,
 line => 384,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 385,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2531,13 +2531,13 @@ bless( {
 level => '0',
 min => 1,
 line => 387,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 388,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2549,13 +2549,13 @@ bless( {
 level => '0',
 min => 1,
 line => 390,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 391,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2567,13 +2567,13 @@ bless( {
 level => '0',
 min => 1,
 line => 393,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 394,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2585,13 +2585,13 @@ bless( {
 level => '0',
 min => 1,
 line => 396,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 397,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2603,13 +2603,13 @@ bless( {
 level => '0',
 min => 1,
 line => 399,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 400,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2621,13 +2621,13 @@ bless( {
 level => '0',
 min => 1,
 line => 402,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 403,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2639,13 +2639,13 @@ bless( {
 level => '0',
 min => 1,
 line => 405,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 406,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2657,13 +2657,13 @@ bless( {
 level => '0',
 min => 1,
 line => 408,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 409,
-children => [],
+items => [],
 max => 1,
 value => '<<EVENT_DETAIL>>'
 }, 'Gedcom::Grammar' )
@@ -2678,17 +2678,17 @@ bless( {
 level => -1,
 selection => 1,
 line => 413,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 416,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 417,
-children => [],
+items => [],
 max => 1,
 value => '<LDS_BAPTISM_DATE_STATUS>',
 tag => 'STAT'
@@ -2697,7 +2697,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 418,
-children => [],
+items => [],
 max => 1,
 value => '<DATE_LDS_ORD>',
 tag => 'DATE'
@@ -2706,7 +2706,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 419,
-children => [],
+items => [],
 max => 1,
 value => '<TEMPLE_CODE>',
 tag => 'TEMP'
@@ -2715,7 +2715,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 420,
-children => [],
+items => [],
 max => 1,
 value => '<PLACE_LIVING_ORDINANCE>',
 tag => 'PLAC'
@@ -2724,7 +2724,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 421,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' ),
@@ -2733,7 +2733,7 @@ level => '+1',
 selection => 1,
 min => '0',
 line => 422,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -2745,12 +2745,12 @@ bless( {
 level => '0',
 min => 1,
 line => 424,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 425,
-children => [],
+items => [],
 max => 1,
 value => '<LDS_BAPTISM_DATE_STATUS>',
 tag => 'STAT'
@@ -2759,7 +2759,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 426,
-children => [],
+items => [],
 max => 1,
 value => '<DATE_LDS_ORD>',
 tag => 'DATE'
@@ -2768,7 +2768,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 427,
-children => [],
+items => [],
 max => 1,
 value => '<TEMPLE_CODE>',
 tag => 'TEMP'
@@ -2777,7 +2777,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 428,
-children => [],
+items => [],
 max => 1,
 value => '<PLACE_LIVING_ORDINANCE>',
 tag => 'PLAC'
@@ -2786,7 +2786,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 429,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' ),
@@ -2795,7 +2795,7 @@ level => '+1',
 selection => 1,
 min => '0',
 line => 430,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -2807,12 +2807,12 @@ bless( {
 level => '0',
 min => 1,
 line => 432,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 433,
-children => [],
+items => [],
 max => 1,
 value => '<LDS_ENDOWMENT_DATE_STATUS>',
 tag => 'STAT'
@@ -2821,7 +2821,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 434,
-children => [],
+items => [],
 max => 1,
 value => '<DATE_LDS_ORD>',
 tag => 'DATE'
@@ -2830,7 +2830,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 435,
-children => [],
+items => [],
 max => 1,
 value => '<TEMPLE_CODE>',
 tag => 'TEMP'
@@ -2839,7 +2839,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 436,
-children => [],
+items => [],
 max => 1,
 value => '<PLACE_LIVING_ORDINANCE>',
 tag => 'PLAC'
@@ -2848,7 +2848,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 437,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' ),
@@ -2857,7 +2857,7 @@ level => '+1',
 selection => 1,
 min => '0',
 line => 438,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -2869,12 +2869,12 @@ bless( {
 level => '0',
 min => 1,
 line => 440,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 441,
-children => [],
+items => [],
 max => 1,
 value => '<LDS_CHILD_SEALING_DATE_STATUS>',
 tag => 'STAT'
@@ -2883,7 +2883,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 442,
-children => [],
+items => [],
 max => 1,
 value => '<DATE_LDS_ORD>',
 tag => 'DATE'
@@ -2892,7 +2892,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 443,
-children => [],
+items => [],
 max => 1,
 value => '<TEMPLE_CODE>',
 tag => 'TEMP'
@@ -2901,7 +2901,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 444,
-children => [],
+items => [],
 max => 1,
 value => '<PLACE_LIVING_ORDINANCE>',
 tag => 'PLAC'
@@ -2910,7 +2910,7 @@ bless( {
 level => '+1',
 min => 1,
 line => 445,
-children => [],
+items => [],
 max => 1,
 value => '@<XREF:FAM>@',
 tag => 'FAMC'
@@ -2919,7 +2919,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 446,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' ),
@@ -2928,7 +2928,7 @@ level => '+1',
 selection => 1,
 min => '0',
 line => 447,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -2942,17 +2942,17 @@ structure => 'LDS_INDIVIDUAL_ORDINANCE'
 bless( {
 level => -1,
 line => 451,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 453,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 454,
-children => [],
+items => [],
 max => 1,
 value => '<LDS_SPOUSE_SEALING_DATE_STATUS>',
 tag => 'STAT'
@@ -2961,7 +2961,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 455,
-children => [],
+items => [],
 max => 1,
 value => '<DATE_LDS_ORD>',
 tag => 'DATE'
@@ -2970,7 +2970,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 456,
-children => [],
+items => [],
 max => 1,
 value => '<TEMPLE_CODE>',
 tag => 'TEMP'
@@ -2979,7 +2979,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 457,
-children => [],
+items => [],
 max => 1,
 value => '<PLACE_LIVING_ORDINANCE>',
 tag => 'PLAC'
@@ -2988,7 +2988,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 458,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' ),
@@ -2996,7 +2996,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 459,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -3011,13 +3011,13 @@ bless( {
 level => -1,
 selection => 1,
 line => 462,
-children => [
+items => [
 bless( {
 level => '0',
 selection => 1,
 min => 1,
 line => 465,
-children => [],
+items => [],
 max => 1,
 value => '@<XREF:OBJE>@',
 tag => 'OBJE'
@@ -3026,12 +3026,12 @@ bless( {
 level => '0',
 min => 1,
 line => 467,
-children => [
+items => [
 bless( {
 level => '+1',
 min => 1,
 line => 468,
-children => [],
+items => [],
 max => 1,
 value => '<MULTIMEDIA_FORMAT>',
 tag => 'FORM'
@@ -3040,7 +3040,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 469,
-children => [],
+items => [],
 max => 1,
 value => '<DESCRIPTIVE_TITLE>',
 tag => 'TITL'
@@ -3049,7 +3049,7 @@ bless( {
 level => '+1',
 min => 1,
 line => 470,
-children => [],
+items => [],
 max => 1,
 value => '<MULTIMEDIA_FILE_REFERENCE>',
 tag => 'FILE'
@@ -3059,7 +3059,7 @@ level => '+1',
 selection => 1,
 min => '0',
 line => 471,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -3074,18 +3074,18 @@ bless( {
 level => -1,
 selection => 1,
 line => 475,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 478,
-children => [
+items => [
 bless( {
 level => '+1',
 selection => 1,
 min => '0',
 line => 479,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' )
@@ -3098,12 +3098,12 @@ bless( {
 level => '0',
 min => 1,
 line => 481,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 482,
-children => [],
+items => [],
 max => 'M',
 value => '<SUBMITTER_TEXT>',
 tag => 'CONC'
@@ -3112,7 +3112,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 483,
-children => [],
+items => [],
 max => 'M',
 value => '<SUBMITTER_TEXT>',
 tag => 'CONT'
@@ -3122,7 +3122,7 @@ level => '+1',
 selection => 1,
 min => '0',
 line => 484,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' )
@@ -3137,17 +3137,17 @@ structure => 'NOTE_STRUCTURE'
 bless( {
 level => -1,
 line => 488,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 490,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 491,
-children => [],
+items => [],
 max => 1,
 value => '<NAME_PIECE_PREFIX>',
 tag => 'NPFX'
@@ -3156,7 +3156,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 492,
-children => [],
+items => [],
 max => 1,
 value => '<NAME_PIECE_GIVEN>',
 tag => 'GIVN'
@@ -3165,7 +3165,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 493,
-children => [],
+items => [],
 max => 1,
 value => '<NAME_PIECE_NICKNAME>',
 tag => 'NICK'
@@ -3174,7 +3174,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 494,
-children => [],
+items => [],
 max => 1,
 value => '<NAME_PIECE_SURNAME_PREFIX>',
 tag => 'SPFX'
@@ -3183,7 +3183,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 495,
-children => [],
+items => [],
 max => 1,
 value => '<NAME_PIECE_SURNAME>',
 tag => 'SURN'
@@ -3192,7 +3192,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 496,
-children => [],
+items => [],
 max => 1,
 value => '<NAME_PIECE_SUFFIX>',
 tag => 'NSFX'
@@ -3201,7 +3201,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 497,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' ),
@@ -3209,7 +3209,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 498,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -3224,17 +3224,17 @@ structure => 'PERSONAL_NAME_STRUCTURE'
 bless( {
 level => -1,
 line => 501,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 503,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 504,
-children => [],
+items => [],
 max => 1,
 value => '<PLACE_HIERARCHY>',
 tag => 'FORM'
@@ -3243,7 +3243,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 505,
-children => [],
+items => [],
 max => 'M',
 value => '<<SOURCE_CITATION>>'
 }, 'Gedcom::Grammar' ),
@@ -3251,7 +3251,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 506,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -3267,17 +3267,17 @@ bless( {
 level => -1,
 selection => 1,
 line => 509,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 512,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 513,
-children => [],
+items => [],
 max => 1,
 value => '<WHERE_WITHIN_SOURCE>',
 tag => 'PAGE'
@@ -3286,12 +3286,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 514,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 515,
-children => [],
+items => [],
 max => 1,
 value => '<ROLE_IN_EVENT>',
 tag => 'ROLE'
@@ -3305,12 +3305,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 516,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 517,
-children => [],
+items => [],
 max => 1,
 value => '<ENTRY_RECORDING_DATE>',
 tag => 'DATE'
@@ -3319,12 +3319,12 @@ bless( {
 level => '+2',
 min => '0',
 line => 518,
-children => [
+items => [
 bless( {
 level => '+3',
 min => '0',
 line => 519,
-children => [],
+items => [],
 max => 'M',
 value => '<TEXT_FROM_SOURCE>',
 tag => 'CONC'
@@ -3333,7 +3333,7 @@ bless( {
 level => '+3',
 min => '0',
 line => 520,
-children => [],
+items => [],
 max => 'M',
 value => '<TEXT_FROM_SOURCE>',
 tag => 'CONT'
@@ -3351,7 +3351,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 521,
-children => [],
+items => [],
 max => 1,
 value => '<CERTAINTY_ASSESSMENT>',
 tag => 'QUAY'
@@ -3360,7 +3360,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 522,
-children => [],
+items => [],
 max => 'M',
 value => '<<MULTIMEDIA_LINK>>'
 }, 'Gedcom::Grammar' ),
@@ -3369,7 +3369,7 @@ level => '+1',
 selection => 1,
 min => '0',
 line => 523,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -3382,12 +3382,12 @@ bless( {
 level => '0',
 min => 1,
 line => 525,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 526,
-children => [],
+items => [],
 max => 'M',
 value => '<SOURCE_DESCRIPTION>',
 tag => 'CONC'
@@ -3396,7 +3396,7 @@ bless( {
 level => '+1',
 min => '0',
 line => 527,
-children => [],
+items => [],
 max => 'M',
 value => '<SOURCE_DESCRIPTION>',
 tag => 'CONT'
@@ -3405,12 +3405,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 528,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 529,
-children => [],
+items => [],
 max => 'M',
 value => '<TEXT_FROM_SOURCE>',
 tag => 'CONC'
@@ -3419,7 +3419,7 @@ bless( {
 level => '+2',
 min => '0',
 line => 530,
-children => [],
+items => [],
 max => 'M',
 value => '<TEXT_FROM_SOURCE>',
 tag => 'CONT'
@@ -3434,7 +3434,7 @@ level => '+1',
 selection => 1,
 min => '0',
 line => 531,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )
@@ -3449,17 +3449,17 @@ structure => 'SOURCE_CITATION'
 bless( {
 level => -1,
 line => 535,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 537,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 538,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' ),
@@ -3467,12 +3467,12 @@ bless( {
 level => '+1',
 min => '0',
 line => 539,
-children => [
+items => [
 bless( {
 level => '+2',
 min => '0',
 line => 540,
-children => [],
+items => [],
 max => 1,
 value => '<SOURCE_MEDIA_TYPE>',
 tag => 'MEDI'
@@ -3493,17 +3493,17 @@ structure => 'SOURCE_REPOSITORY_CITATION'
 bless( {
 level => -1,
 line => 544,
-children => [
+items => [
 bless( {
 level => '0',
 min => 1,
 line => 546,
-children => [
+items => [
 bless( {
 level => '+1',
 min => '0',
 line => 547,
-children => [],
+items => [],
 max => 'M',
 value => '<<NOTE_STRUCTURE>>'
 }, 'Gedcom::Grammar' )

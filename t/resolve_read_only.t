@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
+# Copyright 1999-2000, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -13,4 +13,4 @@ use strict;
 
 use lib -d "t" ? "t" : "..";
 
-use Basic (resolve => "unresolve_xrefs", read_only => 0);
+use Basic (resolve => "resolve_xrefs", read_only => 1);

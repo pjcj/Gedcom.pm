@@ -1,4 +1,4 @@
-# Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
+# Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -14,13 +14,13 @@ require 5.005;
 package Gedcom::Item;
 
 use vars qw($VERSION);
-$VERSION = "1.05";
+$VERSION = "1.06";
 
 sub new
 {
   my $proto = shift;
   my $class = ref($proto) || $proto;
-  my $self = { children => [], @_ };
+  my $self = { @_ };
   bless $self, $class;
   $self->read if $self->{file};
   $self;
@@ -34,7 +34,7 @@ sub copy
   {
     $item->{$key} = $self->{$key} if exists $self->{$key}
   }
-  $item->{children} = [ map { $_->copy } @{$self->{children}} ];
+  $item->{items} = [ map { $_->copy } @{$self->_items} ];
   $item
 }
 
@@ -59,86 +59,133 @@ sub read
     if $callback &&
        !&$callback($title, $txt1, "Record $count", $self->{fh}->tell, $size);
 
-  $self->{level} = -1;
+  $self->level(-1);
 
   # If we have a grammar, then we are reading a gedcom file and must use
   # the grammar to verify what is being read.
   # If we do not have a grammar, then that is what we are reading.
-  while (my $record = $self->next_record($self))
+  while (my $item = $self->next_item($self))
   {
-    $self->add_children($record);
     if ($self->{grammar})
     {
-      my $tag = $record->{tag};
-      if (my $g = $self->{grammar}->child($tag))
+      my $tag = $item->{tag};
+      if (my $g = $self->{grammar}->item($tag))
       {
-        $self->parse($record, $g);
-        push @{$self->{children}}, $record;
+        $self->parse($item, $g);
+        push @{$self->{items}}, $item;
         $count++;
       }
       else
       {
         $tag = "<empty tag>" unless defined $tag && length $tag;
-        warn "$self->{file}:$record->{line}: $tag is not a top level tag\n";
+        warn "$self->{file}:$item->{line}: $tag is not a top level tag\n";
       }
     }
     else
     {
       # just add the grammar item
-      push @{$self->{children}}, $record;
+      push @{$self->{items}}, $item;
       $count++;
     }
     return undef
       if $callback &&
-         !&$callback($title, $txt1, "Record $count line " . $record->{line},
+         !&$callback($title, $txt1, "Record $count line " . $item->{line},
                      $self->{fh}->tell, $size);
   }
-  $self->{fh}->close or die "Can't close file $self->{file}: $!";
-  delete $self->{fh};
+# $self->{fh}->close or die "Can't close file $self->{file}: $!";
+# delete $self->{fh};
   $self;
 }
 
-sub add_children
+sub add_items
 {
   my $self = shift;
-  my ($record) = @_;
-# print "adding children to: "; $record->print;
-  while (my $next = $self->next_record($record))
+  my ($item, $parse) = @_;
+# print "adding items to: "; $item->print;
+  if (!$parse &&
+      $item->{level} >= 0 &&
+      $self->{gedcom}{read_only} &&
+      $self->{gedcom}{grammar})
   {
-    unless (ref $next)
+    # print "ignoring items\n";
+    $self->skip_items($item);
+  }
+  else
+  {
+    if ($parse && $self->{gedcom}{read_only} && $self->{gedcom}{grammar})
     {
-      # The grammar requires a single selection from its children
-      $record->{selection} = 1;
-      next;
+#     print "reading items\n";
+      if (defined $item->{cpos})
+      {
+        $self->{fh}->seek($item->{cpos}, 0);
+      }
     }
-    my $level = $record->{level};
-    my $next_level = $next->{level};
-    if (!defined $next_level || $next_level <= $level)
+    $item->{items} = [];
+    while (my $next = $self->next_item($item))
     {
-      $self->{stored_record} = $next;
-      return;
+      unless (ref $next)
+      {
+        # The grammar requires a single selection from its items
+        $item->{selection} = 1;
+        next;
+      }
+      my $level = $item->{level};
+      my $next_level = $next->{level};
+      if (!defined $next_level || $next_level <= $level)
+      {
+        $self->{stored_item} = $next;
+        print "stored ***********************************\n";
+        return;
+      }
+      else
+      {
+        warn "$self->{file}:$item->{line}: " .
+             "Can't add level $next_level to $level\n"
+          if $next_level > $level + 1;
+        push @{$item->{items}}, $next;
+      }
     }
-    else
-    {
-      warn "$self->{file}:$record->{line}: " .
-           "Can't add level $next_level to $level\n"
-        if $next_level > $level + 1;
-      push @{$record->{children}}, $next;
-    }
+    $item->{_items} = 1 unless $item->{gedcom}{read_only};
   }
 }
 
-sub next_record
+sub skip_items
 {
   my $self = shift;
-  my ($record) = @_;
-  my $rec;
-  if ($rec = $self->{stored_record})
+  my ($item) = @_;
+  my $level = $item->{level};
+  my $cpos = $item->{cpos} = $self->{fh}->tell;
+# print "skipping items to level $level at $item->{line}:$cpos\n";
+  while (my $l = $self->next_text_line)
   {
-    $self->{stored_record} = undef;
+    chomp $l;
+#   print "parsing <$l>\n";
+    if (my ($lev) = $l =~ /^\s*(\d+)/)
+    {
+      if ($lev <= $level)
+      {
+#       print "pushing <$l>\n";
+        $self->{fh}->seek($cpos, 0);
+        last;
+      }
+    }
+    $cpos = $self->{fh}->tell;
+  }
+}
+
+sub next_item
+{
+  my $self = shift;
+  my ($item) = @_;
+  my $bpos = $self->{fh}->tell;
+  my $rec;
+  if ($rec = $self->{stored_item})
+  {
+    $self->{stored_item} = undef;
   }
   elsif ((!$rec || !$rec->{level}) && (my $line = $self->next_text_line))
   {
+    # TODO - tidy this up
 #   print "line is $line";
     my $line_number = eval { $self->{fh}->input_line_number } || $.;
     if (my ($structure) = $line =~ /^\s*(\w+): =\s*$/)
@@ -187,20 +234,30 @@ sub next_record
                 \*?                        # optional *
                 \s*$/x)                    # optional whitespace at end
     {
-      $rec = $self->new(line => $line_number) unless $rec;
-      $rec->{level}  = ($level eq "n" ? 0 : $level) if defined $level;
-      $rec->{xref}   = $xref  =~ /^\@(\w+\d+)\@$/ ? $1 : $xref
-        if defined $xref;
-      $rec->{tag}    = $tag                         if defined $tag;
-      $rec->{value}  = $value =~ /^\@(\w+\d+)\@$/ ? $1 : $value
-        if defined $value;
-      $rec->{min}    = $min                         if defined $min;
-      $rec->{max}    = $max                         if defined $max;
-      $rec->{gedcom} = $self->{gedcom}              if defined $self->{gedcom};
+#     print "found $level below $item->{level}\n";
+      if ($level > $item->{level})
+      {
+        $rec = $self->new(line   => $line_number,
+                          gedcom => $self->{gedcom})
+          unless $rec;
+        $rec->{level} = ($level eq "n" ? 0 : $level) if defined $level;
+        $rec->{xref}  = $xref  =~ /^\@(\w+\d+)\@$/ ? $1 : $xref
+          if defined $xref;
+        $rec->{tag}   = $tag                         if defined $tag;
+        $rec->{value} = $value =~ /^\@(\w+\d+)\@$/ ? $1 : $value
+          if defined $value;
+        $rec->{min}   = $min                         if defined $min;
+        $rec->{max}   = $max                         if defined $max;
+      }
+      else
+      {
+#       print " -- pushing back\n";
+        $self->{fh}->seek($bpos, 0);
+      }
     }
     elsif ($line =~ /^\s*[\[\|\]]\s*(?:\/\*.*\*\/\s*)?$/)
     {
-      # The grammar requires a single selection from its children
+      # The grammar requires a single selection from its items
       return "selection";
     }
     else
@@ -210,12 +267,14 @@ sub next_record
       die "\n$file:$line_number: Can't parse line: $line\n";
     }
   }
-# print "comparing "; $record->print;
-# print Dumper($record);
+
+# use Data::Dumper;
+# print "comparing "; $item->print;
+# print Dumper($item);
 # print "with      "; $rec->print if $rec;
 # print Dumper($rec);
-  $self->add_children($rec)
-    if $rec && defined $rec->{level} && ($rec->{level} > $record->{level});
+  $self->add_items($rec)
+    if $rec && defined $rec->{level} && ($rec->{level} > $item->{level});
   $rec;
 }
 
@@ -223,6 +282,7 @@ sub next_line
 {
   my $self = shift;
   my $line = $self->{fh}->getline;
+# print "read $line";
   $line;
 }
 
@@ -237,24 +297,63 @@ sub next_text_line
 sub write
 {
   my $self = shift;
-  my ($fh, $level) = @_;
+  my ($fh, $level, $flush) = @_;
   my @p;
-  push(@p, $level . "  " x $level)    unless $level < 0;
-  push(@p, "\@$self->{xref}\@")       if     $self->{xref};
-  push(@p, $self->{tag})              if     $level >= 0 && $self->{tag};
+  push(@p, $level . "  " x $level)         unless $flush || $level < 0;
+  push(@p, "\@$self->{xref}\@")            if     $self->{xref};
+  push(@p, $self->{tag})                   if     $level >= 0 && $self->{tag};
   push(@p, ref $self->{value}
            ? "\@$self->{value}{xref}\@"
            : $self->resolve_xref($self->{value})
              ? "\@$self->{value}\@"
-             : $self->{value})        if     $self->{value};
+             : $self->{value})             if     $self->{value};
   $fh->print("@p");
-  $fh->print("\n")                    unless $level < 0;
-  for my $c (0 .. @{$self->{children}} - 1)
+  $fh->print("\n")                         unless $level < 0;
+  for my $c (0 .. @{$self->_items} - 1)
   {
-    $self->{children}[$c]->write($fh, $level + 1);
-    $fh->print("\n")                  if     $level < 0 &&
-                                             $c < @{$self->{children}} - 1;
+    $self->{items}[$c]->write($fh, $level + 1, $flush);
+    $fh->print("\n")                       if     $level < 0 &&
+                                                  $c < @{$self->{items}} - 1;
   }
+}
+
+sub write_xml
+{
+  my $self = shift;
+  my ($fh, $level) = @_;
+  $level = 0 unless $level;
+  my $indent = "  " x $level;
+  my $tag = $level >= 0 && $self->{tag} && $self->{tag} !~ /^CON[CT]$/;
+  my $event;
+  my $p = "";
+  if ($tag)
+  {
+    $tag = defined $self->{gedcom}{types}{$self->{tag}} &&
+                   $self->{gedcom}{types}{$self->{tag}} eq "Event"
+      ? "EVEN"
+      : $self->{tag};
+    $p .= $indent;
+    $p .= "<$tag";
+    $p .= " = $self->{tag}"  if $tag eq "EVEN";
+    $p .= " = $self->{xref}" if $self->{xref};
+    $p .= ">\n";
+  }
+  if ($self->{value})
+  {
+    $p .= $indent . "  ";
+    $p .= ref $self->{value}
+          ? "$self->{value}{xref}"
+          : $self->resolve_xref($self->{value})
+            ? "$self->{value}"
+            : $self->{value};
+    $p .= "\n";
+  }
+  $fh->print($p);
+  for my $c (0 .. @{$self->_items} - 1)
+  {
+    $self->{items}[$c]->write_xml($fh, $level + 1);
+  }
+  $fh->print("$indent</$tag>\n") if $tag;
 }
 
 sub print
@@ -267,96 +366,85 @@ sub print
   print "\n";
 }
 
+sub get_item
+{
+  my $self = shift;
+  my ($tag, $count) = @_;
+  if (wantarray && !$count)
+  {
+    return grep { $_->{tag} eq $tag } @{$self->_items};
+  }
+  else
+  {
+    $count = 1 unless $count;
+    for my $c (@{$self->_items})
+    {
+      return $c if $c->{tag} eq $tag && !--$count;
+    }
+  }
+  undef
+}
+
 sub get_child
 {
+  # NOTE - This function is deprecated - use get_item instead
   my $self = shift;
   my ($t) = @_;
   my ($tag, $count) = $t =~ /^_?(\w+?)(\d*)$/;
-  $count = 1 unless $count;
-  # print "looking for <$tag> number <$count>\n";
-  for my $c (@{$self->{children}})
-  {
-    return $c if $c->{tag} eq $tag && !--$count;
-  }
-  undef;
+  $self->get_item($tag, $count);
 }
 
 sub get_children
 {
+  # NOTE - This function is deprecated - use get_item instead
   my $self = shift;
-  my ($tag) = @_;
-  grep { $_->{tag} eq $tag } @{$self->{children}}
+  $self->get_item(@_)
 }
 
-sub delete_child
+sub delete_item
 {
   my $self = shift;
-  my ($child) = @_;
-  my $c = "$child";
+  my ($item) = @_;
+  my $i = "$item";
   my $n = 0;
-  for (@{$self->{children}})
+  for (@{$self->_items})
   {
-    my $ch = "$_";
+    my $it = "$_";
     # print "matching $ch against $c\n";
-    last if $c eq $ch;
+    last if $i eq $it;
     $n++;
   }
-  # print "deleting child $n of $#{$self->{children}}\n";
-  splice @{$self->{children}}, $n, 1;
+  # print "deleting item $n of $#{$self->{items}}\n";
+  splice @{$self->{items}}, $n, 1;
 }
 
-sub level
+for my $func (qw(level xref tag value min max gedcom file line))
 {
-  my $self = shift;
-  $self->{level}
+  no strict "refs";
+  *$func = sub
+  {
+    my $self = shift;
+    $self->{$func} = shift if @_;
+    $self->{$func}
+  }
 }
 
-sub xref
+sub _items
 {
   my $self = shift;
-  $self->{xref}
+# print "_items() $self->{items}\n"; # $self->print;
+# print "level $self->{level}\n";
+  $self->{gedcom}{record}->add_items($self, 1)
+    if !defined $self->{_items} && $self->{level} >= 0;
+  $self->{_items} = 1;
+  $self->{items}
 }
 
-sub tag
+sub delete_items
 {
   my $self = shift;
-  $self->{tag}
-}
-
-sub value
-{
-  my $self = shift;
-  $self->{value}
-}
-
-sub min
-{
-  my $self = shift;
-  $self->{min}
-}
-
-sub max
-{
-  my $self = shift;
-  $self->{max}
-}
-
-sub gedcom
-{
-  my $self = shift;
-  $self->{gedcom}
-}
-
-sub file
-{
-  my $self = shift;
-  $self->{file}
-}
-
-sub line
-{
-  my $self = shift;
-  $self->{line}
+  delete $self->{_items};
+  delete $self->{items};
 }
 
 1;
@@ -367,33 +455,38 @@ __END__
 
 Gedcom::Item - a base class for Gedcom::Grammar and Gedcom::Record
 
-Version 1.05 - 20th July 1999
+Version 1.06 - 13th February 2000
 
 =head1 SYNOPSIS
 
   use Gedcom::Record;
 
-  $self->{grammar} = Gedcom::Grammar->new(file     => $self->{grammar_file},
-                                          callback => $self->{callback})
-  my $c = $self->copy
-  $self->read if $self->{file}
-  $self->add_children($rec)
-  while (my $next = $self->next_record($record))
-  $line = $self->next_line
-  my $line = $self->next_text_line
-  $record->>write($fh, $level)
-  $item->print
-  my $child = get_child("CHIL2")
-  my @children = get_children("CHIL")
-  my $v = level
-  my $v = xref
-  my $v = tag
-  my $v = value
-  my $v = min
-  my $v = max
-  my $v = gedcom
-  my $v = file
-  my $v = line
+  $item->{grammar} = Gedcom::Grammar->new(file     => $item->{grammar_file},
+                                          callback => $item->{callback});
+  my $c = $item->copy;
+  $item->read if $item->{file};
+  $item->add_items($rec);
+  while (my $next = $item->next_item($item))
+  my $line = $item->next_line;
+  my $line = $item->next_text_line;
+  $item->write($fh, $level, $flush);
+  $item->write_xml($fh, $level);
+  $item->print;
+  my $item  = $item->get_item("CHIL", 2);
+  my @items = $item->get_item("CHIL");
+  $item->delete_item($sub_item);
+  my $v = $item->level;
+  $item->level(1);
+  my $v = $item->xref;
+  my $v = $item->tag;
+  my $v = $item->value;
+  my $v = $item->min;
+  my $v = $item->max;
+  my $v = $item->gedcom;
+  my $v = $item->file;
+  my $v = $item->line;
+  my $sub_items = $item->_items;
+  $item->delete_items;
 
 =head1 DESCRIPTION
 
@@ -439,16 +532,18 @@ The file from which this object was read, if any.
 
 The line number from which this object was read, if any.
 
-=head2 $item->{children}
+=head2 $item->{items}
 
-Array of all children of this item.
+Array of all sub-items of this item.
+
+It should not be necessary to access these hash members directly.
 
 =head1 METHODS
 
 =head2 new
 
-  $self->{grammar} = Gedcom::Grammar->new(file     => $self->{grammar_file},
-                                          callback => $self->{callback})
+  $item->{grammar} = Gedcom::Grammar->new(file     => $item->{grammar_file},
+                                          callback => $item->{callback});
 
 Create a new object.
 
@@ -469,88 +564,142 @@ read.
 
 =head2 copy
 
-  my $c = $self->copy
+  my $c = $item->copy;
 
-Make a copy of the object.  The children are copied too.
+Make a copy of the object.  The sub-items are copied too.
 
 =head2 read
 
-  $self->read if $self->{file}
+  $item->read if $item->{file};
 
 Read a file into the object.  Called by the constructor.
 
-=head2 add_children
+=head2 add_items
 
-  $self->add_children($rec)
+  $item->add_items($rec);
 
-Read in the children of a record.
+Read in the sub-items of a item.
 
-=head2 next_record
+=head2 next_item
 
-  while (my $next = $self->next_record($record))
+  while (my $next = $item->next_item($item))
 
-Read the next record from a file.  Return the record or false if it
+Read the next item from a file.  Return the item or false if it
 cannot be read.
 
 =head2 next_line
 
-  $line = $self->next_line
+  my $line = $item->next_line;
 
 Read the next line from the file, and return it or false.
 
 =head2 next_text_line
 
-  my $line = $self->next_text_line
+  my $line = $item->next_text_line;
 
 Read the next line of text from the file, and return it or false.
 
 =head2 write
 
-  $record->>write($fh, $level)
+  $item->write($fh, $level, $flush);
 
-Write the record to a FileHandle.
+Write the item to a FileHandle.
+
+The subroutine takes three parameters:
+  $fh:        The FileHandle to which to write
+  $level:     The level of the item
+  $flush:     Whether or not to indent the gedcom output according to the level
+
+=head2 write_xml
+
+  $item->write_xml($fh, $level);
+
+Write the item to a FileHandle as XML.
 
 The subroutine takes two parameters:
   $fh:        The FileHandle to which to write
-  $level:     The level of the record
+  $level:     The level of the item
+
+Note that this function is experimental.  Please read the warnings for
+Gedcom::write_xml().
 
 =head2 print
 
-  $item->print
+  $item->print;
 
 Print the item.  Used for debugging.  (What?  There are bugs?)
 
+=head2 get_item
+
+  my $item  = $item->get_item("CHIL", 2);
+  my @items = $item->get_items("CHIL");
+
+Get specific sub-items from the item.
+
+The arguments are the name of the tag, and optionally the count.
+
+In scalar context, returns the sub-item, or undef if it doesn't exist.
+In array context, returns all sub-items matching the specified tag.
+
 =head2 get_child
 
-  my $child = get_child("CHIL2")
+NOTE - This function is deprecated - use get_item instead
 
-Get a specific child from the item.
+  my $child = get_child("CHIL2");
+
+Get a specific child item from the item.
 
 The argument contains the name of the tag, and optionally the count.
 The regular expression to generate the tag and the count is:
 
   my ($tag, $count) = $t =~ /^_?(\w+?)(\d*)$/
 
-Returns the child, or undef if it doesn't exist
+Returns the child item, or undef if it doesn't exist
 
 =head2 get_children
 
-  my @children = get_children("CHIL")
+NOTE - This function is deprecated - use get_item instead
 
-Get all children matching a specified tag.
+  my @children = get_children("CHIL");
+
+=head2 delete_item
+
+  $item->delete_item($sub_item);
+
+Delete the specified sub-item from the item.
 
 =head2 Access functions
 
-  my $v = level
-  my $v = xref
-  my $v = tag
-  my $v = value
-  my $v = min
-  my $v = max
-  my $v = gedcom
-  my $v = file
-  my $v = line
+  my $v = $item->level;
+  $item->level(1);
+  my $v = $item->xref;
+  my $v = $item->tag;
+  my $v = $item->value;
+  my $v = $item->min;
+  my $v = $item->max;
+  my $v = $item->gedcom;
+  my $v = $item->file;
+  my $v = $item->line;
 
-Return the eponymous hash element.
+Return the eponymous hash element.  If a value if passed into the
+function, the element is first assigned that value.
+
+=head2 _items
+
+  my $sub_items = $item->_items;
+
+Return all the sub-items, reading them from the Gedcom file if they have
+not already been read.
+
+It should not be necessary to use this function.
+
+=head2 delete_items
+
+  $item->delete_items;
+
+Delete all the sub-items, allowing the memory to be reused.  If the
+sub-items are requires again, they will be reread.
+
+It should not be necessary to use this function.
 
 =cut

@@ -1,4 +1,4 @@
-# Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
+# Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -22,7 +22,7 @@ use vars qw($VERSION $Tags);
 
 BEGIN
 {
-  $VERSION = "1.05";
+  $VERSION = "1.06";
 
   $Tags =
   {
@@ -158,10 +158,10 @@ BEGIN
   };
 }
 
-use Gedcom::Grammar    1.05;
-use Gedcom::Individual 1.05;
-use Gedcom::Family     1.05;
-use Gedcom::Event      1.05;
+use Gedcom::Grammar    1.06;
+use Gedcom::Individual 1.06;
+use Gedcom::Family     1.06;
+use Gedcom::Event      1.06;
 
 sub new
 {
@@ -169,21 +169,23 @@ sub new
   my $class = ref($proto) || $proto;
   my $self =
   {
-    buffer  => [],
-    records => [],
-    xrefs   => {},
-    types   => {},
-    tags    => $Tags,
+    buffer    => [],
+    records   => [],
+    tags      => $Tags,
+    tie       => 0,
+    read_only => 0,
+    types     => {},
+    xrefs     => {},
     @_
   };
   # TODO - find a way to do this nicely for different grammars
   $self->{types}{INDI} = "Individual";
   $self->{types}{FAM}  = "Family";
-# $self->{types}{$_}   = "Event"
-#   for qw( ADOP ANUL BAPM BARM BASM BIRT BLES BURI CAST CENS CENS CHR CHRA CONF
-#           CREM DEAT DIV DIVF DSCR EDUC EMIG ENGA EVEN EVEN FCOM GRAD IDNO IMMI
-#           MARB MARC MARL MARR MARS NATI NATU NCHI NMR OCCU ORDN PROB PROP RELI
-#           RESI RETI SSN TITL WILL );
+  $self->{types}{$_}   = "Event"
+    for qw( ADOP ANUL BAPM BARM BASM BIRT BLES BURI CAST CENS CENS CHR CHRA CONF
+            CREM DEAT DIV DIVF DSCR EDUC EMIG ENGA EVEN EVEN FCOM GRAD IDNO IMMI
+            MARB MARC MARL MARR MARS NATI NATU NCHI NMR OCCU ORDN PROB PROP RELI
+            RESI RETI SSN WILL );
   bless $self, $class;
 
   # first read in the grammar
@@ -207,7 +209,7 @@ sub new
   my @c = ($self->{grammar} = $grammar);
   while (@c)
   {
-    @c = map { $_->{top} = $grammar; @{$_->{children}} } @c;
+    @c = map { $_->{top} = $grammar; @{$_->{items}} } @c;
   }
 
   # now read in the gedcom file
@@ -221,8 +223,8 @@ sub new
                             grammar  => $grammar->structure("GEDCOM"),
                             gedcom   => $self,
                             callback => $self->{callback});
-    $self->{record}{children} = [ Gedcom::Record->new(tag => "TRLR") ]
-      unless @{$self->{record}{children}};
+    $self->{record}{items} = [ Gedcom::Record->new(tag => "TRLR") ]
+      unless @{$self->{record}{items}};
 
     $self->collect_xrefs;
   }
@@ -231,10 +233,20 @@ sub new
 
 sub write
 {
-  my $self = shift;
-  my $file = shift or die "No filename specified";
+  my $self  = shift;
+  my $file  = shift or die "No filename specified";
+  my $flush = shift;
   $self->{fh} = FileHandle->new($file, "w") or die "Can't open $file: $!";
-  $self->{record}->write($self->{fh}, -1);
+  $self->{record}->write($self->{fh}, -1, $flush);
+  $self->{fh}->close or die "Can't close $file: $!";
+}
+
+sub write_xml
+{
+  my $self  = shift;
+  my $file  = shift or die "No filename specified";
+  $self->{fh} = FileHandle->new($file, "w") or die "Can't open $file: $!";
+  $self->{record}->write_xml($self->{fh});
   $self->{fh}->close or die "Can't close $file: $!";
 }
 
@@ -275,9 +287,9 @@ sub validate
   my ($callback) = @_;
   $self->{validate_callback} = $callback;
   my $ok = $self->{record}->validate_syntax;
-  for my $child (@{$self->{record}{children}})
+  for my $item (@{$self->{record}->_items})
   {
-    $ok = 0 unless $child->validate_semantics;
+    $ok = 0 unless $item->validate_semantics;
   }
   $ok;
 }
@@ -301,10 +313,10 @@ sub renumber
   }
 
   # now, renumber any records left over
-  $_->renumber(\%args, 1) for @{$self->{record}{children}};
+  $_->renumber(\%args, 1) for @{$self->{record}->_items};
 
   # actually change the xref
-  for my $record (@{$self->{record}{children}})
+  for my $record (@{$self->{record}->_items})
   {
     $record->{xref} = delete $record->{new_xref};
     delete $record->{recursed}
@@ -362,19 +374,19 @@ sub order
   my $self     = shift;
   my $sort_sub = shift || sort_sub;   # use default sort unless one is passed in
   local *_ss = $sort_sub;
-  @{$self->{record}{children}} = sort _ss @{$self->{record}{children}}
+  @{$self->{record}{items}} = sort _ss @{$self->{record}->_items}
 }
 
 sub individuals
 {
   my $self = shift;
-  grep { ref eq "Gedcom::Individual" } @{$self->{record}{children}}
+  grep { ref eq "Gedcom::Individual" } @{$self->{record}->_items}
 }
 
 sub families
 {
   my $self = shift;
-  grep { ref eq "Gedcom::Family" } @{$self->{record}{children}}
+  grep { ref eq "Gedcom::Family" } @{$self->{record}->_items}
 }
 
 sub get_individual
@@ -418,7 +430,7 @@ sub get_individual
 
   # Store the name with the individual to avoid continually recalculating it.
   # This is a bit like a Schwartzian transform, with a grep instead of a sort.
-  my @ind = map { [ $_->child_value("NAME") => $_ ] } @individuals;
+  my @ind = map { [ $_->tag_value("NAME") => $_ ] } @individuals;
 
   for my $n ( map { qr/^$_$/, qr/\b$_\b/, $_ } map { $_, qr/$_/i } qr/\Q$name/ )
   {
@@ -451,7 +463,7 @@ sub next_xref
   my ($type) = @_;
   my $re = qr/^$type(\d+)$/;
   my $last = 0;
-  for my $c (@{$self->{record}{children}})
+  for my $c (@{$self->{record}->_items})
   {
     # warn "last $last xref $c->{xref}\n";
     $last = $1 if defined $c->{xref} and $c->{xref} =~ /$re/ and $1 > $last;
@@ -465,9 +477,9 @@ __END__
 
 =head1 NAME
 
-Gedcom - a class to manipulate Gedcom genealogy files
+Gedcom - a module to manipulate Gedcom genealogy files
 
-Version 1.05 - 20th July 1999
+Version 1.06 - 13th February 2000
 
 =head1 SYNOPSIS
 
@@ -480,21 +492,22 @@ Version 1.05 - 20th July 1999
   my $ged = Gedcom->new(grammar_file => "gedcom-5.5.grammar",
                         gedcom_file  => $gedcom_file);
   return unless $ged->validate;
-  my $xref = $self->resolve_xref($value)
+  my $xref = $self->resolve_xref($value);
   $ged->resolve_xrefs;
   $ged->unresolve_xrefs;
   $ged->normalise_dates;
   my %xrefs = $ged->renumber;
   $ged->order;
-  $ged->write($new_gedcom_file);
+  $ged->write($new_gedcom_file, $flush);
+  $ged->write_xml($fh, $level);
   my @individuals = $ged->individuals;
   my @families = $ged->families;
-  my ($me) = $ged->get_individual("Paul Johnson");
+  my $me = $ged->get_individual("Paul Johnson");
   my $xref = $ged->next_xref("I");
 
 =head1 DESCRIPTION
 
-Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
+Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
 
 This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -508,7 +521,7 @@ about Gedcom is available as a zip file at
 ftp://gedcom.org/pub/genealogy/gedcom/gedcom55.zip.  Unfortunately, this
 is only usable if you can access a PC running Windows of some
 description.  Part of the reason I wrote this module is because I don't
-do that.
+do that.  Well, I didn't.  I can now although I prefer not to...
 
 The Gedcom format is specified in a grammar file (gedcom-5.5.grammar).
 Gedcom.pm parses the grammar which is then used to validate and allow
@@ -529,8 +542,18 @@ file, such as reformatting dates, renumbering entries and ordering the
 entries.  It also allows access to individuals, and then to relations of
 individuals, for example sons, siblings, spouse, parents and so forth.
 
-This release includes the beginnings of a lines2perl program to convert
-LifeLines programs to Perl.
+This release includes a lines2perl program to convert LifeLines programs
+to Perl.  The program works, but it has a few rough edges, and some
+missing functionality.  I'll be working on it when it hits the top of my
+TODO list.
+
+This release provides an option for read only access to the gedcom file.
+Actually, this doesn't stop you changing or writing the file, but it
+does parse the gedcom file lazily, meaning that only those portions of
+the gedcom file which are needed will be read.  This can provide a
+substantial saving of time and memory providing that not too much of the
+gedcom file is read.  If you are going to read the whole gedcom file,
+this mode is less efficient.
 
 Note that this is an early release of this software - caveat emptor.
 
@@ -547,9 +570,109 @@ a message to majordomo@icomm.ca and put subscribe S<perl-gedcom> as the
 body of the message. To get on the digest version of the list, put
 subscribe S<perl-gedcom-digest>.
 
-To store my genealogy I wrote a syntax file (ged.vim) and used vim
+To store my genealogy I wrote a syntax file (gedcom.vim) and used vim
 (http://www.vim.org) to enter the data, and Gedcom.pm to validate and
 manipulate it.  I find this to be a nice solution.
+
+=head1 GETTING STARTED
+
+This space is reserved for something of a tutorial.  If you learn best
+by looking at examples, take a look at the test directory, I<t>.  The
+most simple test is I<birthdates.t>.
+
+The first thing to do is to read in the Gedcom file.  At its most
+simple, this will involve a statement such as
+
+  my $ged = Gedcom->new(gedcom_file => $gedcom_file);
+
+It is now possible to access the records within the gedcom file.  Each
+individual and family is a record.  Records can contain other records.
+For example, an individual is a record.  The birth information is
+a sub-record of the individual, and the date of birth is a sub-record of
+the birth record.
+
+Some records, such as the birth record, are simply containers for other
+records.  Some records have a value, such as the date record, whose
+value is a date.  This is all defined in the Gedcom standard.
+
+To access an individual use a statement such as
+
+  my $i = $ged->get_individual("Paul Johnson");
+
+To access information about the individual, use a function of the same
+name as the Gedcom tag, or its description.  Tags and descriptions are
+listed at the head of Gedcom.pm.  For example
+
+    for my $b ($i->birth)
+    {
+    }
+
+will loop through all the birth records in the individual.  Usually
+there will only be one such record, but there may be zero, one or more.
+Calling the function in scalar context will return only the first
+record.
+
+  my $b = $i->birth;
+
+But the second record may be returned with
+
+  my $b = $i->birth(2);
+
+If the record required has a value, for example
+
+  my $n = $i->name;
+
+then the value is returned, in this case the name of the individual.  If
+there is no value, as is the case for the birth record, then the record
+itself is returned.  If there is a value, but the record itself is
+required, then the get_record() function can be used.
+
+Information must be accesed through the Gedcom structure so, for
+example, the birthdate is accessed via the date record from the birth
+record within an individual.
+
+  my $d = $b->date;
+
+Be aware that if you access a record in scalar context, but there is no
+such record, then undef is returned.  In this case, $b would be undef if
+$i had no birth record.  This is another reason why looping through
+records is a nice solution, all else being equal.
+
+Access to values can also be gained through the get_value() function.
+This is a preferable solution where it is necessary to work down the
+Gedcom structure.  For example
+
+  my $bd = $i->get_value("birth date");
+  my $bd = $i->get_value(qw(birth date));
+
+will both return an individual's birth date or undef if there is none.
+And
+
+  my @bd = $i->get_value("birth date");
+
+will return all the birth dates.  The second birth date, if there is
+one, is
+
+  my $bd2 = $i->get_value(["birth", 2], "date");
+
+Using the get_record() function in place of the get_value() function, in
+all cases will return the record rather than the value.
+
+All records are of a type derived from Gedcom::Item.  Individuals are of
+type Gedcom::Individual.  Families are of type Gedcom::Family.  Events
+are of type Gedcom::Event.  Other records are of type Gedcom::Record
+which is the base type of Gedcom::Individual, Gedcom::Family and
+Gedcom::Event.
+
+As individuals are of type Gedcom::Individual, the functions in
+Gedcom::Individual.pm are available.  These allow access to relations
+and other information specific to individuals, for example
+
+  my @sons = $i->sons;
+
+It is possible to get all the individuals in the gedcom file as
+
+  my @individuals = $ged->individuals;
 
 =head1 HASH MEMBERS
 
@@ -559,6 +682,10 @@ the data is accessable though hash members.  This is partly because
 having functions to do this is a little slow, especially on my old
 DECstation, and partly because of laziness again.  I'm not too sure
 whether this is good or bad laziness yet.  Time will tell no doubt.
+
+As of version 1.05, you should be able to access all the data through
+functions.  Well, read access anyway.  The TODO list mentions something
+about improving the situation as far as write access is concerned.
 
 Some of the more important hash members are:
 
@@ -571,8 +698,8 @@ See Gedcom::Grammar.pm for more details.
 =head2 $ged->{record}
 
 This contains the top level gedcom record.  A record contains a number
-of children.  Each of those children are themselves records.  This is
-the way in which the hierarchies are modelled.
+of items.  Each of those items are themselves records.  This is the way
+in which the hierarchies are modelled.
 
 If you want to get at the data in the gedcom object, this is where you
 start.
@@ -620,15 +747,32 @@ If the subroutine returns false, the operation is aborted.
 
 =head2 write
 
-  $ged->write($new_gedcom_file);
+  $ged->write($new_gedcom_file, $flush);
 
 Write out the gedcom file.
 
+Takes the name of the new gedcom file, and whether or not to indent the
+output according to the level of the record.  $flush defaults to false,
+but the new file name must be specified.
+
+=head2 write_xml
+
+  $ged->write_xml($fh);
+
+Write the item to a FileHandle as XML.
+
 Takes the name of the new gedcom file.
+
+Note that this function is experimental.  The XML output doesn't conform
+to any standard that I know of, because I don't know of any standard.
+If and when such a standard surfaces, and probably even if it doesn't,
+I'll change the output from this function.  If you make use of this
+function, beware.  I'd also be very interested in hearing from you to
+determine the requirements for the XML.
 
 =head2 collect_xrefs
 
-  $ged->collect_xrefs($callback)
+  $ged->collect_xrefs($callback);
 
 Collect all the xrefs into a data structure ($ged->{xrefs}) for easy
 location.  $callback is not used yet.
@@ -637,13 +781,13 @@ Called by new().
 
 =head2 resolve_xref
 
-  my $xref = $self->resolve_xref($value)
+  my $xref = $self->resolve_xref($value);
 
 Return the record $value points to, or undef.
 
 =head2 resolve_xrefs
 
-  $ged->resolve_xrefs($callback)
+  $ged->resolve_xrefs($callback);
 
 Changes all xrefs to reference the record they are pointing to.  Like
 changing a soft link to a hard link on a Unix filesystem.  $callback is
@@ -651,7 +795,7 @@ not used yet.
 
 =head2 unresolve_xrefs
 
-  $ged->unresolve_xrefs($callback)
+  $ged->unresolve_xrefs($callback);
 
 Changes all xrefs to name the record they contained.  Like changing a
 hard link to a soft link on a Unix filesystem.  $callback is not used
@@ -659,7 +803,7 @@ yet.
 
 =head2 validate
 
-  return unless $ged->validate($callback)
+  return unless $ged->validate($callback);
 
 Validate the gedcom object.  This performs a number of consistency
 checks, but could do even more.  $callback is not properly used yet.
@@ -736,7 +880,7 @@ Return a list of all the families.
 
 =head2 get_individual
 
-  my ($me) = $ged->get_individual("Paul Johnson");
+  my $me = $ged->get_individual("Paul Johnson");
 
 Return a list of all individuals matching the specified name.
 

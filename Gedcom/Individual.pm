@@ -1,4 +1,4 @@
-# Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
+# Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -13,16 +13,16 @@ require 5.005;
 
 package Gedcom::Individual;
 
-use Gedcom::Record 1.05;
+use Gedcom::Record 1.06;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.05";
+$VERSION = "1.06";
 @ISA     = qw( Gedcom::Record );
 
 sub name
 {
   my $self = shift;
-  my $name = $self->child_value("NAME");
+  my $name = $self->tag_value("NAME");
   $name =~ s/\s+/ /g;
   $name =~ s| ?/ ?(.*?) ?/ ?| /$1/ |;
   $name =~ s/^\s+//g;
@@ -58,7 +58,7 @@ sub soundex
   my $self = shift;
   unless ($INC{"Text/Soundex.pm"})
   {
-    warn "Text::Soundex is required to use soundex()";
+    warn "Text::Soundex.pm is required to use soundex()";
     return undef
   }
   Gedcom::soundex($self->surname)
@@ -67,7 +67,7 @@ sub soundex
 sub sex
 {
   my $self = shift;
-  my $sex = $self->child_value("SEX");
+  my $sex = $self->tag_value("SEX");
   $sex =~ /^F/i ? "F" : $sex =~ /^M/i ? "M" : "U";
 }
 
@@ -148,14 +148,14 @@ sub younger_siblings
 sub brothers
 {
   my $self = shift;
-  my @a = grep { $_->child_value("SEX") !~ /^F/i } $self->siblings;
+  my @a = grep { $_->tag_value("SEX") !~ /^F/i } $self->siblings;
   wantarray ? @a : $a[0]
 }
 
 sub sisters
 {
   my $self = shift;
-  my @a = grep { $_->child_value("SEX") !~ /^M/i } $self->siblings;
+  my @a = grep { $_->tag_value("SEX") !~ /^M/i } $self->siblings;
   wantarray ? @a : $a[0]
 }
 
@@ -169,14 +169,14 @@ sub children
 sub sons
 {
   my $self = shift;
-  my @a = grep { $_->child_value("SEX") !~ /^F/i } $self->children;
+  my @a = grep { $_->tag_value("SEX") !~ /^F/i } $self->children;
   wantarray ? @a : $a[0]
 }
 
 sub daughters
 {
   my $self = shift;
-  my @a = grep { $_->child_value("SEX") !~ /^M/i } $self->children;
+  my @a = grep { $_->tag_value("SEX") !~ /^M/i } $self->children;
   wantarray ? @a : $a[0]
 }
 
@@ -216,24 +216,24 @@ sub delete
     for my $fam (@{$f->[1]})
     {
       # print "deleting from $fam->{xref}\n";
-      for my $child (@{$fam->{children}})
+      for my $record (@{$fam->_items})
       {
-        # print "looking at $child->{tag} $child->{value}\n";
-        if (($child->{tag} =~ /$f->[0]/) &&
-            $self->resolve($child->{value})->{xref} eq $xref)
+        # print "looking at $record->{tag} $record->{value}\n";
+        if (($record->{tag} =~ /$f->[0]/) &&
+            $self->resolve($record->{value})->{xref} eq $xref)
         {
-          $ret = 0 unless $fam->delete_child($child);
+          $ret = 0 unless $fam->delete_record($record);
         }
       }
-      $self->{gedcom}{record}->delete_child($fam)
-        unless $fam->child_values("HUSB") ||
-               $fam->child_values("WIFE") ||
-               $fam->child_values("CHIL");
+      $self->{gedcom}{record}->delete_record($fam)
+        unless $fam->tag_value("HUSB") ||
+               $fam->tag_value("WIFE") ||
+               $fam->tag_value("CHIL");
       # TODO - write Family::delete
       #      - delete associated notes?
     }
   }
-  $ret = 0 unless $self->{gedcom}{record}->delete_child($self);
+  $ret = 0 unless $self->{gedcom}{record}->delete_record($self);
   delete $self->{gedcom}{xrefs}{$xref};
   $ret;
 }
@@ -241,9 +241,10 @@ sub delete
 sub print
 {
   my $self = shift;
-  $self->SUPER::print; $_->print for @{$self->{children}};
-  print "fams:\n"; $_->print for $self->fams;
-  print "famc:\n"; $_->print for $self->famc;
+  $self->_items if shift;
+  $self->SUPER::print; $_->print for @{$self->{items}};
+# print "fams:\n"; $_->print for $self->fams;
+# print "famc:\n"; $_->print for $self->famc;
 }
 
 sub print_generations
@@ -273,14 +274,14 @@ sub print_generations
 sub famc
 {
   my $self = shift;
-  my @a = $self->resolve($self->child_values("FAMC"));
+  my @a = $self->resolve($self->tag_value("FAMC"));
   wantarray ? @a : $a[0]
 }
 
 sub fams
 {
   my $self = shift;
-  my @a = $self->resolve($self->child_values("FAMS"));
+  my @a = $self->resolve($self->tag_value("FAMS"));
   wantarray ? @a : $a[0]
 }
 
@@ -290,33 +291,33 @@ __END__
 
 =head1 NAME
 
-Gedcom::Individual - a class to manipulate Gedcom individuals
+Gedcom::Individual - a module to manipulate Gedcom individuals
 
-Version 1.05 - 20th July 1999
+Version 1.06 - 13th February 2000
 
 =head1 SYNOPSIS
 
   use Gedcom::Individual;
 
-  my $name = $i->name
-  my @rel = $i->father
-  my @rel = $i->mother
-  my @rel = $i->parents
-  my @rel = $i->husband
-  my @rel = $i->wife
-  my @rel = $i->spouse
-  my @rel = $i->siblings
-  my @rel = $i->brothers
-  my @rel = $i->sisters
-  my @rel = $i->children
-  my @rel = $i->sons
-  my @rel = $i->daughters
-  my @rel = $i->descendents
-  my @rel = $i->ancestors
-  my $ok  = $i->delete
+  my $name = $i->name;
+  my @rel = $i->father;
+  my @rel = $i->mother;
+  my @rel = $i->parents;
+  my @rel = $i->husband;
+  my @rel = $i->wife;
+  my @rel = $i->spouse;
+  my @rel = $i->siblings;
+  my @rel = $i->brothers;
+  my @rel = $i->sisters;
+  my @rel = $i->children;
+  my @rel = $i->sons;
+  my @rel = $i->daughters;
+  my @rel = $i->descendents;
+  my @rel = $i->ancestors;
+  my $ok  = $i->delete;
 
-  my @fam = $i->famc
-  my @fam = $i->fams
+  my @fam = $i->famc;
+  my @fam = $i->fams;
 
 =head1 DESCRIPTION
 
@@ -332,74 +333,74 @@ None.
 
 =head2 name
 
-  my $name = $i->name
+  my $name = $i->name;
 
 Return the name of the individual, with spaces normalised.
 
 =head2 cased_name
 
-  my $cased_name = $i->cased_name
+  my $cased_name = $i->cased_name;
 
 Return the name of the individual, with spaces normalised, and surname
 in upper case.
 
 =head2 surname
 
-  my $surname = $i->surname
+  my $surname = $i->surname;
 
 Return the surname of the individual.
 
 =head2 given_names
 
-  my $given_names = $i->given_names
+  my $given_names = $i->given_names;
 
 Return the given names of the individual.
 
 =head2 soundex
 
-  my $soundex = $i->soundex
+  my $soundex = $i->soundex;
 
 Return the soundex code of the individual.  This function is only
-available if I<Text/Soundex> is available.
+available if I<Text::Soundex.pm> is available.
 
 =head2 sex
 
-  my $sex = $i->sex
+  my $sex = $i->sex;
 
 Return the sex of the individual, "M", "F" or "U".
 
 =head2 Individual functions
 
-  my @rel = $i->father
-  my @rel = $i->mother
-  my @rel = $i->parents
-  my @rel = $i->husband
-  my @rel = $i->wife
-  my @rel = $i->spouse
-  my @rel = $i->siblings
-  my @rel = $i->older_siblings
-  my @rel = $i->younger_siblings
-  my @rel = $i->brothers
-  my @rel = $i->sisters
-  my @rel = $i->children
-  my @rel = $i->sons
-  my @rel = $i->daughters
-  my @rel = $i->descendents
-  my @rel = $i->ancestors
+  my @rel = $i->father;
+  my @rel = $i->mother;
+  my @rel = $i->parents;
+  my @rel = $i->husband;
+  my @rel = $i->wife;
+  my @rel = $i->spouse;
+  my @rel = $i->siblings;
+  my @rel = $i->older_siblings;
+  my @rel = $i->younger_siblings;
+  my @rel = $i->brothers;
+  my @rel = $i->sisters;
+  my @rel = $i->children;
+  my @rel = $i->sons;
+  my @rel = $i->daughters;
+  my @rel = $i->descendents;
+  my @rel = $i->ancestors;
 
-Return a list of individuals retaled to $i.
+Return a list of individuals related to $i.
 
 Each function, even those with a singular name such as father(), returns
-a list of individuals holding that releation to $i.
+a list of individuals holding that relation to $i.
 
 More complex relationships can easily be found using the map function.
 eg:
 
-  my @grandparents = map { $_->parents } $i->parents
+  my @grandparents = map { $_->parents } $i->parents;
 
 =head2 delete
 
-  my $ok  = $i->delete
+  my $ok  = $i->delete;
 
 Delete $i from the data structure.
 
@@ -407,8 +408,8 @@ Returns true iff $i was successfully deleted.
 
 =head2 Family functions
 
-  my @fam = $i->famc
-  my @fam = $i->fams
+  my @fam = $i->famc;
+  my @fam = $i->fams;
 
 Return a list of families to which $i belongs.
 
