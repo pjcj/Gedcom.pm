@@ -16,7 +16,7 @@ package Gedcom::Item;
 use Symbol;
 
 use vars qw($VERSION);
-$VERSION = "1.10";
+$VERSION = "1.11";
 
 sub new
 {
@@ -633,7 +633,7 @@ __END__
 
 Gedcom::Item - a base class for Gedcom::Grammar and Gedcom::Record
 
-Version 1.10 - 5th March 2002
+Version 1.11 - 7th April 2002
 
 =head1 SYNOPSIS
 

@@ -215,4 +215,7 @@ Release 1.10 - 5th March 2002
  - Update copyright.
  - A little work on the documentation.
  - Some general tidying up.
- - A couple of workarounds for bleadperl bugs.
+ - A couple of workarounds for bleadperl bugs that are fixed now.
+
+Release 1.11 - 7th April 2002
+ - Improvements to the algorithm in Gedcom::Grammar::item().

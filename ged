@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.10 - 5th March 2002
+# Version 1.11 - 7th April 2002
 
 use strict;
 
@@ -18,15 +18,15 @@ use diagnostics;
 use Data::Dumper;
 $Data::Dumper::Indent = 1;
 
-use Gedcom 1.10;
+use Gedcom 1.11;
 
 use vars qw( $VERSION );
-$VERSION = "1.10";
+$VERSION = "1.11";
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
 
-$SIG{__WARN__} = sub { print "\n@_" };
+$SIG{__WARN__} = sub { print STDERR "\n@_" };
 
 sub main()
 {
@@ -39,9 +39,9 @@ sub main()
     # grammar_version => 0.1,
     # grammar_file    => "gedcom-5.5.grammar",
     callback        => sub { print "." },
-    read_only       => 0,
+    read_only       => 1,
   );
-  if (1)
+  if (0)
   {
     my @i = $ged->get_individual("I82");
     print "\n", $_->xref, " => ", $_->name, "\n" for @i;
@@ -60,9 +60,12 @@ sub main()
 # print "\nnormalising dates...";
 # $ged->normalise_dates("%E %b %Y");
 # sleep 6000;
-  print "\nwriting xml...";
-  $ged->write_xml("$gedcom_file.xml");
-  if (1)
+  if (0)
+  {
+    print "\nwriting xml...";
+    $ged->write_xml("$gedcom_file.xml");
+  }
+  if (0)
   {
     print "\nvalidating...";
     my %x;
@@ -74,13 +77,14 @@ sub main()
     };
     $ged->validate($vcb);
   }
-  if (0)
+  if (@ARGV)
   {
-    my $i = $ged->get_individual("I83");
-    print "\n", $i->xref, " => ", $i->name, "\n";
-    my $n = $i->get_record("note");
-    print "\n", ($n || "undef"), ", ", $i->note, "\n";
-    print "\n", $n->xref, " => ", $n->value, "\n";
+    print "\n---" . localtime();
+    my $i = $ged->get_individual(shift @ARGV);
+    print "\n", $i->xref, " => ", $i->name, "\n---" . localtime() . "\n";
+    # my $n = $i->get_record("note");
+    # print "\n", ($n || "undef"), ", ", $i->note, "\n";
+    # print "\n", $n->xref, " => ", $n->value, "\n";
   }
   if (0)
   {

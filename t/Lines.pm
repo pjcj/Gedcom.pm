@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.10 - 5th March 2002
+# Version 1.11 - 7th April 2002
 
 use strict;
 
@@ -19,9 +19,9 @@ use File::Basename;
 use Test;
 
 use vars qw($VERSION);
-$VERSION = "1.10";
+$VERSION = "1.11";
 
-use Gedcom 1.10;
+use Gedcom 1.11;
 
 sub test
 {

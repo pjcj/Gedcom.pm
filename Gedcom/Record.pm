@@ -16,10 +16,10 @@ package Gedcom::Record;
 use Carp;
 BEGIN { eval "use Date::Manip" }             # We'll use this if it is available
 
-use Gedcom::Item 1.10;
+use Gedcom::Item 1.11;
 
 use vars qw($VERSION @ISA $AUTOLOAD);
-$VERSION = "1.10";
+$VERSION = "1.11";
 @ISA     = qw( Gedcom::Item );
 
 BEGIN
@@ -257,19 +257,28 @@ sub parse
 {
   # print "parsing\n";
   my $self = shift;
-  my ($record, $grammar) = @_;
+  my ($record, $grammar, $test) = @_;
+  $test ||= 0;
+
   # print "checking "; $record->print();
   # print "against ";  $grammar->print();
+  # print "test is $test\n";
+
   my $t = $record->{tag};
   my $g = $grammar->{tag};
   die "Can't match $t with $g" if $t && $t ne $g;               # internal error
+
   $record->{grammar} = $grammar;
   my $class = $record->{gedcom}{types}{$t};
   bless $record, "Gedcom::$class" if $class;
+
+  my $match = 1;
+
   for my $r (@{$record->{items}})
   {
     my $tag = $r->{tag};
     my @i;
+    # print "- valid sub-items of $t are @{[keys %{$grammar->valid_items}]}\n";
     for my $i ($grammar->item($tag))
     {
       # Try to get rid of matches we don't want because they only match
@@ -280,36 +289,54 @@ sub parse
       next unless $i->level =~ /^[+0]/ || $i->level == $r->level;
 
       # Check we have a pointer iff we need one.
-      # print " + ", $i->value, "|", $r->value, "\n";
-      next if $i->value && $r->value && ($i->value =~ /^<XREF:/ ^ $r->pointer);
+      # print " + ", $i->value, "|", $r->value, "|", $r->pointer, "\n";
+      # next if $i->value && $r->value && ($i->value =~ /^<XREF:/ ^ $r->pointer);
+      next if $i->value && ($i->value =~ /^<XREF:/ ^ ($r->pointer || 0));
 
       # print "pushing\n";
       push @i, $i;
     }
-    # print "valid sub-items of $t are @{[keys %{$grammar->{_valid_items}}]}\n";
+
+    # print "valid sub-items of $t are @{[keys %{$grammar->valid_items}]}\n";
     # print "<$tag> => <@i>\n";
+
     unless (@i)
     {
-      warn "$self->{file}:$r->{line}: $tag is not a sub-item of $t\n",
-           "Valid sub-items are ",
-           join(", ", sort keys %{$grammar->{_valid_items}}), "\n"
-        unless substr($tag, 0, 1) eq "_";
-        # unless $tag eq "CONT" || $tag eq "CONC" || substr($tag, 0, 1) eq "_";
-        # TODO - should CONT and CONC be allowed anywhere?
+      # unless $tag eq "CONT" || $tag eq "CONC" || substr($tag, 0, 1) eq "_";
+      # TODO - should CONT and CONC be allowed anywhere?
+      unless (substr($tag, 0, 1) eq "_")
+      {
+        warn "$self->{file}:$r->{line}: $tag is not a sub-item of $t\n",
+             "Valid sub-items are ",
+             join(", ", sort keys %{$grammar->{_valid_items}}), "\n"
+          unless $test;
+        $match = 0;
+        next;
+      }
     }
-    if (@i > 1)
-    {
-      warn "$self->{file}:$r->{line}: Ambiguous tag $tag as sub-item of $t, ",
-           "found ", scalar @i, " matches.  Using first.\n";
-    }
+
+    # print "$self->{file}:$r->{line}: Ambiguous tag $tag as sub-item of $t, ",
+          # "found ", scalar @i, " matches\n" if @i > 1;
+    my $m = 0;
     for my $i (@i)
     {
-      $self->parse($r, $i);
-      last;
-      # TODO - are there any cases in which ambiguous tags could be present?
+      last if $m = $self->parse($r, $i, @i > 1);
+    }
+
+    if (@i > 1 && !$m)
+    {
+      # TODO - I'm not even sure if this can happen.
+      warn "$self->{file}:$r->{line}: Ambiguous tag $tag as sub-item of $t, ",
+           "found ", scalar @i, " matches, all of which have errors.  ",
+           "Reporting errors from last match.\n";
+      $self->parse($r, $i[-1]);
+      $match = 0;
+      # TODO - count the errors in each match and use the best.
     }
   }
-  # print "parsed\n";
+  # print "parsed $match\n";
+
+  $match
 }
 
 sub collect_xrefs
@@ -383,7 +410,7 @@ sub validate_syntax
   for my $record (@{$self->_items})
   {
     print "  " x $I . "level $record->{level} on $self->{level}\n" if $D;
-    $ok = 0, warn "$here: iCan't add level $record->{level} to $self->{level}\n"
+    $ok = 0, warn "$here: Can't add level $record->{level} to $self->{level}\n"
       if $record->{level} > $self->{level} + 1;
     $counts{$record->{tag}}++;
     $ok = 0 unless $record->validate_syntax;
@@ -573,7 +600,7 @@ __END__
 
 Gedcom::Record - a module to manipulate Gedcom records
 
-Version 1.10 - 5th March 2002
+Version 1.11 - 7th April 2002
 
 =head1 SYNOPSIS
 

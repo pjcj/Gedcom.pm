@@ -15,10 +15,10 @@ package Gedcom::Grammar;
 
 use Data::Dumper;
 
-use Gedcom::Item 1.10;
+use Gedcom::Item 1.11;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.10";
+$VERSION = "1.11";
 @ISA     = qw( Gedcom::Item );
 
 sub structure
@@ -41,6 +41,7 @@ sub item
   my ($tag) = @_;
   return unless defined $tag;
   my $valid_items = $self->valid_items;
+  return unless exists $valid_items->{$tag};
   map { $_->{grammar} } @{$valid_items->{$tag}}
 }
 
@@ -137,7 +138,7 @@ __END__
 
 Gedcom::Grammar - a module to manipulate Gedcom grammars
 
-Version 1.10 - 5th March 2002
+Version 1.11 - 7th April 2002
 
 =head1 SYNOPSIS
 

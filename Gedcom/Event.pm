@@ -13,10 +13,10 @@ require 5.005;
 
 package Gedcom::Event;
 
-use Gedcom::Record 1.10;
+use Gedcom::Record 1.11;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.10";
+$VERSION = "1.11";
 @ISA     = qw( Gedcom::Record );
 
 # sub type
@@ -45,7 +45,7 @@ __END__
 
 Gedcom::Event - a module to manipulate Gedcom events
 
-Version 1.10 - 5th March 2002
+Version 1.11 - 7th April 2002
 
 =head1 SYNOPSIS
 
