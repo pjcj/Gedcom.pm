@@ -14,12 +14,9 @@ require 5.004;
 package Gedcom::Item;
 
 use vars qw($VERSION);
-$VERSION = "1.02";
+$VERSION = "1.03";
 
-BEGIN
-{
-  eval "use Date::Manip";                    # We'll use this if it is available
-}
+BEGIN { eval "use Date::Manip"; }            # We'll use this if it is available
 
 sub new
 {
@@ -53,52 +50,37 @@ sub read
        !&$callback($title, $txt1, "Record $count", $self->{fh}->tell, $size);
 
   $self->{level} = -1;
-  my ($structures, %children);
 
   # If we have a grammar, then we are reading a gedcom file and must use
   # the grammar to verify what is being read.
   # If we do not have a grammar, then that is what we are reading.
-  my $grammar = $self->{grammar};
-  if ($grammar)
+  while (my $record = $self->next_record($self))
   {
-    $structures = $grammar->{structures};
-    %children   = %{$grammar->{valid_children}};
-#   print "valid children are: ", join(", ", keys %children), "\n";
-  }
-
-  while (my $structure = $self->next_record($self))
-  {
-    $self->add_children($structure);
-    if ($grammar)
+    $self->add_children($record);
+    if ($self->{grammar})
     {
-      my $tag = $structure->{tag};
-      if (defined $tag && exists $children{$tag})
+      my $tag = $record->{tag};
+      if (my $g = $self->{grammar}->child($tag))
       {
-        if ($self->parse($structure,
-                         $structures,
-                         $children{$tag},
-                         $self->{callback}))
-        {
-          push @{$self->{children}}, $structure;
-          $count++;
-        }
+        $self->parse($record, $g);
+        push @{$self->{children}}, $record;
+        $count++;
       }
       else
       {
         $tag = "<empty tag>" unless defined $tag && length $tag;
-        warn "$self->{file}:$structure->{line}: " .
-             "$tag does not appear to be a top level tag\n";
+        warn "$self->{file}:$record->{line}: $tag is not a top level tag\n";
       }
     }
     else
     {
       # just add the grammar item
-      push @{$self->{children}}, $structure;
+      push @{$self->{children}}, $record;
       $count++;
     }
     return undef
       if $callback &&
-         !&$callback($title, $txt1, "Record $count line " . $structure->{line},
+         !&$callback($title, $txt1, "Record $count line " . $record->{line},
                      $self->{fh}->tell, $size);
   }
   $self->{fh}->close or die "Can't close file $self->{file}: $!";
@@ -115,7 +97,8 @@ sub add_children
   {
     unless (ref $next)
     {
-      $record->{number} = $next;
+      # The grammar requires a single selection from its children
+      $record->{selection} = 1;
       next;
     }
     my $level = $record->{level};
@@ -125,12 +108,11 @@ sub add_children
       $self->{stored_record} = $next;
       return;
     }
-    elsif ($next_level > $level + 1)
-    {
-      warn "Can't add level $next_level to $level";
-    }
     else
     {
+      warn "$self->{file}:$record->{line}: " .
+           "Can't add level $next_level to $level\n"
+        if $next_level > $level + 1;
       push @{$record->{children}}, $next;
     }
   }
@@ -152,7 +134,6 @@ sub next_record
     {
       $rec = $self->new(level     => -1,
                         structure => $structure,
-                        number    => "many",
                         line      => $self->{fh}->input_line_number);
 #     print "found structure $structure\n";
     }
@@ -215,11 +196,15 @@ sub next_record
     }
     elsif ($line =~ /^\s*[\[\|\]]\s*(?:\/\*.*\*\/\s*)?$/)
     {
-      return "one";
+      # The grammar requires a single selection from its children
+      return "selection";
     }
     else
     {
-      die "no match for <$line>";
+      chomp $line;
+      my $file = $self->{file};
+      my $num = $self->{fh}->input_line_number;
+      die "\n$file:$num: Can't parse line: $line\n";
     }
   }
 # print "comparing "; $record->print;
@@ -253,10 +238,12 @@ sub write
   my @p;
   push(@p, $level . "  " x $level)    unless $level < 0;
   push(@p, "\@$self->{xref}\@")       if     $self->{xref};
-  push(@p, $self->{tag})              if     $self->{tag};
+  push(@p, $self->{tag})              if     $level >= 0 && $self->{tag};
   push(@p, ref $self->{value}
-           ? $self->{value}{xref}
-           : $self->{value})          if     $self->{value};
+           ? "\@$self->{value}{xref}\@"
+           : $self->resolve_xref($self->{value})
+             ? "\@$self->{value}\@"
+             : $self->{value})        if     $self->{value};
   $fh->print("@p");
   $fh->print("\n")                    unless $level < 0;
   for my $c (0 .. @{$self->{children}} - 1)
@@ -296,7 +283,7 @@ sub normalise_dates
       # print "date is  $self->{value}\n";
     }
   }
-  $_->normalise_dates($format) for (@{$self->{children}});
+  $_->normalise_dates($format) for @{$self->{children}};
 }
 
 sub print
@@ -355,7 +342,7 @@ __END__
 
 Gedcom::Item - a base class for Gedcom::Grammar and Gedcom::Record
 
-Version 1.02 - 5th May 1999
+Version 1.03 - 13th May 1999
 
 =head1 SYNOPSIS
 

@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.transeda.com/pjcj
 
-# Version 1.02 - 5th May 1999
+# Version 1.03 - 13th May 1999
 
 use strict;
 
@@ -24,10 +24,10 @@ use Tk;
 use Carp;
 use Data::Dumper;
 
-use Gedcom 1.02;
+use Gedcom 1.03;
 
 use vars qw( $VERSION );
-$VERSION = "1.02";
+$VERSION = "1.03";
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
@@ -542,7 +542,7 @@ sub create_windows()
     (
       tag     => "INDI",
       xref    => $indi_id,
-      grammar => $Ged->{grammar}{valid_children}{INDI},
+      grammar => $Ged->{record}{grammar}->child("INDI"),
     );
     add_record($rec, "_NAME1");
     add_record($rec, "_BIRT1_DATE1");
@@ -840,9 +840,6 @@ sub add_record($$)
     # print "child is <$child>\n";
     unless ($child)
     {
-      my %children =
-        map { $_->{tag} => $_ }
-            $rec->{grammar}->valid_children($Ged->{grammar}{structures});
       $n = 1 unless defined $n;
       $n = $count + 1 unless $n;
       # print "n is <$n>\n";
@@ -851,7 +848,7 @@ sub add_record($$)
         $child = Gedcom::Record->new
         (
           tag     => $t,
-          grammar => $children{$t},
+          grammar => $rec->{grammar}->child($t),
         );
         $count++;
         push @{$rec->{children}}, $child;
@@ -932,12 +929,9 @@ sub add_menu_children($;$$)
                      }
        ]
     if $parent;
-  my %children =
-    map { $_->{tag} => $_ }
-        $grammar->valid_children($Ged->{grammar}{structures});
   push @$cascade,
        map {
-             my $c = $children{$_};
+             my $c = $grammar->child($_);
              my $t = $_;
 #            print "child <$t> in <$tag>\n";
              (@{$c->{children}} &&
@@ -962,7 +956,8 @@ sub add_menu_children($;$$)
                       ]
                     }
            }
-           sort { get_name($a) cmp get_name($b) } keys %children;
+           sort { get_name($a) cmp get_name($b) }
+                keys %{$grammar->valid_children};
 # print "returning ", Dumper $cascade;
   if (@$cascade <= 20)
   {
@@ -1042,7 +1037,7 @@ sub add_add_menu(;$)
       -underline => 0,
       -menuitems => add_menu_children
       (
-        $Ged->{grammar}{valid_children}{$Rec->{tag}},
+        $Ged->{record}{grammar}->child($Rec->{tag}),
         undef,
         $extras->{$Rec->{tag}} || []
       )
@@ -1079,7 +1074,7 @@ sub create_fams($$$)
     (
       tag     => "FAM",
       xref    => $fams_id,
-      grammar => $Ged->{grammar}{valid_children}{FAM},
+      grammar => $Ged->{record}{grammar}->child("FAM"),
     );
     # print "new record is ", Dumper $fam;
     splice @{$Ged->{record}{children}}, -1, 0, $fam;               # before TRLR
@@ -1241,7 +1236,7 @@ __END__
 
 tkged - an interactive program to manipulate Gedcom genealogy files
 
-Version 1.02 - 5th May 1999
+Version 1.03 - 13th May 1999
 
 =head1 SYNOPSIS
 

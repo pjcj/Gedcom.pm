@@ -2,7 +2,7 @@
 
    0 <<HEADER>> {1:1}
    0 <<SUBMISSION_RECORD>> {0:1}
-   0 <<RECORD>> {1:M}
+   0 <<RECORD>> {0:M}
    0 TRLR {1:1}
 
    HEADER: =

@@ -4,6 +4,10 @@
 1   DATE Friday, 20th November 1992
 1   FILE ROYALS.GED
 1   CHAR ANSEL
+1   GEDC
+2     VERS 5.5
+2     FORM LINEAGE-LINKED
+1   SUBM @S1@
 1   NOTE This Gedcom file should only be used as part of the testsuite
 2     CONC for Gedcom.pm (http://www.transeda.com/pjcj).  I have removed a
 2     CONC lot of data from the original, and changed a few bits, so you

@@ -16,7 +16,7 @@ Release 1.01 - 27th April 1999
  - Improve testsuite
  - Make Date::Manip optional
 
-Release 1.02
+Release 1.02 - 5th May 1999
  - Add RIN numbers to royal.ged
  - Move test.pl to t/basic.t
  - Make basic.t "use Test"
@@ -32,3 +32,12 @@ Release 1.02
  - Add resolve_xref() to Gedcom.pm
  - Add next_xref() to Gedcom.pm
  - Add unresolve_xrefs() to compliment resolve_xrefs()
+
+Release 1.03 - 13th May 1999
+ - Add Grammar::child() and Grammar::structure()
+ - Make valid_children more efficient and include min and max information
+ - Add validate_syntax() to Gedcom::Record.pm
+ - Rename Record::validate() to Record::validate_semantics()
+ - Add min(), max() and children() to Gedcom::Grammar.pm
+ - Add GEDC and SUBM to royal.ged to accomodate validate_syntax()
+ - Fix bug which prevented writing of @s around xref values

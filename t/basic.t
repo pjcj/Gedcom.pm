@@ -7,16 +7,16 @@
 # The latest version of this software should be available from my homepage:
 # http://www.transeda.com/pjcj
 
-# Version 1.02 - 5th May 1999
+# Version 1.03 - 13th May 1999
 
 use strict;
 use Test;
 
 require 5.004;
 
-BEGIN { plan tests => 2938 }
+BEGIN { plan tests => 2930 }
 
-use Gedcom 1.02;
+use Gedcom 1.03;
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
@@ -46,14 +46,14 @@ sub loop (%)
   my $gedcom_file = "royal.ged";
   my $ged = Gedcom->new(gedcom_file => $gedcom_file);
 
-  $ged->$resolve();
-  ok $ged->validate;
-
   ok $ged;
   ok $ged->validate;
 
+  $ged->$resolve();
+# ok $ged->validate;
+
   $ged->normalise_dates if $INC{"Date/Manip.pm"};
-  ok $ged->validate;
+# ok $ged->validate;
 
   my $fams = 47;
   my $inds = 91;
@@ -65,17 +65,17 @@ sub loop (%)
   ok rins ($ged->families   ), i($inds + 2 .. $fams + $inds + 1);
 
   %xrefs = $ged->renumber;
-  ok $ged->validate;
+# ok $ged->validate;
 
   $ged->$resolve();
-  ok $ged->validate;
+# ok $ged->validate;
 
   ok $xrefs{INDI}, 91;
   ok $xrefs{FAM},  47;
   ok $xrefs{SUBM}, 1;
 
   $ged->order;
-  ok $ged->validate;
+# ok $ged->validate;
 
   ok xrefs($ged->individuals), i(1 .. $inds);
   ok rins ($ged->individuals), "2 3 4 5 6 8 29 55 63 82 7 9 10 25 11 12 16 "   .
@@ -116,7 +116,7 @@ sub loop (%)
     wife        => "",
   );
 
-  ok rins($ind->$_()), $rin_relations{$_} for (sort keys %rin_relations);
+  ok rins($ind->$_()), $rin_relations{$_} for sort keys %rin_relations;
 
   my %xref1_relations =
   (
@@ -136,17 +136,17 @@ sub loop (%)
     wife        => "",
   );
 
-  ok xrefs($ind->$_()), $xref1_relations{$_} for (sort keys %xref1_relations);
+  ok xrefs($ind->$_()), $xref1_relations{$_} for sort keys %xref1_relations;
 
   my $ind_xref = $ind->{xref};
   ok $ind_xref, "I13";
   ok rins($ged->resolve_xref($ind_xref)), "10";
 
   %xrefs = $ged->renumber(xrefs => [$ind_xref]);
-  ok $ged->validate;
+# ok $ged->validate;
 
   $ged->$resolve();
-  ok $ged->validate;
+# ok $ged->validate;
 
   ok $xrefs{INDI}, 91;
   ok $xrefs{FAM},  47;
@@ -178,7 +178,7 @@ sub loop (%)
   ok $ged->next_xref("F"), "F" . ($fams + 1);
   ok $ged->next_xref("S"), "S2";
 
-  ok rins($ind->$_()), $rin_relations{$_} for (sort keys %rin_relations);
+  ok rins($ind->$_()), $rin_relations{$_} for sort keys %rin_relations;
 
   my %xref2_relations =
   (
@@ -198,7 +198,7 @@ sub loop (%)
     wife        => "",
   );
 
-  ok xrefs($ind->$_()), $xref2_relations{$_} for (sort keys %xref2_relations);
+  ok xrefs($ind->$_()), $xref2_relations{$_} for sort keys %xref2_relations;
 
   my %individuals =
   (
@@ -212,9 +212,9 @@ sub loop (%)
   );
 
   ok xrefs($ged->get_individual($_)), i(@{$individuals{$_}})
-    for (sort keys %individuals);
+    for sort keys %individuals;
 
-  ok $ged->validate;
+# ok $ged->validate;
 
   my $f1 = $gedcom_file . "1";
   $ged->write($f1);
@@ -223,7 +223,7 @@ sub loop (%)
 
   # check the gedcom file is correct
   ok open F1, $f1;
-  ok $_, <F1> for (@Ged_data);
+  ok <F1>, $_ for @Ged_data;
   ok eof;
   ok close F1;
   ok unlink $f1;
@@ -236,6 +236,10 @@ __DATA__
 1   DATE Friday, 20th November 1992
 1   FILE ROYALS.GED
 1   CHAR ANSEL
+1   GEDC
+2     VERS 5.5
+2     FORM LINEAGE-LINKED
+1   SUBM @S1@
 1   NOTE This Gedcom file should only be used as part of the testsuite
 2     CONC for Gedcom.pm (http://www.transeda.com/pjcj).  I have removed a
 2     CONC lot of data from the original, and changed a few bits, so you
@@ -295,8 +299,8 @@ __DATA__
 1   BURI
 2     DATE Friday, 20th May 1910
 2     PLAC Windsor,Berkshire,England
-1   FAMS F14
-1   FAMC F46
+1   FAMS @F14@
+1   FAMC @F46@
 1   RIN 2
 
 0 @I30@ INDI
@@ -311,8 +315,8 @@ __DATA__
 2     PLAC Sandringham,,Norfolk,England
 1   BURI
 2     PLAC St. George Chap.,Windsor,Berkshire,England
-1   FAMS F14
-1   FAMC F47
+1   FAMS @F14@
+1   FAMC @F47@
 1   RIN 3
 
 0 @I19@ INDI
@@ -330,8 +334,8 @@ __DATA__
 1   BURI
 2     DATE Tuesday, 28th January 1936
 2     PLAC Windsor Castle,St. George Chap.,Berkshire,England
-1   FAMS F10
-1   FAMC F14
+1   FAMS @F10@
+1   FAMC @F14@
 1   RIN 4
 
 0 @I20@ INDI
@@ -347,8 +351,8 @@ __DATA__
 1   BURI
 2     DATE Tuesday, 31st March 1953
 2     PLAC St. George's,Chapel,Windsor Castle,England
-1   FAMS F10
-1   FAMC F15
+1   FAMS @F10@
+1   FAMC @F15@
 1   RIN 5
 
 0 @I21@ INDI
@@ -363,8 +367,8 @@ __DATA__
 2     PLAC Paris,,,France
 1   BURI
 2     PLAC Frogmore,Windsor,Berkshire,England
-1   FAMS F16
-1   FAMC F10
+1   FAMS @F16@
+1   FAMC @F10@
 1   RIN 6
 
 0 @I7@ INDI
@@ -380,8 +384,8 @@ __DATA__
 1   BURI
 2     DATE Tuesday, 11th March 1952
 2     PLAC St. George Chap.,,Windsor,England
-1   FAMS F2
-1   FAMC F10
+1   FAMS @F2@
+1   FAMC @F10@
 1   RIN 8
 
 0 @I28@ INDI
@@ -394,8 +398,8 @@ __DATA__
 1   DEAT
 2     DATE Sunday, 28th March 1965
 2     PLAC Harewood House,Yorkshire,,England
-1   FAMS F20
-1   FAMC F10
+1   FAMS @F20@
+1   FAMC @F10@
 1   RIN 29
 
 0 @I22@ INDI
@@ -407,8 +411,8 @@ __DATA__
 2     PLAC York Cottage,Sandringham,Norfolk,England
 1   DEAT
 2     DATE 1974
-1   FAMS F31
-1   FAMC F10
+1   FAMS @F31@
+1   FAMC @F10@
 1   RIN 55
 
 0 @I23@ INDI
@@ -421,8 +425,8 @@ __DATA__
 1   DEAT
 2     DATE Tuesday, 25th August 1942
 2     PLAC Morven,,,Scotland
-1   FAMS F34
-1   FAMC F10
+1   FAMS @F34@
+1   FAMC @F10@
 1   RIN 63
 
 0 @I24@ INDI
@@ -437,7 +441,7 @@ __DATA__
 2     PLAC Wood Farm,Wolferton,Norfolk,England
 1   BURI
 2     PLAC Sandringham,Norfolk,,England
-1   FAMC F10
+1   FAMC @F10@
 1   RIN 82
 
 0 @I31@ INDI
@@ -451,10 +455,10 @@ __DATA__
 2     PLAC Paris,,,France
 1   BURI
 2     PLAC Frogmore,Windsor,Berkshire,England
-1   FAMS F16
-1   FAMS F17
-1   FAMS F18
-1   FAMC F19
+1   FAMS @F16@
+1   FAMS @F17@
+1   FAMS @F18@
+1   FAMC @F19@
 1   RIN 7
 
 0 @I8@ INDI
@@ -466,8 +470,8 @@ __DATA__
 2     PLAC ,,London,England
 1   CHR
 2     DATE Sunday, 23rd September 1900
-1   FAMS F2
-1   FAMC F11
+1   FAMS @F2@
+1   FAMC @F11@
 1   RIN 9
 
 0 @I1@ INDI
@@ -477,8 +481,8 @@ __DATA__
 1   BIRT
 2     DATE Wednesday, 21st April 1926
 2     PLAC 17 Bruton St.,London,W1,England
-1   FAMS F1
-1   FAMC F2
+1   FAMS @F1@
+1   FAMC @F2@
 1   RIN 10
 
 0 @I9@ INDI
@@ -488,8 +492,8 @@ __DATA__
 1   BIRT
 2     DATE Thursday, 21st August 1930
 2     PLAC Glamis Castle,,Angus,Scotland
-1   FAMS F12
-1   FAMC F2
+1   FAMS @F12@
+1   FAMC @F2@
 1   RIN 25
 
 0 @I2@ INDI
@@ -499,8 +503,8 @@ __DATA__
 1   BIRT
 2     DATE Friday, 10th June 1921
 2     PLAC Isle of Kerkira,Mon Repos,Corfu,Greece
-1   FAMS F1
-1   FAMC F3
+1   FAMS @F1@
+1   FAMC @F3@
 1   RIN 11
 
 0 @I3@ INDI
@@ -513,8 +517,8 @@ __DATA__
 1   CHR
 2     DATE Wednesday, 15th December 1948
 2     PLAC Buckingham,Palace,Music Room,England
-1   FAMS F4
-1   FAMC F1
+1   FAMS @F4@
+1   FAMC @F1@
 1   RIN 12
 
 0 @I4@ INDI
@@ -527,8 +531,8 @@ __DATA__
 1   CHR
 2     DATE Saturday, 21st October 1950
 2     PLAC ,,,England
-1   FAMS F6
-1   FAMC F1
+1   FAMS @F6@
+1   FAMC @F1@
 1   RIN 16
 
 0 @I5@ INDI
@@ -538,8 +542,8 @@ __DATA__
 1   BIRT
 2     DATE Friday, 19th February 1960
 2     PLAC Belgian Suite,Buckingham,Palace,England
-1   FAMS F8
-1   FAMC F1
+1   FAMS @F8@
+1   FAMC @F1@
 1   RIN 20
 
 0 @I6@ INDI
@@ -551,7 +555,7 @@ __DATA__
 2     PLAC Buckingham,Palace,London,England
 1   CHR
 2     DATE Saturday, 2nd May 1964
-1   FAMC F1
+1   FAMC @F1@
 1   RIN 24
 
 0 @I10@ INDI
@@ -563,8 +567,8 @@ __DATA__
 2     PLAC Park House,Sandringham,Norfolk,England
 1   CHR
 2     PLAC Sandringham,Church,Norfolk,England
-1   FAMS F4
-1   FAMC F5
+1   FAMS @F4@
+1   FAMC @F5@
 1   RIN 13
 
 0 @I11@ INDI
@@ -577,7 +581,7 @@ __DATA__
 1   CHR
 2     DATE Wednesday, 4th August 1982
 2     PLAC Music Room,Buckingham,Palace,England
-1   FAMC F4
+1   FAMC @F4@
 1   RIN 14
 
 0 @I12@ INDI
@@ -587,7 +591,7 @@ __DATA__
 1   BIRT
 2     DATE Saturday, 15th September 1984
 2     PLAC St. Mary's Hosp.,Paddington,London,England
-1   FAMC F4
+1   FAMC @F4@
 1   RIN 15
 
 0 @I13@ INDI
@@ -596,8 +600,8 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE Wednesday, 22nd September 1948
-1   FAMS F6
-1   FAMC F7
+1   FAMS @F6@
+1   FAMC @F7@
 1   RIN 17
 
 0 @I15@ INDI
@@ -606,7 +610,7 @@ __DATA__
 1   BIRT
 2     DATE Friday, 15th May 1981
 2     PLAC St. Marys Hosp.,Paddington,London,England
-1   FAMC F6
+1   FAMC @F6@
 1   RIN 19
 
 0 @I14@ INDI
@@ -618,7 +622,7 @@ __DATA__
 1   CHR
 2     DATE Thursday, 22nd December 1977
 2     PLAC Music Room,Buckingham,Palace,England
-1   FAMC F6
+1   FAMC @F6@
 1   RIN 18
 
 0 @I16@ INDI
@@ -628,8 +632,8 @@ __DATA__
 1   BIRT
 2     DATE Thursday, 15th October 1959
 2     PLAC 27 Welbech St.,Marylebone,London,England
-1   FAMS F8
-1   FAMC F9
+1   FAMS @F8@
+1   FAMC @F9@
 1   RIN 21
 
 0 @I17@ INDI
@@ -639,7 +643,7 @@ __DATA__
 1   BIRT
 2     DATE Monday, 8th August 1988
 2     PLAC Portland Hosp.,,England
-1   FAMC F8
+1   FAMC @F8@
 1   RIN 22
 
 0 @I18@ INDI
@@ -652,7 +656,7 @@ __DATA__
 1   CHR
 2     DATE Sunday, 23rd December 1990
 2     PLAC Sandringham,England
-1   FAMC F8
+1   FAMC @F8@
 1   RIN 23
 
 0 @I25@ INDI
@@ -661,8 +665,8 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE Friday, 7th March 1930
-1   FAMS F12
-1   FAMS F13
+1   FAMS @F12@
+1   FAMS @F13@
 1   RIN 26
 
 0 @I26@ INDI
@@ -671,7 +675,7 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE Friday, 3rd November 1961
-1   FAMC F12
+1   FAMC @F12@
 1   RIN 27
 
 0 @I27@ INDI
@@ -680,7 +684,7 @@ __DATA__
 1   SEX F
 1   BIRT
 2     DATE Friday, 1st May 1964
-1   FAMC F12
+1   FAMC @F12@
 1   RIN 28
 
 0 @I32@ INDI
@@ -691,7 +695,7 @@ __DATA__
 2     DATE 1882
 1   DEAT
 2     DATE 1947
-1   FAMS F20
+1   FAMS @F20@
 1   RIN 30
 
 0 @I33@ INDI
@@ -700,9 +704,9 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1923
-1   FAMS F21
-1   FAMS F22
-1   FAMC F20
+1   FAMS @F21@
+1   FAMS @F22@
+1   FAMC @F20@
 1   RIN 31
 
 0 @I34@ INDI
@@ -711,9 +715,9 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1924
-1   FAMS F28
-1   FAMS F29
-1   FAMC F20
+1   FAMS @F28@
+1   FAMS @F29@
+1   FAMC @F20@
 1   RIN 49
 
 0 @I35@ INDI
@@ -722,8 +726,8 @@ __DATA__
 1   SEX F
 1   BIRT
 2     DATE 1926
-1   FAMS F21
-1   FAMC F23
+1   FAMS @F21@
+1   FAMC @F23@
 1   RIN 32
 
 0 @I36@ INDI
@@ -731,8 +735,8 @@ __DATA__
 1   SEX F
 1   BIRT
 2     DATE 1923
-1   FAMS F22
-1   FAMS F27
+1   FAMS @F22@
+1   FAMS @F27@
 1   RIN 47
 
 0 @I37@ INDI
@@ -741,8 +745,8 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1950
-1   FAMS F24
-1   FAMC F21
+1   FAMS @F24@
+1   FAMC @F21@
 1   RIN 33
 
 0 @I38@ INDI
@@ -751,8 +755,8 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1953
-1   FAMS F25
-1   FAMC F21
+1   FAMS @F25@
+1   FAMC @F21@
 1   RIN 39
 
 0 @I39@ INDI
@@ -761,8 +765,8 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1955
-1   FAMS F26
-1   FAMC F21
+1   FAMS @F26@
+1   FAMC @F21@
 1   RIN 43
 
 0 @I40@ INDI
@@ -771,13 +775,13 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1964
-1   FAMC F22
+1   FAMC @F22@
 1   RIN 48
 
 0 @I41@ INDI
 1   NAME Margaret  /Messenger/
 1   SEX F
-1   FAMS F24
+1   FAMS @F24@
 1   RIN 34
 
 0 @I42@ INDI
@@ -786,7 +790,7 @@ __DATA__
 1   SEX F
 1   BIRT
 2     DATE 1976
-1   FAMC F24
+1   FAMC @F24@
 1   RIN 35
 
 0 @I43@ INDI
@@ -795,7 +799,7 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1978
-1   FAMC F24
+1   FAMC @F24@
 1   RIN 36
 
 0 @I44@ INDI
@@ -804,7 +808,7 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1980
-1   FAMC F24
+1   FAMC @F24@
 1   RIN 37
 
 0 @I45@ INDI
@@ -812,13 +816,13 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1982
-1   FAMC F24
+1   FAMC @F24@
 1   RIN 38
 
 0 @I46@ INDI
 1   NAME Fredericka Ann /Duhrrson/
 1   SEX F
-1   FAMS F25
+1   FAMS @F25@
 1   RIN 40
 
 0 @I47@ INDI
@@ -826,7 +830,7 @@ __DATA__
 1   SEX F
 1   BIRT
 2     DATE 1973
-1   FAMC F25
+1   FAMC @F25@
 1   RIN 41
 
 0 @I48@ INDI
@@ -834,13 +838,13 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1977
-1   FAMC F25
+1   FAMC @F25@
 1   RIN 42
 
 0 @I49@ INDI
 1   NAME Julie  /Bayliss/
 1   SEX F
-1   FAMS F26
+1   FAMS @F26@
 1   RIN 44
 
 0 @I50@ INDI
@@ -848,7 +852,7 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1982
-1   FAMC F26
+1   FAMC @F26@
 1   RIN 45
 
 0 @I51@ INDI
@@ -856,7 +860,7 @@ __DATA__
 1   SEX F
 1   BIRT
 2     DATE 1984
-1   FAMC F26
+1   FAMC @F26@
 1   RIN 46
 
 0 @I52@ INDI
@@ -864,7 +868,7 @@ __DATA__
 1   SEX F
 1   BIRT
 2     DATE 1919
-1   FAMS F28
+1   FAMS @F28@
 1   RIN 50
 
 0 @I53@ INDI
@@ -872,7 +876,7 @@ __DATA__
 1   SEX F
 1   BIRT
 2     DATE 1924
-1   FAMS F29
+1   FAMS @F29@
 1   RIN 53
 
 0 @I54@ INDI
@@ -880,8 +884,8 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1953
-1   FAMS F30
-1   FAMC F28
+1   FAMS @F30@
+1   FAMC @F28@
 1   RIN 51
 
 0 @I55@ INDI
@@ -889,13 +893,13 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1963
-1   FAMC F29
+1   FAMC @F29@
 1   RIN 54
 
 0 @I56@ INDI
 1   NAME Alexandra  /Morton/
 1   SEX F
-1   FAMS F30
+1   FAMS @F30@
 1   RIN 52
 
 0 @I57@ INDI
@@ -905,8 +909,8 @@ __DATA__
 1   BIRT
 2     DATE Wednesday, 25th December 1901
 2     PLAC London,England
-1   FAMS F31
-1   FAMC F32
+1   FAMS @F31@
+1   FAMC @F32@
 1   RIN 56
 
 0 @I58@ INDI
@@ -922,7 +926,7 @@ __DATA__
 1   DEAT
 2     DATE Monday, 28th August 1972
 2     PLAC Near,Wolverhampton,England
-1   FAMC F31
+1   FAMC @F31@
 1   RIN 57
 
 0 @I59@ INDI
@@ -935,8 +939,8 @@ __DATA__
 1   CHR
 2     DATE Friday, 20th October 1944
 2     PLAC Private Chapel,Windsor Castle,Berkshire,England
-1   FAMS F33
-1   FAMC F31
+1   FAMS @F33@
+1   FAMC @F31@
 1   RIN 58
 
 0 @I60@ INDI
@@ -945,7 +949,7 @@ __DATA__
 1   SEX F
 1   BIRT
 2     DATE 1947
-1   FAMS F33
+1   FAMS @F33@
 1   RIN 59
 
 0 @I62@ INDI
@@ -956,7 +960,7 @@ __DATA__
 2     DATE Saturday, 19th November 1977
 1   CHR
 2     PLAC Barnwell Church,,England
-1   FAMC F33
+1   FAMC @F33@
 1   RIN 61
 
 0 @I63@ INDI
@@ -969,7 +973,7 @@ __DATA__
 1   CHR
 2     DATE Sunday, 13th July 1980
 2     PLAC Barnwell Church,,England
-1   FAMC F33
+1   FAMC @F33@
 1   RIN 62
 
 0 @I61@ INDI
@@ -982,7 +986,7 @@ __DATA__
 1   CHR
 2     DATE Sunday, 9th February 1975
 2     PLAC Barnwell Church
-1   FAMC F33
+1   FAMC @F33@
 1   RIN 60
 
 0 @I64@ INDI
@@ -995,8 +999,8 @@ __DATA__
 1   DEAT
 2     DATE 1968
 2     PLAC Kensington,Palace,,England
-1   FAMS F34
-1   FAMC F35
+1   FAMS @F34@
+1   FAMC @F35@
 1   RIN 64
 
 0 @I65@ INDI
@@ -1006,8 +1010,8 @@ __DATA__
 1   BIRT
 2     DATE Monday, 9th September 1935
 2     PLAC 3 Belgrave Sq.,,England
-1   FAMS F36
-1   FAMC F34
+1   FAMS @F36@
+1   FAMC @F34@
 1   RIN 65
 
 0 @I66@ INDI
@@ -1016,8 +1020,8 @@ __DATA__
 1   SEX F
 1   BIRT
 2     DATE Friday, 25th December 1936
-1   FAMS F41
-1   FAMC F34
+1   FAMS @F41@
+1   FAMC @F34@
 1   RIN 71
 
 0 @I67@ INDI
@@ -1027,8 +1031,8 @@ __DATA__
 1   BIRT
 2     DATE Saturday, 4th July 1942
 2     PLAC Coppins,,England
-1   FAMS F44
-1   FAMC F34
+1   FAMS @F44@
+1   FAMC @F34@
 1   RIN 78
 
 0 @I69@ INDI
@@ -1040,8 +1044,8 @@ __DATA__
 1   CHR
 2     DATE Friday, 14th September 1962
 2     PLAC Buckingham,Palace,Music Room,England
-1   FAMS F38
-1   FAMC F36
+1   FAMS @F38@
+1   FAMC @F36@
 1   RIN 67
 
 0 @I70@ INDI
@@ -1053,7 +1057,7 @@ __DATA__
 1   CHR
 2     DATE Tuesday, 12th May 1964
 2     PLAC Private Chapel,Windsor Castle,Berkshire,England
-1   FAMC F36
+1   FAMC @F36@
 1   RIN 69
 
 0 @I71@ INDI
@@ -1065,7 +1069,7 @@ __DATA__
 2     PLAC Kings College,Hospital,Denmark Hill
 1   CHR
 2     PLAC Private Chapel,Windsor Castle,Berkshire,England
-1   FAMC F36
+1   FAMC @F36@
 1   RIN 70
 
 0 @I72@ INDI
@@ -1074,9 +1078,9 @@ __DATA__
 1   BIRT
 2     DATE ABT    1957
 2     PLAC Canada
-1   FAMS F39
-1   FAMS F38
-1   FAMC F40
+1   FAMS @F39@
+1   FAMS @F38@
+1   FAMC @F40@
 1   RIN 68
 
 0 @I68@ INDI
@@ -1085,8 +1089,8 @@ __DATA__
 1   SEX F
 1   BIRT
 2     DATE 1933
-1   FAMS F36
-1   FAMC F37
+1   FAMS @F36@
+1   FAMC @F37@
 1   RIN 66
 
 0 @I73@ INDI
@@ -1095,7 +1099,7 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE 1928
-1   FAMS F41
+1   FAMS @F41@
 1   RIN 72
 
 0 @I74@ INDI
@@ -1104,8 +1108,8 @@ __DATA__
 1   BIRT
 2     DATE Saturday, 29th February 1964
 2     PLAC Thatched House,Lodge,,England
-1   FAMS F42
-1   FAMC F41
+1   FAMS @F42@
+1   FAMC @F41@
 1   RIN 73
 
 0 @I75@ INDI
@@ -1114,14 +1118,14 @@ __DATA__
 1   BIRT
 2     DATE Sunday, 31st July 1966
 2     PLAC Thatched House,Lodge,Richmond Park,England
-1   FAMS F43
-1   FAMC F41
+1   FAMS @F43@
+1   FAMC @F41@
 1   RIN 75
 
 0 @I76@ INDI
 1   NAME Julia  /Rawlinson/
 1   SEX F
-1   FAMS F42
+1   FAMS @F42@
 1   RIN 74
 
 0 @I78@ INDI
@@ -1129,7 +1133,7 @@ __DATA__
 1   SEX F
 1   BIRT
 2     DATE Saturday, 26th May 1990
-1   FAMC F43
+1   FAMC @F43@
 1   RIN 77
 
 0 @I77@ INDI
@@ -1137,7 +1141,7 @@ __DATA__
 1   SEX M
 1   BIRT
 2     DATE ABT    1962
-1   FAMS F43
+1   FAMS @F43@
 1   RIN 76
 
 0 @I79@ INDI
@@ -1147,8 +1151,8 @@ __DATA__
 1   BIRT
 2     DATE Monday, 15th January 1945
 2     PLAC Czechoslovakia
-1   FAMS F45
-1   FAMS F44
+1   FAMS @F45@
+1   FAMS @F44@
 1   RIN 79
 
 0 @I80@ INDI
@@ -1161,7 +1165,7 @@ __DATA__
 1   CHR
 2     DATE Wednesday, 11th July 1979
 2     PLAC Chapel Royal,St. James Palace,England
-1   FAMC F44
+1   FAMC @F44@
 1   RIN 80
 
 0 @I81@ INDI
@@ -1174,7 +1178,7 @@ __DATA__
 1   CHR
 2     DATE Monday, 8th June 1981
 2     PLAC Chapel Royal,St. James Palace,England
-1   FAMC F44
+1   FAMC @F44@
 1   RIN 81
 
 0 @I82@ INDI
@@ -1218,16 +1222,16 @@ __DATA__
 1   RIN 92
 
 0 @F14@ FAM
-1   HUSB I29
-1   WIFE I30
-1   CHIL I19
+1   HUSB @I29@
+1   WIFE @I30@
+1   CHIL @I19@
 1   MARR
 2     DATE Tuesday, 10th March 1863
 2     PLAC St. George Chap.,Windsor,,England
 1   RIN 94
 
 0 @F46@ FAM
-1   CHIL I29
+1   CHIL @I29@
 1   DIV N
 1   MARR
 2     DATE Monday, 10th February 1840
@@ -1235,32 +1239,32 @@ __DATA__
 1   RIN 93
 
 0 @F47@ FAM
-1   CHIL I30
+1   CHIL @I30@
 1   MARR
 2     DATE 1842
 1   RIN 116
 
 0 @F10@ FAM
-1   HUSB I19
-1   WIFE I20
-1   CHIL I21
-1   CHIL I7
-1   CHIL I28
-1   CHIL I22
-1   CHIL I23
-1   CHIL I24
+1   HUSB @I19@
+1   WIFE @I20@
+1   CHIL @I21@
+1   CHIL @I7@
+1   CHIL @I28@
+1   CHIL @I22@
+1   CHIL @I23@
+1   CHIL @I24@
 1   MARR
 2     DATE Thursday, 6th July 1893
 2     PLAC Chapel Royal,St. James Palace
 1   RIN 95
 
 0 @F15@ FAM
-1   CHIL I20
+1   CHIL @I20@
 1   RIN 111
 
 0 @F16@ FAM
-1   HUSB I21
-1   WIFE I31
+1   HUSB @I21@
+1   WIFE @I31@
 1   DIV N
 1   MARR
 2     DATE Thursday, 3rd June 1937
@@ -1268,44 +1272,44 @@ __DATA__
 1   RIN 104
 
 0 @F17@ FAM
-1   WIFE I31
+1   WIFE @I31@
 1   DIV Y
 1   MARR
 2     DATE 1916
 1   RIN 106
 
 0 @F18@ FAM
-1   WIFE I31
+1   WIFE @I31@
 1   DIV Y
 1   MARR
 2     DATE 1928
 1   RIN 107
 
 0 @F19@ FAM
-1   CHIL I31
+1   CHIL @I31@
 1   RIN 115
 
 0 @F2@ FAM
-1   HUSB I7
-1   WIFE I8
-1   CHIL I1
-1   CHIL I9
+1   HUSB @I7@
+1   WIFE @I8@
+1   CHIL @I1@
+1   CHIL @I9@
 1   DIV N
 1   MARR
 2     DATE Thursday, 26th April 1923
 1   RIN 96
 
 0 @F11@ FAM
-1   CHIL I8
+1   CHIL @I8@
 1   RIN 112
 
 0 @F1@ FAM
-1   HUSB I2
-1   WIFE I1
-1   CHIL I3
-1   CHIL I4
-1   CHIL I5
-1   CHIL I6
+1   HUSB @I2@
+1   WIFE @I1@
+1   CHIL @I3@
+1   CHIL @I4@
+1   CHIL @I5@
+1   CHIL @I6@
 1   DIV N
 1   MARR
 2     DATE Thursday, 20th November 1947
@@ -1313,16 +1317,16 @@ __DATA__
 1   RIN 98
 
 0 @F3@ FAM
-1   CHIL I2
+1   CHIL @I2@
 1   MARR
 2     DATE 1903
 1   RIN 108
 
 0 @F4@ FAM
-1   HUSB I3
-1   WIFE I10
-1   CHIL I11
-1   CHIL I12
+1   HUSB @I3@
+1   WIFE @I10@
+1   CHIL @I11@
+1   CHIL @I12@
 1   DIV N
 1   MARR
 2     DATE Wednesday, 29th July 1981
@@ -1330,7 +1334,7 @@ __DATA__
 1   RIN 100
 
 0 @F5@ FAM
-1   CHIL I10
+1   CHIL @I10@
 1   DIV Y
 1   MARR
 2     DATE 1954
@@ -1338,10 +1342,10 @@ __DATA__
 1   RIN 118
 
 0 @F6@ FAM
-1   HUSB I13
-1   WIFE I4
-1   CHIL I14
-1   CHIL I15
+1   HUSB @I13@
+1   WIFE @I4@
+1   CHIL @I14@
+1   CHIL @I15@
 1   DIV N
 1   MARR
 2     DATE Wednesday, 14th November 1973
@@ -1349,21 +1353,21 @@ __DATA__
 1   RIN 99
 
 0 @F7@ FAM
-1   CHIL I13
+1   CHIL @I13@
 1   RIN 132
 
 0 @F8@ FAM
-1   HUSB I5
-1   WIFE I16
-1   CHIL I17
-1   CHIL I18
+1   HUSB @I5@
+1   WIFE @I16@
+1   CHIL @I17@
+1   CHIL @I18@
 1   MARR
 2     DATE Wednesday, 23rd July 1986
 2     PLAC Westminster,Abbey,London,England
 1   RIN 113
 
 0 @F9@ FAM
-1   CHIL I16
+1   CHIL @I16@
 1   DIV Y
 1   MARR
 2     DATE Thursday, 19th January 1956
@@ -1371,10 +1375,10 @@ __DATA__
 1   RIN 114
 
 0 @F12@ FAM
-1   HUSB I25
-1   WIFE I9
-1   CHIL I26
-1   CHIL I27
+1   HUSB @I25@
+1   WIFE @I9@
+1   CHIL @I26@
+1   CHIL @I27@
 1   DIV Y
 1   MARR
 2     DATE Friday, 6th May 1960
@@ -1382,210 +1386,210 @@ __DATA__
 1   RIN 97
 
 0 @F13@ FAM
-1   HUSB I25
+1   HUSB @I25@
 1   MARR
 2     DATE Sunday, 17th December 1978
 1   RIN 136
 
 0 @F20@ FAM
-1   HUSB I32
-1   WIFE I28
-1   CHIL I33
-1   CHIL I34
+1   HUSB @I32@
+1   WIFE @I28@
+1   CHIL @I33@
+1   CHIL @I34@
 1   MARR
 2     DATE Tuesday, 28th February 1922
 2     PLAC Westminster,Abbey,London,England
 1   RIN 102
 
 0 @F21@ FAM
-1   HUSB I33
-1   WIFE I35
-1   CHIL I37
-1   CHIL I38
-1   CHIL I39
+1   HUSB @I33@
+1   WIFE @I35@
+1   CHIL @I37@
+1   CHIL @I38@
+1   CHIL @I39@
 1   DIV Y
 1   MARR
 2     DATE 1949
 1   RIN 119
 
 0 @F22@ FAM
-1   HUSB I33
-1   WIFE I36
-1   CHIL I40
+1   HUSB @I33@
+1   WIFE @I36@
+1   CHIL @I40@
 1   MARR
 2     DATE 1967
 1   RIN 121
 
 0 @F23@ FAM
-1   CHIL I35
+1   CHIL @I35@
 1   RIN 139
 
 0 @F24@ FAM
-1   HUSB I37
-1   WIFE I41
-1   CHIL I42
-1   CHIL I43
-1   CHIL I44
-1   CHIL I45
+1   HUSB @I37@
+1   WIFE @I41@
+1   CHIL @I42@
+1   CHIL @I43@
+1   CHIL @I44@
+1   CHIL @I45@
 1   MARR
 2     DATE 1979
 1   RIN 126
 
 0 @F25@ FAM
-1   HUSB I38
-1   WIFE I46
-1   CHIL I47
-1   CHIL I48
+1   HUSB @I38@
+1   WIFE @I46@
+1   CHIL @I47@
+1   CHIL @I48@
 1   MARR
 2     DATE 1973
 1   RIN 127
 
 0 @F26@ FAM
-1   HUSB I39
-1   WIFE I49
-1   CHIL I50
-1   CHIL I51
+1   HUSB @I39@
+1   WIFE @I49@
+1   CHIL @I50@
+1   CHIL @I51@
 1   MARR
 2     DATE 1981
 1   RIN 128
 
 0 @F27@ FAM
-1   WIFE I36
+1   WIFE @I36@
 1   RIN 138
 
 0 @F28@ FAM
-1   HUSB I34
-1   WIFE I52
-1   CHIL I54
+1   HUSB @I34@
+1   WIFE @I52@
+1   CHIL @I54@
 1   DIV Y
 1   MARR
 2     DATE 1952
 1   RIN 120
 
 0 @F29@ FAM
-1   HUSB I34
-1   WIFE I53
-1   CHIL I55
+1   HUSB @I34@
+1   WIFE @I53@
+1   CHIL @I55@
 1   MARR
 2     DATE 1978
 1   RIN 122
 
 0 @F30@ FAM
-1   HUSB I54
-1   WIFE I56
+1   HUSB @I54@
+1   WIFE @I56@
 1   MARR
 2     DATE 1979
 1   RIN 130
 
 0 @F31@ FAM
-1   HUSB I22
-1   WIFE I57
-1   CHIL I58
-1   CHIL I59
+1   HUSB @I22@
+1   WIFE @I57@
+1   CHIL @I58@
+1   CHIL @I59@
 1   MARR
 2     DATE Wednesday, 6th November 1935
 2     PLAC Buckingham,Palace,London,England
 1   RIN 103
 
 0 @F32@ FAM
-1   CHIL I57
+1   CHIL @I57@
 1   RIN 125
 
 0 @F33@ FAM
-1   HUSB I59
-1   WIFE I60
-1   CHIL I61
-1   CHIL I62
-1   CHIL I63
+1   HUSB @I59@
+1   WIFE @I60@
+1   CHIL @I61@
+1   CHIL @I62@
+1   CHIL @I63@
 1   MARR
 2     DATE Wednesday, 19th July 1972
 1   RIN 105
 
 0 @F34@ FAM
-1   HUSB I23
-1   WIFE I64
-1   CHIL I65
-1   CHIL I66
-1   CHIL I67
+1   HUSB @I23@
+1   WIFE @I64@
+1   CHIL @I65@
+1   CHIL @I66@
+1   CHIL @I67@
 1   MARR
 2     DATE Thursday, 29th November 1934
 2     PLAC Westminster,Abbey,London,England
 1   RIN 101
 
 0 @F35@ FAM
-1   CHIL I64
+1   CHIL @I64@
 1   MARR
 2     DATE 1902
 1   RIN 117
 
 0 @F36@ FAM
-1   HUSB I65
-1   WIFE I68
-1   CHIL I69
-1   CHIL I70
-1   CHIL I71
+1   HUSB @I65@
+1   WIFE @I68@
+1   CHIL @I69@
+1   CHIL @I70@
+1   CHIL @I71@
 1   MARR
 2     DATE 1961
 1   RIN 110
 
 0 @F38@ FAM
-1   HUSB I69
-1   WIFE I72
+1   HUSB @I69@
+1   WIFE @I72@
 1   MARR
 2     DATE Tuesday, 19th January 1988
 1   RIN 133
 
 0 @F39@ FAM
-1   WIFE I72
+1   WIFE @I72@
 1   DIV Y
 1   RIN 134
 
 0 @F40@ FAM
-1   CHIL I72
+1   CHIL @I72@
 1   DIV Y
 1   RIN 135
 
 0 @F37@ FAM
-1   CHIL I68
+1   CHIL @I68@
 1   RIN 129
 
 0 @F41@ FAM
-1   HUSB I73
-1   WIFE I66
-1   CHIL I74
-1   CHIL I75
+1   HUSB @I73@
+1   WIFE @I66@
+1   CHIL @I74@
+1   CHIL @I75@
 1   MARR
 2     DATE Friday, 19th April 1963
 2     PLAC ,,England
 1   RIN 109
 
 0 @F42@ FAM
-1   HUSB I74
-1   WIFE I76
+1   HUSB @I74@
+1   WIFE @I76@
 1   MARR
 2     DATE AFT    1989
 1   RIN 137
 
 0 @F43@ FAM
-1   HUSB I77
-1   WIFE I75
-1   CHIL I78
+1   HUSB @I77@
+1   WIFE @I75@
+1   CHIL @I78@
 1   MARR
 2     DATE Monday, 19th February 1990
 1   RIN 131
 
 0 @F44@ FAM
-1   HUSB I67
-1   WIFE I79
-1   CHIL I80
-1   CHIL I81
+1   HUSB @I67@
+1   WIFE @I79@
+1   CHIL @I80@
+1   CHIL @I81@
 1   MARR
 2     DATE Friday, 30th June 1978
 2     PLAC Vienna,Austria
 1   RIN 123
 
 0 @F45@ FAM
-1   WIFE I79
+1   WIFE @I79@
 1   DIV Y
 1   MARR
 2     DATE Sunday, 19th September 1971

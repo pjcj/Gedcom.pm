@@ -7,16 +7,14 @@
 # The latest version of this software should be available from my homepage:
 # http://www.transeda.com/pjcj
 
-# Version 1.011 - 28th April 1999
-
 use strict;
 
 require 5.004;
 
 use ExtUtils::MakeMaker;
 
-my $Version = "1.02";
-my $Date    = "5th May 1999";
+my $Version = "1.03";
+my $Date    = "13th May 1999";
 
 open(M, "MANIFEST") or die "Cannot open MANIFEST: $!";
 my @files    = map { split } <M>;
@@ -78,6 +76,8 @@ my @command = ("perlbug", "-a", $author,
                           "-s", "Installation of Gedcom $Version",
                           "-okay");
 
+my $command = join " ", map { / / ? "'$_'" : $_ } @command;
+
 my $message = <<EOM;
 
 I like to have some idea of the distribution of this software.  To that
@@ -85,7 +85,7 @@ end I would be very grateful for mail from you.  This will be used only
 to satisfy my curiosity and to help me make decisions which may involve
 changes to the interface etc.
 
-The command: @command
+The command: $command
 will provide all the information I need.
 
 EOM
@@ -108,14 +108,14 @@ EOM
     print <<EOM;
 
 If you are able to send a message in the future, please do so with the
-command: @command
+command: $command
 
 EOM
   }
   else
   {
     system @command;
-    print "\n@command failed: status $?\n\nPlease send a message manually\n\n"
+    print "\n$command failed: status $?\n\nPlease send a message manually\n\n"
       if $?;
   }
 }

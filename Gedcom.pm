@@ -16,12 +16,12 @@ package Gedcom;
 use Data::Dumper;
 use FileHandle;
 
-use Gedcom::Grammar    1.02;
-use Gedcom::Individual 1.02;
-use Gedcom::Family     1.02;
+use Gedcom::Grammar    1.03;
+use Gedcom::Individual 1.03;
+use Gedcom::Family     1.03;
 
 use vars qw($VERSION);
-$VERSION = "1.02";
+$VERSION = "1.03";
 
 sub new
 {
@@ -48,19 +48,24 @@ sub new
     no strict "refs";
     return undef unless $grammar = ${$g . "::grammar"};
   }
-  $self->{grammar} = $grammar;
-
-  my $structures = $grammar->{structures} = $grammar->structures;
-  my %children   = map { $_->{tag} => $_ }
-                       $structures->{GEDCOM}->valid_children($structures);
-  $grammar->{valid_children} = \%children;
+  my @c = ($self->{grammar} = $grammar);
+  while (@c)
+  {
+    @c = map { $_->{top} = $grammar; @{$_->{children}} } @c;
+  }
 
   # now read in the gedcom file
-  return undef unless
-    $self->{record} = Gedcom::Record->new(file     => $self->{gedcom_file},
-                                          grammar  => $grammar,
-                                          gedcom   => $self,
-                                          callback => $self->{callback});
+  if (defined $self->{gedcom_file})
+  {
+    return undef unless
+      $self->{record} =
+        Gedcom::Record->new(file     => $self->{gedcom_file},
+                            line     => 0,
+                            tag      => "GEDCOM",
+                            grammar  => $grammar->structure("GEDCOM"),
+                            gedcom   => $self,
+                            callback => $self->{callback});
+  }
   $self->{record}{children} = [ Gedcom::Record->new(tag => "TRLR") ]
     unless @{$self->{record}{children}};
 
@@ -112,11 +117,13 @@ sub validate
 {
   my $self = shift;
   my ($callback) = @_;
+  $self->{validate_callback} = $callback;
+  my $ok = $self->{record}->validate_syntax;
   for my $child (@{$self->{record}{children}})
   {
-    return 0 unless $child->validate($self->{record}, $callback);
+    $ok = 0 unless $child->validate_semantics;
   }
-  1;
+  $ok;
 }
 
 sub normalise_dates
@@ -138,10 +145,10 @@ sub renumber
   }
 
   # now, renumber any records left over
-  $_->renumber(\%args, 1) for (@{$self->{record}{children}});
+  $_->renumber(\%args, 1) for @{$self->{record}{children}};
 
   # and remove new_xref so we can do it again
-  delete @$_{qw(renumbered recursed)} for (@{$self->{record}{children}});
+  delete @$_{qw(renumbered recursed)} for @{$self->{record}{children}};
 
   # and update the xrefs
   $self->collect_xrefs;
@@ -253,7 +260,7 @@ __END__
 
 Gedcom - a class to manipulate Gedcom genealogy files
 
-Version 1.02 - 5th May 1999
+Version 1.03 - 13th May 1999
 
 =head1 SYNOPSIS
 
@@ -439,9 +446,12 @@ yet.
   return unless $ged->validate($callback)
 
 Validate the gedcom object.  This performs a number of consistency
-checks, but could do even more.  $callback is not used yet.
+checks, but could do even more.  $callback is not properly used yet.
 
-Returns true iff the object is valid.
+Any errors found are given out as warnings.  If this is unwanted, use
+$SIG{__WARN__} to catch the warnings.
+
+Returns true iff the gedcom object is valid.
 
 =head2 normalise_dates
 
