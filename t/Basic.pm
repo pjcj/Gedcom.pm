@@ -5,9 +5,9 @@
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.transeda.com/pjcj
+# http://www.pjcj.fsnet.co.uk
 
-# Version 1.06 - 13th February 2000
+# Version 1.07 - 14th March 2000
 
 use strict;
 
@@ -15,14 +15,12 @@ require 5.005;
 
 package Basic;
 
+use vars qw($VERSION);
+$VERSION = "1.07";
+
 use Test;
 
-use vars qw($VERSION);
-$VERSION = "1.06";
-
-BEGIN { plan tests => 1469 }
-
-use Gedcom 1.06;
+use Gedcom 1.07;
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
@@ -44,6 +42,7 @@ sub i (@) { "@_" }
 sub import
 {
   my $class = shift;
+  my %args = @_;
   my $basic_test = sub
   {
     my $ged = shift;
@@ -220,6 +219,8 @@ sub import
     ok xrefs($ged->get_individual($_)), i(@{$individuals{$_}})
       for sort keys %individuals;
 
+    ok $ged->get_individual("I82")->note, "Line 1\nLine 2\nLine 3\nLine 4";
+
 #   ok $ged->validate;
 
     my $f1 = $gedcom_file . "1";
@@ -235,8 +236,28 @@ sub import
     ok unlink $f1;
   };
 
+  my $tests = 1476;
+  my $grammar;
+  if ($grammar = delete $args{create_grammar})
+  {
+    plan tests => $tests + 3;
+    system ($^X, ((-d "t") ? "." : "..") . "/parse_grammar", $grammar, 0.1);
+    ok $?, 0;
+    ok -e "Gedcom/Grammar_0_1.pm";
+    $args{grammar_version} = 0.1;
+  }
+  else
+  {
+    plan tests => $tests;
+  }
+
   require Engine;
-  Engine->test(@_, subroutine => $basic_test)
+  Engine->test(%args, subroutine => $basic_test);
+
+  if ($grammar)
+  {
+    ok unlink ((-d "t") ? "." : "..") . "/Gedcom/Grammar_0_1.pm";
+  }
 }
 
 __DATA__
@@ -251,7 +272,7 @@ __DATA__
 2     FORM LINEAGE-LINKED
 1   SUBM @S1@
 1   NOTE This Gedcom file should only be used as part of the testsuite
-2     CONC for Gedcom.pm (http://www.transeda.com/pjcj).  I have removed a
+2     CONC for Gedcom.pm (http://www.pjcj.fsnet.co.uk).  I have removed a
 2     CONC lot of data from the original, and changed a few bits, so you
 2     CONC should use the original if you want royal genealogy.  Contact me
 2     CONC if you cannot locate the original.
@@ -1198,6 +1219,12 @@ __DATA__
 1   BIRT
 2     DATE Sunday, 2nd January 2000
 1   RIN 83
+1   NOTE Line 1
+2     CONT Line 2
+2     CONT Lin
+2     CONC e 3
+2     CONT Line 
+2     CONC 4
 
 0 @I83@ INDI
 1   NAME A2 B2 C2

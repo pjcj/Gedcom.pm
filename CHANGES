@@ -134,3 +134,11 @@ Release 1.06 - 13th February 2000
  - Bless appropriate objects into Gedcom::Event.
  - Add an experimental write_xml().
  - Add tutorial section to documentation.
+
+Release 1.07 - 14th March 2000
+ - Add functions to:
+     Item.pm:
+       item()
+       full_value()
+ - Get parse_grammar working again.
+ - Add a test for parse_grammar.

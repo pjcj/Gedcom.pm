@@ -3,7 +3,7 @@
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.transeda.com/pjcj
+# http://www.pjcj.fsnet.co.uk
 
 # documentation at __END__
 
@@ -22,7 +22,7 @@ use vars qw($VERSION $Tags);
 
 BEGIN
 {
-  $VERSION = "1.06";
+  $VERSION = "1.07";
 
   $Tags =
   {
@@ -158,10 +158,10 @@ BEGIN
   };
 }
 
-use Gedcom::Grammar    1.06;
-use Gedcom::Individual 1.06;
-use Gedcom::Family     1.06;
-use Gedcom::Event      1.06;
+use Gedcom::Grammar    1.07;
+use Gedcom::Individual 1.07;
+use Gedcom::Family     1.07;
+use Gedcom::Event      1.07;
 
 sub new
 {
@@ -479,7 +479,7 @@ __END__
 
 Gedcom - a module to manipulate Gedcom genealogy files
 
-Version 1.06 - 13th February 2000
+Version 1.07 - 14th March 2000
 
 =head1 SYNOPSIS
 
@@ -512,7 +512,7 @@ Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
 This software is free.  It is licensed under the same terms as Perl itself.
 
 The latest version of this software should be available from my homepage:
-http://www.transeda.com/pjcj
+http://www.pjcj.fsnet.co.uk
 
 This module provides for manipulation of Gedcom files.  Gedcom is a
 format for storing genealogical information designed by The Church of

@@ -5,9 +5,9 @@
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.transeda.com/pjcj
+# http://www.pjcj.fsnet.co.uk
 
-# Version 1.06 - 13th February 2000
+# Version 1.07 - 14th March 2000
 
 use strict;
 
@@ -15,17 +15,18 @@ require 5.005;
 
 use diagnostics;
 
-use Gedcom 1.06;
+use Data::Dumper;
+$Data::Dumper::Indent = 1;
+
+use Gedcom 1.07;
 
 use vars qw( $VERSION );
-$VERSION = "1.06";
+$VERSION = "1.07";
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
 
 $SIG{__WARN__} = sub { print "\n@_" };
-
-main();
 
 sub main()
 {
@@ -34,18 +35,19 @@ sub main()
   print "reading...";
   my $ged = Gedcom->new
   (
-    gedcom_file  => $gedcom_file,
-#   grammar_file => "gedcom-5.5.grammar",
-    callback     => sub { print "." },
-    read_only    => 0,
+    gedcom_file     => $gedcom_file,
+    grammar_version => 0.1,
+#   grammar_file    => "gedcom-5.5.grammar",
+    callback        => sub { print "." },
+    read_only       => 0,
   );
+# print Dumper $ged;
 # print "\nnormalising dates...";
 # $ged->normalise_dates("%E %b %Y");
 # sleep 6000;
-  print "\nwriting xml...";
-  $ged->write_xml("$gedcom_file.xml");
-  return;
-  if (0)
+# print "\nwriting xml...";
+# $ged->write_xml("$gedcom_file.xml");
+  if (1)
   {
     print "\nvalidating...";
     my %x;
@@ -56,6 +58,9 @@ sub main()
       print "." if $t && !$x{$t}++;
     };
     $ged->validate($vcb);
+  }
+  if (0)
+  {
     print "\nnormalising dates...";
     $ged->normalise_dates("%E %b %Y");
 #   $ged->normalise_dates;
@@ -80,3 +85,5 @@ sub main()
     $ged->write("$gedcom_file.new");
   }
 }
+
+main;

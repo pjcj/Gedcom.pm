@@ -5,7 +5,7 @@
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.transeda.com/pjcj
+# http://www.pjcj.fsnet.co.uk
 
 use strict;
 
@@ -15,8 +15,8 @@ use ExtUtils::MakeMaker;
 
 $| = 1;
 
-my $Version = "1.06";
-my $Date    = "13th February 2000";
+my $Version = "1.07";
+my $Date    = "14th March 2000";
 
 open(M, "MANIFEST") or die "Cannot open MANIFEST: $!";
 my @files    = map { split } <M>;

@@ -5,9 +5,9 @@
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.transeda.com/pjcj
+# http://www.pjcj.fsnet.co.uk
 
-# Version 1.06 - 13th February 2000
+# Version 1.07 - 14th March 2000
 
 use strict;
 
@@ -15,20 +15,18 @@ require 5.005;
 
 use Data::Dumper;
 
-use Gedcom 1.06;
+use Gedcom 1.07;
 
 use vars qw( $VERSION );
-$VERSION = "1.06";
+$VERSION = "1.07";
 
 $SIG{__WARN__} = sub { print "\n@_" };
-
-main();
 
 sub main()
 {
   die "usage: $0 grammar_file [version]\n" unless @ARGV == 1 || @ARGV == 2;
   my ($grammar_file, $version) = @ARGV;
-  ($version) = $grammar_file =~ /(\d+(\.\d+)*)/;
+  ($version) = $grammar_file =~ /(\d+(\.\d+)*)/ unless defined $version;
   die "version must be a gedcom version number\n" unless $version;
   $| = 1;
   print "reading $grammar_file ...";
@@ -55,12 +53,12 @@ sub main()
   open(G, ">$gpm") or die "Can't open $gpm: $!";
 
   print G <<EOT;
-# Copyright 1998-2000, Paul Johnson (pjcj\@transeda.com)
+# Copyright 1998-2000, Paul Johnson (pjcj\@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.transeda.com/pjcj
+# http://www.pjcj.fsnet.co.uk
 
 # This file was automatically generated from $grammar_file
 # by $me
@@ -80,7 +78,7 @@ require 5.005;
 package Gedcom::$g;
 
 use vars qw(\$VERSION \$grammar);
-\$VERSION = "1.011";
+\$VERSION = $VERSION;
 
 EOT
 
@@ -89,3 +87,5 @@ EOT
   print G $d->Dump;
   close G or die "Can't open $gpm: $!";
 }
+
+main;

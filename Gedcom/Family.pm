@@ -3,7 +3,7 @@
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.transeda.com/pjcj
+# http://www.pjcj.fsnet.co.uk
 
 # documentation at __END__
 
@@ -13,10 +13,10 @@ require 5.005;
 
 package Gedcom::Family;
 
-use Gedcom::Record 1.06;
+use Gedcom::Record 1.07;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.06";
+$VERSION = "1.07";
 @ISA     = qw( Gedcom::Record );
 
 sub husband
@@ -82,7 +82,7 @@ __END__
 
 Gedcom::Family - a module to manipulate Gedcom families
 
-Version 1.06 - 13th February 2000
+Version 1.07 - 14th March 2000
 
 =head1 SYNOPSIS
 

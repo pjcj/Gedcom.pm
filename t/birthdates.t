@@ -5,9 +5,9 @@
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.transeda.com/pjcj
+# http://www.pjcj.fsnet.co.uk
 
-# Version 1.06 - 13th February 2000
+# Version 1.07 - 14th March 2000
 
 use strict;
 
@@ -19,7 +19,7 @@ BEGIN { plan tests => 161 }
 
 use lib -d "t" ? "t" : "..";
 
-use Gedcom 1.06;
+use Gedcom 1.07;
 use Engine;
 
 my $Test = sub

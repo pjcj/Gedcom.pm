@@ -3,7 +3,7 @@
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.transeda.com/pjcj
+# http://www.pjcj.fsnet.co.uk
 
 # documentation at __END__
 
@@ -14,7 +14,7 @@ require 5.005;
 package Gedcom::Item;
 
 use vars qw($VERSION);
-$VERSION = "1.06";
+$VERSION = "1.07";
 
 sub new
 {
@@ -57,9 +57,9 @@ sub read
   my $count = 0;
   return undef
     if $callback &&
-       !&$callback($title, $txt1, "Record $count", $self->{fh}->tell, $size);
+       !$callback->($title, $txt1, "Record $count", $self->{fh}->tell, $size);
 
-  $self->level(-1);
+  $self->level($self->{grammar} ? -1 : -2);
 
   # If we have a grammar, then we are reading a gedcom file and must use
   # the grammar to verify what is being read.
@@ -88,9 +88,10 @@ sub read
       $count++;
     }
     return undef
-      if $callback &&
-         !&$callback($title, $txt1, "Record $count line " . $item->{line},
-                     $self->{fh}->tell, $size);
+      if ref $item &&
+         $callback &&
+         !$callback->($title, $txt1, "Record $count line " . $item->{line},
+                      $self->{fh}->tell, $size);
   }
 # $self->{fh}->close or die "Can't close file $self->{file}: $!";
 # delete $self->{fh};
@@ -134,7 +135,7 @@ sub add_items
       if (!defined $next_level || $next_level <= $level)
       {
         $self->{stored_item} = $next;
-        print "stored ***********************************\n";
+        # print "stored ***********************************\n";
         return;
       }
       else
@@ -211,7 +212,7 @@ sub next_item
                 (?:                        # value
                   (                        #
                     (?:                    # one of
-                      @?<?.*?>?@?          # text element - non greedy
+                      @?<?.*?\s*>?@?       # text element - non greedy
                       |                    # or
                       \[\s*                # start list
                       (?:                  #
@@ -235,11 +236,13 @@ sub next_item
                 \s*$/x)                    # optional whitespace at end
     {
 #     print "found $level below $item->{level}\n";
-      if ($level > $item->{level})
+      if ($level eq "n" || $level > $item->{level})
       {
-        $rec = $self->new(line   => $line_number,
-                          gedcom => $self->{gedcom})
-          unless $rec;
+        unless ($rec)
+        {
+          $rec = $self->new(line => $line_number);
+          $rec->{gedcom} = $self->{gedcom} if $self->{gedcom}{grammar};
+        }
         $rec->{level} = ($level eq "n" ? 0 : $level) if defined $level;
         $rec->{xref}  = $xref  =~ /^\@(\w+\d+)\@$/ ? $1 : $xref
           if defined $xref;
@@ -269,7 +272,7 @@ sub next_item
   }
 
 # use Data::Dumper;
-# print "comparing "; $item->print;
+# print "\ncomparing "; $item->print;
 # print Dumper($item);
 # print "with      "; $rec->print if $rec;
 # print Dumper($rec);
@@ -429,6 +432,18 @@ for my $func (qw(level xref tag value min max gedcom file line))
   }
 }
 
+sub full_value
+{
+  my $self = shift;
+  my $value = $self->{value};
+  for my $item (@{$self->_items})
+  {
+    $value .= "\n$item->{value}" if $item->{tag} eq "CONT";
+    $value .=    $item->{value}  if $item->{tag} eq "CONC";
+  }
+  $value
+}
+
 sub _items
 {
   my $self = shift;
@@ -438,6 +453,12 @@ sub _items
     if !defined $self->{_items} && $self->{level} >= 0;
   $self->{_items} = 1;
   $self->{items}
+}
+
+sub items
+{
+  my $self = shift;
+  @{$self->_items}
 }
 
 sub delete_items
@@ -455,7 +476,7 @@ __END__
 
 Gedcom::Item - a base class for Gedcom::Grammar and Gedcom::Record
 
-Version 1.06 - 13th February 2000
+Version 1.07 - 14th March 2000
 
 =head1 SYNOPSIS
 
@@ -485,7 +506,9 @@ Version 1.06 - 13th February 2000
   my $v = $item->gedcom;
   my $v = $item->file;
   my $v = $item->line;
+  my $v = $item->full_value;
   my $sub_items = $item->_items;
+  my @sub_items = $item->items;
   $item->delete_items;
 
 =head1 DESCRIPTION
@@ -684,21 +707,44 @@ Delete the specified sub-item from the item.
 Return the eponymous hash element.  If a value if passed into the
 function, the element is first assigned that value.
 
+=head2 full_value
+
+  my $v = $item->full_value;
+
+Return the value of the item including all CONT and CONC lines.  This is
+probably what you want most of the time, and is the function called by
+default from other functions that return values.  If, for some reason,
+you want to process CONT and CONC items yourself, you will need to use
+the value() function and probably the items() function.
+
 =head2 _items
 
   my $sub_items = $item->_items;
 
-Return all the sub-items, reading them from the Gedcom file if they have
-not already been read.
+Return a reference to alist of all the sub-items, reading them from the
+Gedcom file if they have not already been read.
 
-It should not be necessary to use this function.
+It should not be necessary to use this function.  See items().
+
+=head2 items
+
+  my @sub_items = $item->items;
+
+Return a list of all the sub-items, reading them from the Gedcom file if
+they have not already been read.
+
+In general it should not be necessary to use this function.  The
+sub-items will usually be accessed by name.  This function is only
+necessary if the ordering of the different items is important.  This is
+very rare, but is needed for example, when processing CONT and CONC
+items.
 
 =head2 delete_items
 
   $item->delete_items;
 
 Delete all the sub-items, allowing the memory to be reused.  If the
-sub-items are requires again, they will be reread.
+sub-items are required again, they will be reread.
 
 It should not be necessary to use this function.
 

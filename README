@@ -1,7 +1,7 @@
 NAME
     Gedcom - a module to manipulate Gedcom genealogy files
 
-    Version 1.06 - 13th February 2000
+    Version 1.07 - 14th March 2000
 
 DESCRIPTION
     Copyright 1998-2000, Paul Johnson (pjcj@cpan.org)
@@ -10,7 +10,7 @@ DESCRIPTION
     itself.
 
     The latest version of this software should be available from my
-    homepage: http://www.transeda.com/pjcj
+    homepage: http://www.pjcj.fsnet.co.uk
 
     This module provides for manipulation of Gedcom files. Gedcom is a
     format for storing genealogical information designed by The Church of

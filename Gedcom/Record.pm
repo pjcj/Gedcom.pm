@@ -3,7 +3,7 @@
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.transeda.com/pjcj
+# http://www.pjcj.fsnet.co.uk
 
 # documentation at __END__
 
@@ -16,10 +16,10 @@ package Gedcom::Record;
 use Carp ();
 BEGIN { eval "use Date::Manip" }             # We'll use this if it is available
 
-use Gedcom::Item 1.06;
+use Gedcom::Item 1.07;
 
 use vars qw($VERSION @ISA $AUTOLOAD);
-$VERSION = "1.06";
+$VERSION = "1.07";
 @ISA     = qw( Gedcom::Item );
 
 my %Funcs;
@@ -58,12 +58,12 @@ sub AUTOLOAD
     my ($count) = @_;
     if (wantarray)
     {
-      return map { $_ && $_->{value} || $_ } $self->record([$func, $count]);
+      return map { $_ && $_->full_value || $_ } $self->record([$func, $count]);
     }
     else
     {
       my $record = $self->record([$func, $count]);
-      return $record && $record->{value} || $record;
+      return $record && $record->full_value || $record;
     }
   };
   goto &$func
@@ -114,12 +114,12 @@ sub get_value
   my $self = shift;
   if (wantarray)
   {
-    return map { $_->{value} || () } $self->record(@_);
+    return map { $_->full_value || () } $self->record(@_);
   }
   else
   {
     my $record = $self->record(@_);
-    return $record && $record->{value};
+    return $record && $record->full_value;
   }
 }
 
@@ -128,12 +128,12 @@ sub tag_value
   my $self = shift;
   if (wantarray)
   {
-    return map { $_->{value} || () } $self->tag_record(@_);
+    return map { $_->full_value || () } $self->tag_record(@_);
   }
   else
   {
     my $record = $self->tag_record(@_);
-    return $record && $record->{value};
+    return $record && $record->full_value;
   }
 }
 
@@ -225,7 +225,8 @@ sub validate_syntax
     if defined $self->{gedcom}{validate_callback};
   my $grammar = $self->{grammar};
   $I++;
-  print "  " x $I . "validate_syntax($grammar->{tag})\n" if $D;
+  print "  " x $I . "validate_syntax(" .
+        (defined $grammar->{tag} ? $grammar->{tag} : "") . ")\n" if $D;
   my $file = $self->{gedcom}{record}{file};
   my $here = "$file:$self->{line}: $self->{tag}" .
              (defined $self->{xref} ? " $self->{xref}" : "");
@@ -233,7 +234,7 @@ sub validate_syntax
   for my $record (@{$self->_items})
   {
     print "  " x $I . "level $record->{level} on $self->{level}\n" if $D;
-    $ok = 0, warn "$here: Can't add level $record->{level} to $self->{level}\n"
+    $ok = 0, warn "$here: iCan't add level $record->{level} to $self->{level}\n"
       if $record->{level} > $self->{level} + 1;
     $counts{$record->{tag}}++;
     $ok = 0 unless $record->validate_syntax;
@@ -420,7 +421,7 @@ __END__
 
 Gedcom::Record - a module to manipulate Gedcom records
 
-Version 1.06 - 13th February 2000
+Version 1.07 - 14th March 2000
 
 =head1 SYNOPSIS
 

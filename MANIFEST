@@ -24,6 +24,7 @@ t/read_only.t
 t/resolve.t
 t/resolve_read_only.t
 t/birthdates.t
+t/parse_grammar.t
 t/Lines.pm
 t/lines.t
 t/lines/lines

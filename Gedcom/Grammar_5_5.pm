@@ -3,7 +3,7 @@
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.transeda.com/pjcj
+# http://www.pjcj.fsnet.co.uk
 
 # This file was automatically generated from gedcom-5.5.grammar
 # by Paul Johnson
@@ -14,7 +14,7 @@
 # Edit parse_grammar or Makefile.PL to increase the legibility of this file.
 # (Removal of the leading spaces nearly halves the size of the file.)
 
-# Version 1.06 - 13th February 2000
+# Version 1.07 - 14th March 2000
 
 use strict;
 
@@ -23,7 +23,7 @@ require 5.005;
 package Gedcom::Grammar_5_5;
 
 use vars qw($VERSION $grammar);
-$VERSION = "1.06";
+$VERSION = "1.07";
 
 $grammar = bless( {
 level => -1,

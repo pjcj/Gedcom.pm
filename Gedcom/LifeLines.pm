@@ -3,7 +3,7 @@
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
-# http://www.transeda.com/pjcj
+# http://www.pjcj.fsnet.co.uk
 
 # documentation at __END__
 
@@ -20,10 +20,10 @@ BEGIN
   eval "use Roman ()";
 }
 
-use Gedcom 1.06;
+use Gedcom 1.07;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = "1.06";
+$VERSION = "1.07";
 @ISA     = qw( Exporter );
 @EXPORT  = qw
 (
@@ -442,7 +442,7 @@ sub value
 {
   my ($record) = @_;
   return unless $record;
-  $record->value
+  $record->full_value
 }
 
 sub parent
@@ -583,7 +583,7 @@ sub extractdate
   my $m      = \shift;
   my $y      = \shift;
   $$d = $$m = $$y = 0;
-  my $date = $record->tag eq "DATE" ? $record->value : $record->date;
+  my $date = $record->tag eq "DATE" ? $record->full_value : $record->date;
   return unless $date;
   unless ($INC{"Date/Manip.pm"})
   {
@@ -606,7 +606,7 @@ sub extractnames
   my $surname = \shift;
   $$names = [];
   $$count = $$surname = 0;
-  my $name = $record->tag eq "NAME" ? $record->value : $record->name;
+  my $name = $record->tag eq "NAME" ? $record->full_value : $record->name;
   return unless $name;
   $name =~ s|/\s+|/|;
   $name =~ s|(/.*?)/s+/|$1/|;
@@ -631,7 +631,7 @@ sub extractplaces
   my $count  = \shift;
   $$places = [];
   $$count  = 0;
-  my $place = $record->tag eq "PLACE" ? $record->value : $record->place;
+  my $place = $record->tag eq "PLACE" ? $record->full_value : $record->place;
   return unless $place;
   @$$places = split /\s*,\s*/, $place;
   $$count   = scalar @$$places;
@@ -1206,7 +1206,7 @@ __END__
 
 Gedcom::LifeLines - functions for lines2perl
 
-Version 1.06 - 13th February 2000
+Version 1.07 - 14th March 2000
 
 =head1 SYNOPSIS
 
