@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.transeda.com/pjcj
 
-# Version 1.07 - 14th March 2000
+# Version 1.08 - 8th May 2000
 
 use strict;
 

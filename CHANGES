@@ -142,3 +142,8 @@ Release 1.07 - 14th March 2000
        full_value()
  - Get parse_grammar working again.
  - Add a test for parse_grammar.
+
+Release 1.08 - 8th May 2000
+ - Allow xrefs to match .+ instead of \w+\d+
+ - Make XML output valid.
+ - Allow extra sub-items of a grammar structure.

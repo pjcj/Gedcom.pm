@@ -7,6 +7,5 @@
 - Make constructors better.
 - Finish LifeLines.pm.
 - Speed ups.
-- Add a test for parse_grammar.
 - Turn children from an array into a hash: key is tag, value is array of items.
 - Separate REs for parsing grammar files and gedcom files.

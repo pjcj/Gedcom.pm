@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.fsnet.co.uk
 
-# Version 1.07 - 14th March 2000
+# Version 1.08 - 8th May 2000
 
 use strict;
 
@@ -16,11 +16,11 @@ require 5.005;
 package Basic;
 
 use vars qw($VERSION);
-$VERSION = "1.07";
+$VERSION = "1.08";
 
 use Test;
 
-use Gedcom 1.07;
+use Gedcom 1.08;
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};

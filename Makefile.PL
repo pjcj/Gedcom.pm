@@ -15,8 +15,8 @@ use ExtUtils::MakeMaker;
 
 $| = 1;
 
-my $Version = "1.07";
-my $Date    = "14th March 2000";
+my $Version = "1.08";
+my $Date    = "8th May 2000";
 
 open(M, "MANIFEST") or die "Cannot open MANIFEST: $!";
 my @files    = map { split } <M>;

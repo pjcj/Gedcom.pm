@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.fsnet.co.uk
 
-# Version 1.07 - 14th March 2000
+# Version 1.08 - 8th May 2000
 
 use strict;
 
@@ -16,9 +16,9 @@ require 5.005;
 package Engine;
 
 use vars qw($VERSION);
-$VERSION = "1.07";
+$VERSION = "1.08";
 
-use Gedcom 1.07;
+use Gedcom 1.08;
 
 sub test
 {

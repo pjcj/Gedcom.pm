@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.fsnet.co.uk
 
-# Version 1.07 - 14th March 2000
+# Version 1.08 - 8th May 2000
 
 # This is really just a test of the lifelines testing mechanism, but it
 # also serves as a very basic lifelines test.

@@ -13,13 +13,13 @@ require 5.005;
 
 package Gedcom::Record;
 
-use Carp ();
+use Carp;
 BEGIN { eval "use Date::Manip" }             # We'll use this if it is available
 
-use Gedcom::Item 1.07;
+use Gedcom::Item 1.08;
 
 use vars qw($VERSION @ISA $AUTOLOAD);
-$VERSION = "1.07";
+$VERSION = "1.08";
 @ISA     = qw( Gedcom::Item );
 
 my %Funcs;
@@ -50,7 +50,7 @@ sub AUTOLOAD
   my $func = $AUTOLOAD;
   # print "autoloading $func\n";
   $func =~ s/^.*:://;
-  warn "Undefined subroutine $func called" unless $Funcs{lc $func};
+  carp "Undefined subroutine $func called" unless $Funcs{lc $func};
   no strict "refs";
   *$func = sub
   {
@@ -159,6 +159,8 @@ sub parse
     }
     else
     {
+      print "Valid sub-items are ",
+            join(", ", keys %{$grammar->{_valid_items}}), "\n";
       warn "$self->{file}:$r->{line}: $tag is not a sub-item of $t\n"
         unless substr($tag, 0, 1) eq "_";
         # unless $tag eq "CONT" || $tag eq "CONC" || substr($tag, 0, 1) eq "_";
@@ -421,7 +423,7 @@ __END__
 
 Gedcom::Record - a module to manipulate Gedcom records
 
-Version 1.07 - 14th March 2000
+Version 1.08 - 8th May 2000
 
 =head1 SYNOPSIS
 

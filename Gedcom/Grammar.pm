@@ -15,10 +15,10 @@ package Gedcom::Grammar;
 
 use Data::Dumper;
 
-use Gedcom::Item 1.07;
+use Gedcom::Item 1.08;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.07";
+$VERSION = "1.08";
 @ISA     = qw( Gedcom::Item );
 
 sub structure
@@ -61,51 +61,67 @@ sub items
   keys %{$self->valid_items}
 }
 
-sub valid_items
+sub _valid_items
 {
   my $self = shift;
-  unless (exists $self->{_valid_items})
+  my %valid_items;
+  for my $item (@{$self->{items}})
   {
-    my %valid_items;
-    for my $item (@{$self->{items}})
+    my $min = $item->min;
+    my $max = $item->max;
+    if ($item->{tag})
     {
-      my $min = $item->min;
-      my $max = $item->max;
-      if ($item->{tag})
+      $valid_items{$item->{tag}} =
       {
-        $valid_items{$item->{tag}} =
+        grammar => $item,
+        min     => $min,
+        max     => $max
+      };
+    }
+    else
+    {
+      die "What's a " . Data::Dumper->new([$item], ["grammar"])
+        unless my ($value) = $item->{value} =~ /<<(.*)>>/;
+      die "Can't find $value in gedcom structures"
+        unless my $structure = $self->structure($value);
+      $item->{structure} = $structure;
+      while (my($tag, $g) = each %{$structure->valid_items})
+      {
+        $valid_items{$tag} =
         {
-          grammar => $item,
-          min     => $min,
-          max     => $max
+          grammar => $g->{grammar},
+          # min and max can be calculated by multiplication because
+          # the grammar always permits multiple selection records, and
+          # selection records never have compulsory records.  This may
+          # change in future grammars, but I would not expect it to -
+          # such a grammar would seem to have little practical use.
+          min     => $g->{min} * $min,
+          max     => $g->{max} * $max
         };
       }
-      else
+      if (exists $item->{items} && @{$item->{items}})
       {
-        die "What's a " . Data::Dumper->new([$item], ["grammar"])
-          unless my ($value) = $item->{value} =~ /<<(.*)>>/;
-        die "Can't find $value in gedcom structures"
-          unless my $structure = $self->structure($value);
-        $item->{structure} = $structure;
-        while (my($tag, $g) = each %{$structure->valid_items})
+        my $extra_items = $item->_valid_items;
+        while (my ($sub_item, $sub_grammar) = each %valid_items)
         {
-          $valid_items{$tag} =
+          $sub_grammar->{grammar}->valid_items;
+          while (my ($i, $g) = each %$extra_items)
           {
-            grammar => $g->{grammar},
-            # min and max can be calculated by multiplication because
-            # the grammar always permits multiple selection records, and
-            # selection records never have compulsory records.  This may
-            # change in future grammars, but I would not expect it to -
-            # such a grammar would seem to have little practical use.
-            min     => $g->{min} * $min,
-            max     => $g->{max} * $max
-          };
+            # print "adding $i to $sub_item\n";
+            $sub_grammar->{grammar}{_valid_items}{$i} = $g;
+          }
+          # print "giving @{[keys %{$sub_grammar->{grammar}->valid_items}]}\n";
         }
       }
     }
-    $self->{_valid_items} = \%valid_items;
   }
-  $self->{_valid_items}
+  \%valid_items
+}
+
+sub valid_items
+{
+  my $self = shift;
+  $self->{_valid_items} ||= $self->_valid_items
 }
 
 1;
@@ -116,13 +132,13 @@ __END__
 
 Gedcom::Grammar - a module to manipulate Gedcom grammars
 
-Version 1.07 - 14th March 2000
+Version 1.08 - 8th May 2000
 
 =head1 SYNOPSIS
 
   use Gedcom::Grammar;
 
-  my $st = $grammar->structures("GEDCOM");
+  my $st = $grammar->structure("GEDCOM");
   my $sgr = $grammar->item("DATE");
   my @items = $grammar->valid_items;
   my $min = $grammar->min;
@@ -152,7 +168,7 @@ objects.
 
 =head2 structures
 
-  my $st = $grammar->structures("GEDCOM");
+  my $st = $grammar->structure("GEDCOM");
 
 Return the grammar item of the specified structure, if it exists, or undef.
 

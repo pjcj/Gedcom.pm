@@ -20,10 +20,10 @@ BEGIN
   eval "use Roman ()";
 }
 
-use Gedcom 1.07;
+use Gedcom 1.08;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = "1.07";
+$VERSION = "1.08";
 @ISA     = qw( Exporter );
 @EXPORT  = qw
 (
@@ -186,29 +186,29 @@ sub burial
 sub father
 {
   my ($indi) = @_;
-  return unless $indi;
-  $indi->father
+  return undef unless $indi;
+  scalar $indi->father
 }
 
 sub mother
 {
   my ($indi) = @_;
-  return unless $indi;
-  $indi->mother
+  return undef unless $indi;
+  scalar $indi->mother
 }
 
 sub nextsib
 {
   my ($indi) = @_;
-  return unless $indi;
-  $indi->younger_siblings
+  return undef unless $indi;
+  scalar $indi->younger_siblings
 }
 
 sub prevsib
 {
   my ($indi) = @_;
-  return unless $indi;
-  $indi->older_siblings
+  return undef unless $indi;
+  scalar $indi->older_siblings
 }
 
 sub sex
@@ -245,7 +245,7 @@ sub nspouses
   my ($indi) = @_;
   return unless $indi;
   my @a = $indi->spouse;
-  $#a
+  scalar @a
 }
 
 sub nfamilies
@@ -253,14 +253,15 @@ sub nfamilies
   my ($indi) = @_;
   return unless $indi;
   my @a = $indi->fams;
-  $#a
+  scalar @a
 }
 
 sub parents
 {
   my ($indi) = @_;
   return unless $indi;
-  scalar $indi->famc
+  my @a = $indi->famc;
+  scalar @a
 }
 
 sub title
@@ -347,15 +348,15 @@ sub marriage
 sub husband
 {
   my ($fam) = @_;
-  return unless $fam;
-  ($fam->husband)[0]
+  return undef unless $fam;
+  scalar $fam->husband
 }
 
 sub wife
 {
   my ($fam) = @_;
-  return unless $fam;
-  ($fam->wife)[0]
+  return undef unless $fam;
+  scalar $fam->wife
 }
 
 sub nchildren
@@ -368,15 +369,15 @@ sub nchildren
 sub firstchild
 {
   my ($fam) = @_;
-  return unless $fam;
-  ($fam->children)[0]
+  return undef unless $fam;
+  scalar $fam->children
 }
 
 sub lastchild
 {
   my ($fam) = @_;
-  return unless $fam;
-  ($fam->children)[-1]
+  return undef unless $fam;
+  scalar $fam->children
 }
 
 sub fnode
@@ -513,8 +514,11 @@ sub gettoday
 {
   my $today = localtime;
   $today =~ s/\d\d:\d\d:\d\d //;
-  my $date  = Gedcom::Record->new(tag => "DATE", value => $today);
-  my $event = Gedcom::Record->new(items => [$date]);
+  my $date  = Gedcom::Record->new(gedcom => $Ged,
+                                  tag    => "DATE",
+                                  value  => $today);
+  my $event = Gedcom::Record->new(gedcom => $Ged,
+                                  items  => [$date]);
   $event
 }
 
@@ -677,7 +681,15 @@ sub getindiset
 
 sub getfam
 {
-  die "LifeLines getfam function not yet implemented"
+  my $fam = \shift;
+  my $string =  shift || "Please enter a family:";
+  print STDERR $string, " ";
+  my $f = <STDIN>;
+  chomp $f;
+  $$fam = $Ged->resolve_xref($f) ||
+          $Ged->resolve_xref(uc $f) ||
+          $Ged->resolve_xref("F$f");
+  return
 }
 
 sub getint
@@ -686,6 +698,7 @@ sub getint
   my $string =  shift || "Please enter an integer:";
   print STDERR $string, " ";
   $$number = <STDIN>;
+  chomp $$number;
   return
 }
 
@@ -963,7 +976,14 @@ sub outfile
 sub copyfile
 {
   my ($file) = @_;
-  die "LifeLines copyfile function not yet implemented"
+  $file = "$ENV{LLPROGRAMS}/$file" unless -e $file;
+  unless (open(F, $file))
+  {
+    warn "Error: Cannot open file $file in copyfile: $!";
+    return;
+  }
+  print while <F>;
+  close F or warn "Error: Cannot close file $file in copyfile: $!";
 }
 
 sub print
@@ -1206,7 +1226,7 @@ __END__
 
 Gedcom::LifeLines - functions for lines2perl
 
-Version 1.07 - 14th March 2000
+Version 1.08 - 8th May 2000
 
 =head1 SYNOPSIS
 
@@ -1226,7 +1246,6 @@ Functions yet to be implemented include:
   parent()
   sibling()
   getindiset()
-  getfam()
   choosechild()
   choosefam()
   chooseindi()
@@ -1236,7 +1255,6 @@ Functions yet to be implemented include:
   ord()
   newfile()
   outfile()
-  copyfile()
   gengedcom()
   createnode()
   addnode()

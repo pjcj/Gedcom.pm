@@ -14,7 +14,7 @@ require 5.005;
 package Gedcom::Item;
 
 use vars qw($VERSION);
-$VERSION = "1.07";
+$VERSION = "1.08";
 
 sub new
 {
@@ -244,10 +244,10 @@ sub next_item
           $rec->{gedcom} = $self->{gedcom} if $self->{gedcom}{grammar};
         }
         $rec->{level} = ($level eq "n" ? 0 : $level) if defined $level;
-        $rec->{xref}  = $xref  =~ /^\@(\w+\d+)\@$/ ? $1 : $xref
+        $rec->{xref}  = $xref  =~ /^\@(.+)\@$/ ? $1 : $xref
           if defined $xref;
         $rec->{tag}   = $tag                         if defined $tag;
-        $rec->{value} = $value =~ /^\@(\w+\d+)\@$/ ? $1 : $value
+        $rec->{value} = $value =~ /^\@(.+)\@$/ ? $1 : $value
           if defined $value;
         $rec->{min}   = $min                         if defined $min;
         $rec->{max}   = $max                         if defined $max;
@@ -327,7 +327,13 @@ sub write_xml
   $level = 0 unless $level;
   my $indent = "  " x $level;
   my $tag = $level >= 0 && $self->{tag} && $self->{tag} !~ /^CON[CT]$/;
-  my $event;
+  my $value = $self->{value}
+              ? ref $self->{value}
+                ? "$self->{value}{xref}"
+                : $self->resolve_xref($self->{value})
+                  ? "$self->{value}"
+                  : $self->{value}
+              : undef;
   my $p = "";
   if ($tag)
   {
@@ -337,20 +343,24 @@ sub write_xml
       : $self->{tag};
     $p .= $indent;
     $p .= "<$tag";
-    $p .= " = $self->{tag}"  if $tag eq "EVEN";
-    $p .= " = $self->{xref}" if $self->{xref};
+    if ($tag eq "EVEN")
+    {
+      $p .= qq( EV="$self->{tag}");
+    }
+    elsif ($tag =~ /^(FAM[SC]|SUBM|NOTE|HUSB|WIFE|CHIL)$/)
+    {
+      $p .= qq( REF="$value") if defined $value;
+      $value = undef;
+      $tag = undef unless @{$self->_items};
+    }
+    elsif ($self->{xref})
+    {
+      $p .= qq( ID="$self->{xref}");
+    }
+    $p .= "/" unless defined $value || $tag;
     $p .= ">\n";
   }
-  if ($self->{value})
-  {
-    $p .= $indent . "  ";
-    $p .= ref $self->{value}
-          ? "$self->{value}{xref}"
-          : $self->resolve_xref($self->{value})
-            ? "$self->{value}"
-            : $self->{value};
-    $p .= "\n";
-  }
+  $p .= "$indent  $value\n" if defined $value;
   $fh->print($p);
   for my $c (0 .. @{$self->_items} - 1)
   {
@@ -447,6 +457,8 @@ sub full_value
 sub _items
 {
   my $self = shift;
+# use Data::Dumper;
+# print STDERR Dumper $self unless $self->{gedcom}{record};
 # print "_items() $self->{items}\n"; # $self->print;
 # print "level $self->{level}\n";
   $self->{gedcom}{record}->add_items($self, 1)
@@ -476,7 +488,7 @@ __END__
 
 Gedcom::Item - a base class for Gedcom::Grammar and Gedcom::Record
 
-Version 1.07 - 14th March 2000
+Version 1.08 - 8th May 2000
 
 =head1 SYNOPSIS
 

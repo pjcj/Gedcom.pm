@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.fsnet.co.uk
 
-# Version 1.07 - 14th March 2000
+# Version 1.08 - 8th May 2000
 
 use strict;
 
@@ -18,10 +18,10 @@ use diagnostics;
 use Data::Dumper;
 $Data::Dumper::Indent = 1;
 
-use Gedcom 1.07;
+use Gedcom 1.08;
 
 use vars qw( $VERSION );
-$VERSION = "1.07";
+$VERSION = "1.08";
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
@@ -45,8 +45,8 @@ sub main()
 # print "\nnormalising dates...";
 # $ged->normalise_dates("%E %b %Y");
 # sleep 6000;
-# print "\nwriting xml...";
-# $ged->write_xml("$gedcom_file.xml");
+  print "\nwriting xml...";
+  $ged->write_xml("$gedcom_file.xml");
   if (1)
   {
     print "\nvalidating...";
