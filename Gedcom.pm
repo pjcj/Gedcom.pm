@@ -9,25 +9,181 @@
 
 use strict;
 
-require 5.004;
+require 5.005;
 
 package Gedcom;
 
 use Data::Dumper;
 use FileHandle;
 
-use Gedcom::Grammar    1.04;
-use Gedcom::Individual 1.04;
-use Gedcom::Family     1.04;
+BEGIN { eval "use Text::Soundex" }           # We'll use this if it is available
 
-use vars qw($VERSION);
-$VERSION = "1.04";
+use vars qw($VERSION $Tags);
+
+BEGIN
+{
+  $VERSION = "1.05";
+
+  $Tags =
+  {
+    ABBR => "Abbreviation",
+    ADDR => "Address",
+    ADOP => "Adoption",
+    ADR1 => "Address1",
+    ADR2 => "Address2",
+    AFN  => "Afn",
+    AGE  => "Age",
+    AGNC => "Agency",
+    ALIA => "Alias",
+    ANCE => "Ancestors",
+    ANCI => "Ances Interest",
+    ANUL => "Annulment",
+    ASSO => "Associates",
+    AUTH => "Author",
+    BAPL => "Baptism-LDS",
+    BAPM => "Baptism",
+    BARM => "Bar Mitzvah",
+    BASM => "Bas Mitzvah",
+    BIRT => "Birth",
+    BLES => "Blessing",
+    BLOB => "Binary Object",
+    BURI => "Burial",
+    CALN => "Call Number",
+    CAST => "Caste",
+    CAUS => "Cause",
+    CENS => "Census",
+    CHAN => "Change",
+    CHAR => "Character",
+    CHIL => "Child",
+    CHR  => "Christening",
+    CHRA => "Adult Christening",
+    CITY => "City",
+    CONC => "Concatenation",
+    CONF => "Confirmation",
+    CONL => "Confirmation L",
+    CONT => "Continued",
+    COPR => "Copyright",
+    CORP => "Corporate",
+    CREM => "Cremation",
+    CTRY => "Country",
+    DATA => "Data",
+    DATE => "Date",
+    DEAT => "Death",
+    DESC => "Descendants",
+    DESI => "Descendant Int",
+    DEST => "Destination",
+    DIV  => "Divorce",
+    DIVF => "Divorce Filed",
+    DSCR => "Phy Description",
+    EDUC => "Education",
+    EMIG => "Emigration",
+    ENDL => "Endowment",
+    ENGA => "Engagement",
+    EVEN => "Event",
+    FAM  => "Family",
+    FAMC => "Family Child",
+    FAMF => "Family File",
+    FAMS => "Family Spouse",
+    FCOM => "First Communion",
+    FILE => "File",
+    FORM => "Format",
+    GEDC => "Gedcom",
+    GIVN => "Given Name",
+    GRAD => "Graduation",
+    HEAD => "Header",
+    HUSB => "Husband",
+    IDNO => "Ident Number",
+    IMMI => "Immigration",
+    INDI => "Individual",
+    LANG => "Language",
+    LEGA => "Legatee",
+    MARB => "Marriage Bann",
+    MARC => "Marr Contract",
+    MARL => "Marr License",
+    MARR => "Marriage",
+    MARS => "Marr Settlement",
+    MEDI => "Media",
+    NAME => "Name",
+    NATI => "Nationality",
+    NATU => "Naturalization",
+    NCHI => "Children_count",
+    NICK => "Nickname",
+    NMR  => "Marriage_count",
+    NOTE => "Note",
+    NPFX => "Name_prefix",
+    NSFX => "Name_suffix",
+    OBJE => "Object",
+    OCCU => "Occupation",
+    ORDI => "Ordinance",
+    ORDN => "Ordination",
+    PAGE => "Page",
+    PEDI => "Pedigree",
+    PHON => "Phone",
+    PLAC => "Place",
+    POST => "Postal_code",
+    PROB => "Probate",
+    PROP => "Property",
+    PUBL => "Publication",
+    QUAY => "Quality Of Data",
+    REFN => "Reference",
+    RELA => "Relationship",
+    RELI => "Religion",
+    REPO => "Repository",
+    RESI => "Residence",
+    RESN => "Restriction",
+    RETI => "Retirement",
+    RFN  => "Rec File Number",
+    RIN  => "Rec Id Number",
+    ROLE => "Role",
+    SEX  => "Sex",
+    SLGC => "Sealing Child",
+    SLGS => "Sealing Spouse",
+    SOUR => "Source",
+    SPFX => "Surn Prefix",
+    SSN  => "Soc Sec Number",
+    STAE => "State",
+    STAT => "Status",
+    SUBM => "Submitter",
+    SUBN => "Submission",
+    SURN => "Surname",
+    TEMP => "Temple",
+    TEXT => "Text",
+    TIME => "Time",
+    TITL => "Title",
+    TRLR => "Trailer",
+    TYPE => "Type",
+    VERS => "Version",
+    WIFE => "Wife",
+    WILL => "Will",
+  };
+}
+
+use Gedcom::Grammar    1.05;
+use Gedcom::Individual 1.05;
+use Gedcom::Family     1.05;
+use Gedcom::Event      1.05;
 
 sub new
 {
   my $proto = shift;
   my $class = ref($proto) || $proto;
-  my $self = { buffer => [], records => [], xrefs => {}, @_ };
+  my $self =
+  {
+    buffer  => [],
+    records => [],
+    xrefs   => {},
+    types   => {},
+    tags    => $Tags,
+    @_
+  };
+  # TODO - find a way to do this nicely for different grammars
+  $self->{types}{INDI} = "Individual";
+  $self->{types}{FAM}  = "Family";
+# $self->{types}{$_}   = "Event"
+#   for qw( ADOP ANUL BAPM BARM BASM BIRT BLES BURI CAST CENS CENS CHR CHRA CONF
+#           CREM DEAT DIV DIVF DSCR EDUC EMIG ENGA EVEN EVEN FCOM GRAD IDNO IMMI
+#           MARB MARC MARL MARR MARS NATI NATU NCHI NMR OCCU ORDN PROB PROP RELI
+#           RESI RETI SSN TITL WILL );
   bless $self, $class;
 
   # first read in the grammar
@@ -65,11 +221,11 @@ sub new
                             grammar  => $grammar->structure("GEDCOM"),
                             gedcom   => $self,
                             callback => $self->{callback});
-  }
-  $self->{record}{children} = [ Gedcom::Record->new(tag => "TRLR") ]
-    unless @{$self->{record}{children}};
+    $self->{record}{children} = [ Gedcom::Record->new(tag => "TRLR") ]
+      unless @{$self->{record}{children}};
 
-  $self->collect_xrefs;
+    $self->collect_xrefs;
+  }
   $self;
 }
 
@@ -147,8 +303,12 @@ sub renumber
   # now, renumber any records left over
   $_->renumber(\%args, 1) for @{$self->{record}{children}};
 
-  # and remove new_xref so we can do it again
-  delete @$_{qw(renumbered recursed)} for @{$self->{record}{children}};
+  # actually change the xref
+  for my $record (@{$self->{record}{children}})
+  {
+    $record->{xref} = delete $record->{new_xref};
+    delete $record->{recursed}
+  }
 
   # and update the xrefs
   $self->collect_xrefs;
@@ -222,40 +382,67 @@ sub get_individual
   my $self = shift;
   my $name = "@_";
 
-  # Store the name with the individual to avoid continually recalculating it.
-  # This is a bit like a Schwartzian transform, with a grep instead of a sort.
-  my @ind = map { [ $_->child_value("NAME") => $_ ] } $self->individuals;
+  my $i = $self->resolve_xref($name) || $self->resolve_xref(uc $name);
+  return $i if $i;
+
+  # search for the name in the specified order
+  my $ordered = sub
+  {
+    my ($n, @ind) = @_;
+    map { $_->[1] } grep { $_->[0] =~ $n } @ind
+  };
+
+  # search for the name in any order
+  my $unordered = sub
+  {
+    my ($names, $t, @ind) = @_;
+    map { $_->[1] }
+        grep
+        {
+          my $i = $_->[0];
+          my $r = 1;
+          for my $n (@$names)
+          {
+            # remove matches as they are found
+            # we don't want to match the same name twice
+            last unless $r = $i =~ s/$n->[$t]//;
+          }
+          $r
+        }
+        @ind;
+  };
 
   # look for various matches in decreasing order of exactitude
+  my @individuals = $self->individuals;
   my @i;
+
+  # Store the name with the individual to avoid continually recalculating it.
+  # This is a bit like a Schwartzian transform, with a grep instead of a sort.
+  my @ind = map { [ $_->child_value("NAME") => $_ ] } @individuals;
+
   for my $n ( map { qr/^$_$/, qr/\b$_\b/, $_ } map { $_, qr/$_/i } qr/\Q$name/ )
   {
-    return @i if @i = map { $_->[1] } grep { $_->[0] =~ $n } @ind
+    return wantarray ? @i : $i[0] if @i = $ordered->($n, @ind)
   }
 
-  # look for the names in any order
   # create an array with one element per name
   # each element is an array of REs in decreasing order of exactitude
-  my @n = map { [ map { qr/\b$_\b/, $_ } map { qr/$_/, qr/$_/i } "\Q$_" ] }
+  my @names = map { [ map { qr/\b$_\b/, $_ } map { qr/$_/, qr/$_/i } "\Q$_" ] }
               split / /, $name;
-  for my $t (0 .. $#{$n[0]})
+  for my $t (0 .. $#{$names[0]})
   {
-    return @i if @i = map { $_->[1] }
-                          grep
-                          {
-                            my $i = $_->[0];
-                            my $r = 1;
-                            for my $n (@n)
-                            {
-                              # remove matches as they are found - we
-                              # don't want to match the same name twice
-                              last unless $r = $i =~ s/$n->[$t]//;
-                            }
-                            $r
-                          }
-                          @ind;
+    return wantarray ? @i : $i[0] if @i = $unordered->(\@names, $t, @ind)
   }
-  ()
+
+  # check soundex
+  my @sdx = map { [ $_->soundex => $_ ] } @individuals;
+
+  for my $n ( map { qr/$_/ } $name, soundex($name) )
+  {
+    return wantarray ? @i : $i[0] if @i = $ordered->($n, @sdx)
+  }
+
+  return wantarray ? () : undef;
 }
 
 sub next_xref
@@ -266,7 +453,8 @@ sub next_xref
   my $last = 0;
   for my $c (@{$self->{record}{children}})
   {
-    $last = $1 if exists $c->{xref} and $c->{xref} =~ /$re/ and $1 > $last;
+    # warn "last $last xref $c->{xref}\n";
+    $last = $1 if defined $c->{xref} and $c->{xref} =~ /$re/ and $1 > $last;
   }
   $type . ++$last
 }
@@ -279,7 +467,7 @@ __END__
 
 Gedcom - a class to manipulate Gedcom genealogy files
 
-Version 1.04 - 29th May 1999
+Version 1.05 - 20th July 1999
 
 =head1 SYNOPSIS
 
@@ -552,21 +740,24 @@ Return a list of all the families.
 
 Return a list of all individuals matching the specified name.
 
-There are ten matches performed, and the results from the first
+There are thirteen matches performed, and the results from the first
 successful match are returned.
 
 The matches are:
 
-   1 - Exact
-   2 - On word boundaries
-   3 - Anywhere
-   4 - Exact, case insensitive
-   5 - On word boundaries, case insensitive
-   6 - Anywhere, case insensitive
-   7 - Names in any order, on word boundaries
-   8 - Names in any order, anywhere
-   9 - Names in any order, on word boundaries, case insensitive
-  10 - Names in any order, anywhere, case insensitive
+   1 - Xref
+   2 - Exact
+   3 - On word boundaries
+   4 - Anywhere
+   5 - Exact, case insensitive
+   6 - On word boundaries, case insensitive
+   7 - Anywhere, case insensitive
+   8 - Names in any order, on word boundaries
+   9 - Names in any order, anywhere
+  10 - Names in any order, on word boundaries, case insensitive
+  11 - Names in any order, anywhere, case insensitive
+  12 - Soundex code
+  13 - Soundex of name
 
 =head2 next_xref
 

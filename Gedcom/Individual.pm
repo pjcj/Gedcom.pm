@@ -9,38 +9,80 @@
 
 use strict;
 
-require 5.004;
+require 5.005;
 
 package Gedcom::Individual;
 
-use Gedcom::Record 1.04;
+use Gedcom::Record 1.05;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.04";
+$VERSION = "1.05";
 @ISA     = qw( Gedcom::Record );
 
-sub famc
+sub name
 {
   my $self = shift;
-  $self->resolve($self->child_values("FAMC"))
+  my $name = $self->child_value("NAME");
+  $name =~ s/\s+/ /g;
+  $name =~ s| ?/ ?(.*?) ?/ ?| /$1/ |;
+  $name =~ s/^\s+//g;
+  $name =~ s/\s+$//g;
+  $name
 }
 
-sub fams
+sub cased_name
 {
   my $self = shift;
-  $self->resolve($self->child_values("FAMS"))
+  my $name = $self->name;
+  $name =~ s|/([^/]*)/?|uc $1|e;
+  $name
+}
+
+sub surname
+{
+  my $self = shift;
+  my ($surname) = $self->name =~ m|/([^/]*)/?|;
+  $surname
+}
+
+sub given_names
+{
+  my $self = shift;
+  my $name = $self->name;
+  $name =~ s|/([^/]*)/?||;
+  $name
+}
+
+sub soundex
+{
+  my $self = shift;
+  unless ($INC{"Text/Soundex.pm"})
+  {
+    warn "Text::Soundex is required to use soundex()";
+    return undef
+  }
+  Gedcom::soundex($self->surname)
+}
+
+sub sex
+{
+  my $self = shift;
+  my $sex = $self->child_value("SEX");
+  $sex =~ /^F/i ? "F" : $sex =~ /^M/i ? "M" : "U";
 }
 
 sub father
 {
   my $self = shift;
-  map { $_->husband } $self->famc
+  my @a = map { $_->husband } $self->famc;
+  wantarray ? @a : $a[0]
 }
 
 sub mother
 {
   my $self = shift;
-  map { $_->wife } $self->famc
+  my @a = map { $_->wife } $self->famc;
+  wantarray ? @a : $a[0]
 }
 
 sub parents
@@ -52,55 +94,90 @@ sub parents
 sub husband
 {
   my $self = shift;
-  grep { $_->{xref} ne $self->{xref} } map { $_->husband } $self->fams
+  my @a = grep { $_->{xref} ne $self->{xref} } map { $_->husband } $self->fams;
+  wantarray ? @a : $a[0]
 }
 
 sub wife
 {
   my $self = shift;
-  grep { $_->{xref} ne $self->{xref} } map { $_->wife } $self->fams
+  my @a = grep { $_->{xref} ne $self->{xref} } map { $_->wife } $self->fams;
+  wantarray ? @a : $a[0]
 }
 
 sub spouse
 {
   my $self = shift;
-  ($self->husband, $self->wife)
+  my @a = ($self->husband, $self->wife);
+  wantarray ? @a : $a[0]
 }
 
 sub siblings
 {
   my $self = shift;
-  grep { $_->{xref} ne $self->{xref} } map { $_->children } $self->famc
+  my @a = grep { $_->{xref} ne $self->{xref} } map { $_->children } $self->famc;
+  wantarray ? @a : $a[0]
+}
+
+sub older_siblings
+{
+  my $self = shift;
+  my @a = map { $_->children } $self->famc;
+  my $i;
+  for ($i = 0; $i <= $#a; $i++)
+  {
+    last if $a[$i]->{xref} eq $self->{xref}
+  }
+  splice @a, $i;
+  wantarray ? @a : $a[-1]
+}
+
+sub younger_siblings
+{
+  my $self = shift;
+  my @a = map { $_->children } $self->famc;
+  my $i;
+  for ($i = 0; $i <= $#a; $i++)
+  {
+    last if $a[$i]->{xref} eq $self->{xref}
+  }
+  splice @a, 0, $i + 1;
+  wantarray ? @a : $a[0]
 }
 
 sub brothers
 {
   my $self = shift;
-  grep { $_->child_value("SEX") !~ /^F/i } $self->siblings
+  my @a = grep { $_->child_value("SEX") !~ /^F/i } $self->siblings;
+  wantarray ? @a : $a[0]
 }
 
 sub sisters
 {
   my $self = shift;
-  grep { $_->child_value("SEX") !~ /^M/i } $self->siblings
+  my @a = grep { $_->child_value("SEX") !~ /^M/i } $self->siblings;
+  wantarray ? @a : $a[0]
 }
 
 sub children
 {
   my $self = shift;
-  grep { $_->{xref} ne $self->{xref} } map { $_->children } $self->fams
+  my @a = map { $_->children } $self->fams;
+  wantarray ? @a : $a[0]
 }
 
 sub sons
 {
   my $self = shift;
-  grep { $_->child_value("SEX") !~ /^F/i } $self->children
+  my @a = grep { $_->child_value("SEX") !~ /^F/i } $self->children;
+  wantarray ? @a : $a[0]
 }
 
 sub daughters
 {
   my $self = shift;
-  grep { $_->child_value("SEX") !~ /^M/i } $self->children
+  my @a = grep { $_->child_value("SEX") !~ /^M/i } $self->children;
+  wantarray ? @a : $a[0]
 }
 
 sub descendents
@@ -161,6 +238,52 @@ sub delete
   $ret;
 }
 
+sub print
+{
+  my $self = shift;
+  $self->SUPER::print; $_->print for @{$self->{children}};
+  print "fams:\n"; $_->print for $self->fams;
+  print "famc:\n"; $_->print for $self->famc;
+}
+
+sub print_generations
+{
+  my $self = shift;
+  my ($generations, $indent) = @_;
+  $generations = 0 unless $generations;
+  $indent      = 0 unless $indent;
+  return unless $generations > 0;
+  my $i = "  " x $indent;
+  print "$i$self->{xref} (", $self->rin, ") ", $self->name, "\n" unless $indent;
+  for my $fam ($self->fams)
+  {
+    for my $spouse ($fam->husband, $fam->wife)
+    {
+      next if $self->xref eq $spouse->xref;
+      print "$i= $spouse->{xref} (", $spouse->rin, ") ", $spouse->name, "\n";
+    }
+    for my $child ($fam->children)
+    {
+      print "$i> $child->{xref} (", $child->rin, ") ", $child->name, "\n";
+      $child->print_generations($generations - 1, $indent + 1);
+    }
+  }
+}
+
+sub famc
+{
+  my $self = shift;
+  my @a = $self->resolve($self->child_values("FAMC"));
+  wantarray ? @a : $a[0]
+}
+
+sub fams
+{
+  my $self = shift;
+  my @a = $self->resolve($self->child_values("FAMS"));
+  wantarray ? @a : $a[0]
+}
+
 1;
 
 __END__
@@ -169,29 +292,31 @@ __END__
 
 Gedcom::Individual - a class to manipulate Gedcom individuals
 
-Version 1.04 - 29th May 1999
+Version 1.05 - 20th July 1999
 
 =head1 SYNOPSIS
 
   use Gedcom::Individual;
 
-  my @fam = $i->famc;
-  my @fam = $i->fams;
-  my @rel = $i->father;
-  my @rel = $i->mother;
-  my @rel = $i->parents;
-  my @rel = $i->husband;
-  my @rel = $i->wife;
-  my @rel = $i->spouse;
-  my @rel = $i->siblings;
-  my @rel = $i->brothers;
-  my @rel = $i->sisters;
-  my @rel = $i->children;
-  my @rel = $i->sons;
-  my @rel = $i->daughters;
-  my @rel = $i->descendents;
-  my @rel = $i->ancestors;
-  my $ok  = $i->delete;
+  my $name = $i->name
+  my @rel = $i->father
+  my @rel = $i->mother
+  my @rel = $i->parents
+  my @rel = $i->husband
+  my @rel = $i->wife
+  my @rel = $i->spouse
+  my @rel = $i->siblings
+  my @rel = $i->brothers
+  my @rel = $i->sisters
+  my @rel = $i->children
+  my @rel = $i->sons
+  my @rel = $i->daughters
+  my @rel = $i->descendents
+  my @rel = $i->ancestors
+  my $ok  = $i->delete
+
+  my @fam = $i->famc
+  my @fam = $i->fams
 
 =head1 DESCRIPTION
 
@@ -205,32 +330,62 @@ None.
 
 =head1 METHODS
 
-=head2 Family functions
+=head2 name
 
-  my @fam = $i->famc;
-  my @fam = $i->fams;
+  my $name = $i->name
 
-Return a list of families to which $i belongs.
+Return the name of the individual, with spaces normalised.
 
-famc() returns those families in which $i is a child.
-fams() returns those families in which $i is a spouse.
+=head2 cased_name
+
+  my $cased_name = $i->cased_name
+
+Return the name of the individual, with spaces normalised, and surname
+in upper case.
+
+=head2 surname
+
+  my $surname = $i->surname
+
+Return the surname of the individual.
+
+=head2 given_names
+
+  my $given_names = $i->given_names
+
+Return the given names of the individual.
+
+=head2 soundex
+
+  my $soundex = $i->soundex
+
+Return the soundex code of the individual.  This function is only
+available if I<Text/Soundex> is available.
+
+=head2 sex
+
+  my $sex = $i->sex
+
+Return the sex of the individual, "M", "F" or "U".
 
 =head2 Individual functions
 
-  my @rel = $i->father;
-  my @rel = $i->mother;
-  my @rel = $i->parents;
-  my @rel = $i->husband;
-  my @rel = $i->wife;
-  my @rel = $i->spouse;
-  my @rel = $i->siblings;
-  my @rel = $i->brothers;
-  my @rel = $i->sisters;
-  my @rel = $i->children;
-  my @rel = $i->sons;
-  my @rel = $i->daughters;
-  my @rel = $i->descendents;
-  my @rel = $i->ancestors;
+  my @rel = $i->father
+  my @rel = $i->mother
+  my @rel = $i->parents
+  my @rel = $i->husband
+  my @rel = $i->wife
+  my @rel = $i->spouse
+  my @rel = $i->siblings
+  my @rel = $i->older_siblings
+  my @rel = $i->younger_siblings
+  my @rel = $i->brothers
+  my @rel = $i->sisters
+  my @rel = $i->children
+  my @rel = $i->sons
+  my @rel = $i->daughters
+  my @rel = $i->descendents
+  my @rel = $i->ancestors
 
 Return a list of individuals retaled to $i.
 
@@ -240,14 +395,24 @@ a list of individuals holding that releation to $i.
 More complex relationships can easily be found using the map function.
 eg:
 
-  my @grandparents = map { $_->parents } $i->parents;
+  my @grandparents = map { $_->parents } $i->parents
 
 =head2 delete
 
-  my $ok  = $i->delete;
+  my $ok  = $i->delete
 
 Delete $i from the data structure.
 
 Returns true iff $i was successfully deleted.
+
+=head2 Family functions
+
+  my @fam = $i->famc
+  my @fam = $i->fams
+
+Return a list of families to which $i belongs.
+
+famc() returns those families in which $i is a child.
+fams() returns those families in which $i is a spouse.
 
 =cut

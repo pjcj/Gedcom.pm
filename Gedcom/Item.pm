@@ -9,14 +9,12 @@
 
 use strict;
 
-require 5.004;
+require 5.005;
 
 package Gedcom::Item;
 
 use vars qw($VERSION);
-$VERSION = "1.04";
-
-BEGIN { eval "use Date::Manip"; }            # We'll use this if it is available
+$VERSION = "1.05";
 
 sub new
 {
@@ -26,6 +24,18 @@ sub new
   bless $self, $class;
   $self->read if $self->{file};
   $self;
+}
+
+sub copy
+{
+  my $self = shift;
+  my $item  = $self->new;
+  for my $key (qw(level xref tag value min max gedcom))
+  {
+    $item->{$key} = $self->{$key} if exists $self->{$key}
+  }
+  $item->{children} = [ map { $_->copy } @{$self->{children}} ];
+  $item
 }
 
 sub read
@@ -187,13 +197,6 @@ sub next_record
       $rec->{min}    = $min                         if defined $min;
       $rec->{max}    = $max                         if defined $max;
       $rec->{gedcom} = $self->{gedcom}              if defined $self->{gedcom};
-      if (ref($self) !~ /Grammar/ and $_ = $rec->{tag})
-      {
-        my $class = /INDI/i ? "Individual" :
-                    /FAM/i  ? "Family"     :
-                              undef;
-        bless $rec, "Gedcom::$class" if $class;
-      }
     }
     elsif ($line =~ /^\s*[\[\|\]]\s*(?:\/\*.*\*\/\s*)?$/)
     {
@@ -254,38 +257,6 @@ sub write
   }
 }
 
-sub normalise_dates
-{
-  my $self = shift;
-  unless ($INC{"Date/Manip.pm"})
-  {
-    warn "Date::Manip is required to use normalise_dates()";
-    return;
-  }
-  my $format = shift || "%A, %E %B %Y";
-  if (defined $self->{tag} && $self->{tag} =~ /^date$/i)
-  {
-    if (defined $self->{value} && $self->{value})
-    {
-      # print "date was $self->{value}\n";
-      my @dates = split / or /, $self->{value};
-      for my $dt (@dates)
-      {
-        # don't change the date if it is just < 7 digits
-        if ($dt !~ /^\s*(\d+)\s*$/ || length $1 > 6)
-        {
-          my $date = ParseDate($dt);
-          my $d = UnixDate($date, $format);
-          $dt = $d if $d;
-        }
-      }
-      $self->{value} = join " or ", @dates;
-      # print "date is  $self->{value}\n";
-    }
-  }
-  $_->normalise_dates($format) for @{$self->{children}};
-}
-
 sub print
 {
   my $self = shift;
@@ -334,6 +305,60 @@ sub delete_child
   splice @{$self->{children}}, $n, 1;
 }
 
+sub level
+{
+  my $self = shift;
+  $self->{level}
+}
+
+sub xref
+{
+  my $self = shift;
+  $self->{xref}
+}
+
+sub tag
+{
+  my $self = shift;
+  $self->{tag}
+}
+
+sub value
+{
+  my $self = shift;
+  $self->{value}
+}
+
+sub min
+{
+  my $self = shift;
+  $self->{min}
+}
+
+sub max
+{
+  my $self = shift;
+  $self->{max}
+}
+
+sub gedcom
+{
+  my $self = shift;
+  $self->{gedcom}
+}
+
+sub file
+{
+  my $self = shift;
+  $self->{file}
+}
+
+sub line
+{
+  my $self = shift;
+  $self->{line}
+}
+
 1;
 
 __END__
@@ -342,24 +367,33 @@ __END__
 
 Gedcom::Item - a base class for Gedcom::Grammar and Gedcom::Record
 
-Version 1.04 - 29th May 1999
+Version 1.05 - 20th July 1999
 
 =head1 SYNOPSIS
 
   use Gedcom::Record;
 
   $self->{grammar} = Gedcom::Grammar->new(file     => $self->{grammar_file},
-                                          callback => $self->{callback});
-  $self->read if $self->{file};
+                                          callback => $self->{callback})
+  my $c = $self->copy
+  $self->read if $self->{file}
   $self->add_children($rec)
   while (my $next = $self->next_record($record))
   $line = $self->next_line
   my $line = $self->next_text_line
   $record->>write($fh, $level)
-  $record->normalise_dates($format)
   $item->print
   my $child = get_child("CHIL2")
   my @children = get_children("CHIL")
+  my $v = level
+  my $v = xref
+  my $v = tag
+  my $v = value
+  my $v = min
+  my $v = max
+  my $v = gedcom
+  my $v = file
+  my $v = line
 
 =head1 DESCRIPTION
 
@@ -393,6 +427,18 @@ The minimum number of items allowed.
 
 The maximum number of items allowed.
 
+=head2 $item->{gedcom}
+
+The top level gedcom object.
+
+=head2 $item->{file}
+
+The file from which this object was read, if any.
+
+=head2 $item->{line}
+
+The line number from which this object was read, if any.
+
 =head2 $item->{children}
 
 Array of all children of this item.
@@ -402,7 +448,7 @@ Array of all children of this item.
 =head2 new
 
   $self->{grammar} = Gedcom::Grammar->new(file     => $self->{grammar_file},
-                                          callback => $self->{callback});
+                                          callback => $self->{callback})
 
 Create a new object.
 
@@ -421,9 +467,15 @@ The subroutine takes five parameters:
 The subroutine should return true iff the file shuld continue to be
 read.
 
+=head2 copy
+
+  my $c = $self->copy
+
+Make a copy of the object.  The children are copied too.
+
 =head2 read
 
-  $self->read if $self->{file};
+  $self->read if $self->{file}
 
 Read a file into the object.  Called by the constructor.
 
@@ -462,14 +514,6 @@ The subroutine takes two parameters:
   $fh:        The FileHandle to which to write
   $level:     The level of the record
 
-=head2 normalise_dates
-
-  $record->normalise_dates($format)
-
-Change the format of all dates in the record.
-
-See the documentation for Gedcom::normalise_dates
-
 =head2 print
 
   $item->print
@@ -485,14 +529,28 @@ Get a specific child from the item.
 The argument contains the name of the tag, and optionally the count.
 The regular expression to generate the tag and the count is:
 
-  my ($tag, $count) = $t =~ /^_?(\w+?)(\d*)$/;
+  my ($tag, $count) = $t =~ /^_?(\w+?)(\d*)$/
 
-Returns the child, or undef if it doesn't exist;
+Returns the child, or undef if it doesn't exist
 
 =head2 get_children
 
   my @children = get_children("CHIL")
 
 Get all children matching a specified tag.
+
+=head2 Access functions
+
+  my $v = level
+  my $v = xref
+  my $v = tag
+  my $v = value
+  my $v = min
+  my $v = max
+  my $v = gedcom
+  my $v = file
+  my $v = line
+
+Return the eponymous hash element.
 
 =cut

@@ -9,14 +9,14 @@
 
 use strict;
 
-require 5.004;
+require 5.005;
 
 use ExtUtils::MakeMaker;
 
 $| = 1;
 
-my $Version = "1.04";
-my $Date    = "29th May 1999";
+my $Version = "1.05";
+my $Date    = "20th July 1999";
 
 open(M, "MANIFEST") or die "Cannot open MANIFEST: $!";
 my @files    = map { split } <M>;
@@ -34,7 +34,7 @@ WriteMakefile
 );
 
 print "\n";
-print "checking for Date::Manip...";
+print "checking for Date::Manip..........";
 
 eval "use Date::Manip";
 if (my $m = $INC{"Date/Manip.pm"})
@@ -53,7 +53,26 @@ In the meantime, you may continue to use the rest of Gedcom.pm.
 EOM
 }
 
-print "checking for Parse::RecDescent...";
+print "checking for Text::Soundex........";
+
+eval "use Text::Soundex";
+if (my $m = $INC{"Text/Soundex.pm"})
+{
+  print "$m\n";
+}
+else
+{
+  print  <<EOM;
+not found
+
+Text::Soundex is required to use the Gedcom function soundex().  This function
+will be unavailable until you install this module, available from CPAN.  In the
+meantime, you may continue to use the rest of Gedcom.pm.
+
+EOM
+}
+
+print "checking for Parse::RecDescent....";
 
 eval "use Parse::RecDescent";
 if (my $m = $INC{"Parse/RecDescent.pm"})
@@ -68,11 +87,6 @@ not found
 Parse::RecDescent is required to use the Gedcom program lines2perl.  This
 program will be unavailable until you install this module, available from CPAN.
 In the meantime, you may continue to use the rest of Gedcom.pm.
-
-I wouldn't worry too much about this just yet.  Although I've implemented the
-general purpose language constructs, I've yet to include any genealogical
-functions, so it's unlikely that the program will be of much use to you at the
-moment.
 
 EOM
 }
@@ -186,6 +200,6 @@ EOM
 
 print <<EOM;
 If you have any questions or comments, mailing list details are available in the
-README file.
+README file, or send mail to me directly.
 
 EOM

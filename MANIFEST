@@ -13,7 +13,9 @@ Gedcom/Grammar.pm
 Gedcom/Record.pm
 Gedcom/Individual.pm
 Gedcom/Family.pm
+Gedcom/Event.pm
 Gedcom/Grammar_5_5.pm
+Gedcom/LifeLines.pm
 gedcom-5.5.grammar
 t/basic.t
 royal.ged

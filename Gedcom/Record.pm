@@ -9,15 +9,58 @@
 
 use strict;
 
-require 5.004;
+require 5.005;
 
 package Gedcom::Record;
 
-use Gedcom::Item 1.04;
+use Carp;
+BEGIN { eval "use Date::Manip" }             # We'll use this if it is available
 
-use vars qw($VERSION @ISA);
-$VERSION = "1.04";
+use Gedcom::Item 1.05;
+
+use vars qw($VERSION @ISA $AUTOLOAD);
+$VERSION = "1.05";
 @ISA     = qw( Gedcom::Item );
+
+my %Funcs;
+BEGIN
+{
+  while (my($tag, $name) = each(%$Gedcom::Tags))
+  {
+    # print "looking at tag $tag <$name>\n";
+    $Funcs{$tag} = $Funcs{lc $tag} = $tag;
+    if ($name)
+    {
+      $name =~ s/ /_/g;
+      $name = lc $name;
+      $Funcs{lc $name} = $tag;
+    }
+  }
+  # use Data::Dumper;
+  # print "Funcs are ", Dumper(\%Funcs);
+  use subs keys %Funcs;
+}
+
+sub AUTOLOAD
+{
+  my $self = shift;
+  return if $AUTOLOAD =~ /::DESTROY$/;
+  my $func = $AUTOLOAD;
+  # print "autoloading $func\n";
+  $func =~ s/^.*:://;
+  my $child = $Funcs{lc $func};
+  croak "Undefined subroutine $func called" unless $child;
+  if (wantarray)
+  {
+    my @c = $self->get_children($child);
+    return map { $_ && $_->{value} ? $_->{value} : $_ } @c;
+  }
+  else
+  {
+    my $c = $self->get_child($child);
+    return $c && $c->{value} ? $c->{value} : $c;
+  }
+}
 
 sub parse
 {
@@ -29,6 +72,9 @@ sub parse
   my $g = $grammar->{tag};
   die "Can't match $t with $g" if $t && $t ne $g;               # internal error
   $record->{grammar} = $grammar;
+  my $class = $record->{gedcom}{types}{$t};
+# print "$t is a $class\n" if $class;
+  bless $record, "Gedcom::$class" if $class;
   for my $child (@{$record->{children}})
   {
     my $tag = $child->{tag};
@@ -210,14 +256,47 @@ sub validate_semantics
   $ok;
 }
 
+sub normalise_dates
+{
+  my $self = shift;
+  unless ($INC{"Date/Manip.pm"})
+  {
+    warn "Date::Manip is required to use normalise_dates()";
+    return;
+  }
+  my $format = shift || "%A, %E %B %Y";
+  if (defined $self->{tag} && $self->{tag} =~ /^date$/i)
+  {
+    if (defined $self->{value} && $self->{value})
+    {
+      # print "date was $self->{value}\n";
+      my @dates = split / or /, $self->{value};
+      for my $dt (@dates)
+      {
+        # don't change the date if it is just < 7 digits
+        if ($dt !~ /^\s*(\d+)\s*$/ || length $1 > 6)
+        {
+          my $date = ParseDate($dt);
+          my $d = UnixDate($date, $format);
+          $dt = $d if $d;
+        }
+      }
+      $self->{value} = join " or ", @dates;
+      # print "date is  $self->{value}\n";
+    }
+  }
+  $_->normalise_dates($format) for @{$self->{children}};
+}
+
 sub renumber
 {
   my $self = shift;
   my ($args, $recurse) = @_;
-  return if exists $self->{recursed} or not exists $self->{xref};
-  $self->{xref} = substr($self->{tag}, 0, 1). ++$args->{$self->{tag}}
-    unless exists $self->{renumbered};
-  $self->{renumbered} = 1;
+  # TODO - add the xref if there is supposed to be one
+  return if exists $self->{recursed} or not defined $self->{xref};
+  # we can't actaully change the xrefs until the end
+  $self->{new_xref} = substr($self->{tag}, 0, 1). ++$args->{$self->{tag}}
+    unless exists $self->{new_xref};
   return unless $recurse and not exists $self->{recursed};
   $self->{recursed} = 1;
   if ($self->{tag} eq "INDI")
@@ -270,7 +349,7 @@ __END__
 
 Gedcom::Record - a class to manipulate Gedcom records
 
-Version 1.04 - 29th May 1999
+Version 1.05 - 20th July 1999
 
 =head1 SYNOPSIS
 
@@ -282,11 +361,12 @@ Version 1.04 - 29th May 1999
   my @famc = $self->resolve($self->child_values("FAMC"))
   $record->resolve_xrefs($callback)
   $record->unresolve_xrefs($callback)
-  return 0 unless $child->validate_semantics;
-  $record->renumber($args);
-  my $child = $record->child_value("NAME");
-  my @children = $record->child_values("CHIL");
-  print $record->summary, "\n";
+  return 0 unless $child->validate_semantics
+  $record->normalise_dates($format)
+  $record->renumber($args)
+  my $child = $record->child_value("NAME")
+  my @children = $record->child_values("CHIL")
+  print $record->summary, "\n"
 
 =head1 DESCRIPTION
 
@@ -298,7 +378,7 @@ Derived from Gedcom::Item.
 
 Some of the more important hash members are:
 
-=head2 $record->{renumbered}
+=head2 $record->{new_xref}
 
 Used by renumber().
 
@@ -352,16 +432,24 @@ See Gedcom::unresolve_xrefs()
 
 =head2 validate_semantics
 
-  return 0 unless $child->validate_semantics;
+  return 0 unless $child->validate_semantics
 
 Validate the semantics of the Gedcom::Record.  This performs a number of
 consistency checks, but could do even more.
 
 Returns true iff the Record is valid.
 
+=head2 normalise_dates
+
+  $record->normalise_dates($format)
+
+Change the format of all dates in the record.
+
+See the documentation for Gedcom::normalise_dates
+
 =head2 renumber
 
-  $record->renumber($args);
+  $record->renumber($args)
 
 Renumber the record.
 
@@ -369,28 +457,40 @@ See Gedcom::renumber().
 
 =head2 child_value
 
-  my $child = $record->child_value("NAME");
+  my $child = $record->child_value("NAME")
 
 Return the value of the specified child, or undef if the child could not
 be found.  Calls get_child().
 
 =head2 child_values
 
-  my @children = $record->child_values("CHIL");
+  my @children = $record->child_values("CHIL")
 
 Return a list of the values of the specified children.  Calls
 get_children().
 
 =head2 summary
 
-  print $record->summary, "\n";
+  print $record->summary, "\n"
 
 Return a line of text summarising the record.
 
+=head2 Access functions
+
+All the Gedcom tag names can be used as function names.  Depending on
+the context in which they are called, the functions return either an
+array of the specified children, or the first specified child.
+
+The descriptions of the tags, with spaces replaced by underscores, can
+also be used as function names.  The function names can be of either, or
+mixed case.  Unless you use the tag name, in either case, or the
+description in lower case, the function will not be pre-declared and you
+will need to qualify it or C<use subs>.
+
 =cut
 
-=for if we cannot make the min/max assumptions specified in
-     Gedcom::Grammar::valid_children
+=begin if we cannot make the min/max assumptions specified in
+       Gedcom::Grammar::valid_children
 
 use as:
   my @children = @{$ged->{record}{children}};
@@ -540,4 +640,4 @@ sub validate_syntax2
   $I--;
   $warn
 }
-=cut
+=end

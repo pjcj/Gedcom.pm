@@ -9,16 +9,16 @@
 
 use strict;
 
-require 5.004;
+require 5.005;
 
 package Gedcom::Grammar;
 
 use Data::Dumper;
 
-use Gedcom::Item 1.04;
+use Gedcom::Item 1.05;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.04";
+$VERSION = "1.05";
 @ISA     = qw( Gedcom::Item );
 
 sub structure
@@ -116,7 +116,7 @@ __END__
 
 Gedcom::Grammar - a class to manipulate Gedcom grammars
 
-Version 1.04 - 29th May 1999
+Version 1.05 - 20th July 1999
 
 =head1 SYNOPSIS
 

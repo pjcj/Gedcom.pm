@@ -48,3 +48,43 @@ Release 1.04 - 29th May 1999
  - Add lines2perl
  - Improve Makefile.PL environment tests
  - Work around IO::Handle::input_line_number bug
+
+Release 1.05
+ - Add LifeLines.pm
+ - Add Event.pm
+ - Add functions to:
+     Gedcom.pm:
+       soundex()
+     Item.pm:
+       level()
+       xref()
+       tag()
+       value()
+       min()
+       max()
+       gedcom()
+       file()
+       line()
+     Individual.pm:
+       name()
+       cased_name()
+       surname()
+       given_names()
+       soundex()
+       sex()
+       older_siblings()
+       younger_siblings()
+     Family.pm:
+       parents()
+       number_of_children()
+ - Change most functions in Individual and Family to check wantarray
+ - Have get_individual check xrefs and soundex
+ - Fix renumber error - xrefs are now calculated and then changed
+ - Change basic.t to reflect renumber fix
+ - Move normalise_dates from Item.pm to Record.pm
+ - Add AUTOLOAD function to Record.pm to provide access based on tag
+   name or description
+ - Change lines2perl to use references to arrays and hashes
+ - Other major changes to lines2perl to increase functionality
+ - Change require 5.004 to require 5.005
+ - Add check for Text/Soundex to Makefile.PL

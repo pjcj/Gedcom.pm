@@ -7,16 +7,16 @@
 # The latest version of this software should be available from my homepage:
 # http://www.transeda.com/pjcj
 
-# Version 1.04 - 29th May 1999
+# Version 1.05 - 20th July 1999
 
 use strict;
 use Test;
 
-require 5.004;
+require 5.005;
 
 BEGIN { plan tests => 2930 }
 
-use Gedcom 1.04;
+use Gedcom 1.05;
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
@@ -28,12 +28,12 @@ loop(resolve => "unresolve_xrefs");
 
 sub xrefs (@)
 {
-  join " ", map { $_->{xref} =~ /(\d+)/; $1 } @_
+  join " ", map { $_->xref =~ /(\d+)/; $1 } @_
 }
 
 sub rins (@)
 {
-  join " ", map { $_->child_value("RIN") } @_
+  join " ", map { $_->rin } @_
 }
 
 sub i (@) { "@_" }
@@ -79,16 +79,16 @@ sub loop (%)
 
   ok xrefs($ged->individuals), i(1 .. $inds);
   ok rins ($ged->individuals), "2 3 4 5 6 8 29 55 63 82 7 9 10 25 11 12 16 "   .
-                               "20 24 13 14 15 17 19 18 21 22 23 26 27 28 30 " .
+                               "20 24 13 14 15 17 18 19 21 22 23 26 27 28 30 " .
                                "31 49 32 47 33 39 43 48 34 35 36 37 38 40 41 " .
-                               "42 44 45 46 50 53 51 54 52 56 57 58 59 61 62 " .
-                               "60 64 65 71 78 67 69 70 68 66 72 73 75 74 77 " .
-                               "76 79 80 81 83 84 85 86 87 88 89 90 91 92";
+                               "42 44 45 46 50 53 51 54 52 56 57 58 59 60 61 " .
+                               "62 64 65 71 78 66 67 69 70 68 72 73 75 74 76 " .
+                               "77 79 80 81 83 84 85 86 87 88 89 90 91 92";
   ok xrefs($ged->families   ), i(1 .. $fams);
-  ok rins ($ged->families   ), "94 93 116 95 111 104 106 107 115 96 112 98 "  .
-                               "108 100 118 99 132 113 114 97 136 102 119 "   .
-                               "121 139 126 127 128 138 120 122 130 103 125 " .
-                               "105 101 117 110 133 134 135 129 109 137 131 " .
+  ok rins ($ged->families   ), "94 93 116 95 111 104 106 107 115 96 112 98 "   .
+                               "108 100 118 99 132 113 114 97 136 102 119 "    .
+                               "121 139 126 127 128 138 120 122 130 103 125 "  .
+                               "105 101 117 110 129 133 134 135 109 137 131 "  .
                                "123 124";
 
   ok $ged->next_xref("I"), "I" . ($inds + 1);
@@ -124,7 +124,7 @@ sub loop (%)
     brothers    => "",
     children    => "16 17 18 19",
     daughters   => "17",
-    descendents => "16 17 18 19 21 22 25 24 27 28",
+    descendents => "16 17 18 19 21 22 24 25 27 28",
     father      => "6",
     husband     => "15",
     mother      => "12",
@@ -153,25 +153,25 @@ sub loop (%)
   ok $xrefs{SUBM}, 1;
   ok rins($ged->resolve_xref($ind_xref)), "17";
 
-  ok xrefs($ged->individuals), "29 30 19 20 21 7 28 22 23 24 31 8 1 9 2 3 4 "  .
-                               "5 6 10 11 12 13 15 14 16 17 18 25 26 27 32 "   .
+  ok xrefs($ged->individuals), "29 30 19 20 21 7 22 23 24 25 31 8 1 9 2 3 4 "  .
+                               "5 6 10 11 12 13 14 15 16 17 18 26 27 28 32 "   .
                                "33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 " .
-                               "48 49 50 51 52 53 54 55 56 57 58 59 60 62 63 " .
-                               "61 64 65 66 67 69 70 71 72 68 73 74 75 76 78 " .
-                               "77 79 80 81 82 83 84 85 86 87 88 89 90 91";
-  ok rins ($ged->individuals), "2 3 4 5 6 8 29 55 63 82 7 9 10 25 11 12 16 "   .
-                               "20 24 13 14 15 17 19 18 21 22 23 26 27 28 30 " .
+                               "48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 " .
+                               "63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 " .
+                               "78 79 80 81 82 83 84 85 86 87 88 89 90 91";
+  ok rins ($ged->individuals), "2 3 4 5 6 8 29 55 63 82 7 9 10 25 11 12 16 " .
+                               "20 24 13 14 15 17 18 19 21 22 23 26 27 28 30 " .
                                "31 49 32 47 33 39 43 48 34 35 36 37 38 40 41 " .
-                               "42 44 45 46 50 53 51 54 52 56 57 58 59 61 62 " .
-                               "60 64 65 71 78 67 69 70 68 66 72 73 75 74 77 " .
-                               "76 79 80 81 83 84 85 86 87 88 89 90 91 92";
+                               "42 44 45 46 50 53 51 54 52 56 57 58 59 60 61 " .
+                               "62 64 65 71 78 66 67 69 70 68 72 73 75 74 76 " .
+                               "77 79 80 81 83 84 85 86 87 88 89 90 91 92";
   ok xrefs($ged->families   ), "14 46 47 10 15 16 17 18 19 2 11 1 3 4 5 6 7 "  .
                                "8 9 12 13 20 21 22 23 24 25 26 27 28 29 30 "   .
-                               "31 32 33 34 35 36 38 39 40 37 41 42 43 44 45";
+                               "31 32 33 34 35 36 37 38 39 40 41 42 43 44 45";
   ok rins ($ged->families   ), "94 93 116 95 111 104 106 107 115 96 112 98 "   .
                                "108 100 118 99 132 113 114 97 136 102 119 "    .
                                "121 139 126 127 128 138 120 122 130 103 125 "  .
-                               "105 101 117 110 133 134 135 129 109 137 131 "  .
+                               "105 101 117 110 129 133 134 135 109 137 131 "  .
                                "123 124";
 
   ok $ged->next_xref("I"), "I" . ($inds + 1);
@@ -228,7 +228,6 @@ sub loop (%)
   ok close F1;
   ok unlink $f1;
 }
-
 __DATA__
 0 HEAD
 1   SOUR PAF 2.2
@@ -388,7 +387,7 @@ __DATA__
 1   FAMC @F10@
 1   RIN 8
 
-0 @I28@ INDI
+0 @I22@ INDI
 1   NAME Mary  /Windsor/
 1   TITL Princess Royal
 1   SEX F
@@ -402,7 +401,7 @@ __DATA__
 1   FAMC @F10@
 1   RIN 29
 
-0 @I22@ INDI
+0 @I23@ INDI
 1   NAME Henry William Frederick/Windsor/
 1   TITL Duke
 1   SEX M
@@ -415,7 +414,7 @@ __DATA__
 1   FAMC @F10@
 1   RIN 55
 
-0 @I23@ INDI
+0 @I24@ INDI
 1   NAME George Edward Alexander/Windsor/
 1   TITL Duke of Kent
 1   SEX M
@@ -429,7 +428,7 @@ __DATA__
 1   FAMC @F10@
 1   RIN 63
 
-0 @I24@ INDI
+0 @I25@ INDI
 1   NAME John Charles Francis/Windsor/
 1   TITL Prince
 1   SEX M
@@ -604,15 +603,6 @@ __DATA__
 1   FAMC @F7@
 1   RIN 17
 
-0 @I15@ INDI
-1   NAME Zara Anne Elizabeth/Phillips/
-1   SEX F
-1   BIRT
-2     DATE Friday, 15th May 1981
-2     PLAC St. Marys Hosp.,Paddington,London,England
-1   FAMC @F6@
-1   RIN 19
-
 0 @I14@ INDI
 1   NAME Peter Mark Andrew/Phillips/
 1   SEX M
@@ -624,6 +614,15 @@ __DATA__
 2     PLAC Music Room,Buckingham,Palace,England
 1   FAMC @F6@
 1   RIN 18
+
+0 @I15@ INDI
+1   NAME Zara Anne Elizabeth/Phillips/
+1   SEX F
+1   BIRT
+2     DATE Friday, 15th May 1981
+2     PLAC St. Marys Hosp.,Paddington,London,England
+1   FAMC @F6@
+1   RIN 19
 
 0 @I16@ INDI
 1   NAME Sarah Margaret /Ferguson/
@@ -659,7 +658,7 @@ __DATA__
 1   FAMC @F8@
 1   RIN 23
 
-0 @I25@ INDI
+0 @I26@ INDI
 1   NAME Anthony Charles Robert/Armstrong-Jones/
 1   TITL Earl of Snowdon
 1   SEX M
@@ -669,7 +668,7 @@ __DATA__
 1   FAMS @F13@
 1   RIN 26
 
-0 @I26@ INDI
+0 @I27@ INDI
 1   NAME David Albert Charles/Armstrong-Jones/
 1   TITL Vicount Linley
 1   SEX M
@@ -678,7 +677,7 @@ __DATA__
 1   FAMC @F12@
 1   RIN 27
 
-0 @I27@ INDI
+0 @I28@ INDI
 1   NAME Sarah Frances Elizabeth/Armstrong-Jones/
 1   TITL Lady
 1   SEX F
@@ -952,6 +951,19 @@ __DATA__
 1   FAMS @F33@
 1   RIN 59
 
+0 @I61@ INDI
+1   NAME Alexander Patrick Gregers//
+1   TITL Earl of Ulster
+1   SEX M
+1   BIRT
+2     DATE Thursday, 24th October 1974
+2     PLAC St. Marys Hosp.,Paddington,London,England
+1   CHR
+2     DATE Sunday, 9th February 1975
+2     PLAC Barnwell Church
+1   FAMC @F33@
+1   RIN 60
+
 0 @I62@ INDI
 1   NAME Davina Elizabeth Alice/Windsor/
 1   TITL Lady
@@ -975,19 +987,6 @@ __DATA__
 2     PLAC Barnwell Church,,England
 1   FAMC @F33@
 1   RIN 62
-
-0 @I61@ INDI
-1   NAME Alexander Patrick Gregers//
-1   TITL Earl of Ulster
-1   SEX M
-1   BIRT
-2     DATE Thursday, 24th October 1974
-2     PLAC St. Marys Hosp.,Paddington,London,England
-1   CHR
-2     DATE Sunday, 9th February 1975
-2     PLAC Barnwell Church
-1   FAMC @F33@
-1   RIN 60
 
 0 @I64@ INDI
 1   NAME Marina of_Greece //
@@ -1034,6 +1033,16 @@ __DATA__
 1   FAMS @F44@
 1   FAMC @F34@
 1   RIN 78
+
+0 @I68@ INDI
+1   NAME Katharine  /Worsley/
+1   TITL Duchess of Kent
+1   SEX F
+1   BIRT
+2     DATE 1933
+1   FAMS @F36@
+1   FAMC @F37@
+1   RIN 66
 
 0 @I69@ INDI
 1   NAME George Philip of_St._Andrews/Windsor/
@@ -1083,16 +1092,6 @@ __DATA__
 1   FAMC @F40@
 1   RIN 68
 
-0 @I68@ INDI
-1   NAME Katharine  /Worsley/
-1   TITL Duchess of Kent
-1   SEX F
-1   BIRT
-2     DATE 1933
-1   FAMS @F36@
-1   FAMC @F37@
-1   RIN 66
-
 0 @I73@ INDI
 1   NAME Angus  /Ogilvy/
 1   TITL Hon.
@@ -1128,14 +1127,6 @@ __DATA__
 1   FAMS @F42@
 1   RIN 74
 
-0 @I78@ INDI
-1   NAME /Mowatt/
-1   SEX F
-1   BIRT
-2     DATE Saturday, 26th May 1990
-1   FAMC @F43@
-1   RIN 77
-
 0 @I77@ INDI
 1   NAME Paul  /Mowatt/
 1   SEX M
@@ -1143,6 +1134,14 @@ __DATA__
 2     DATE ABT    1962
 1   FAMS @F43@
 1   RIN 76
+
+0 @I78@ INDI
+1   NAME /Mowatt/
+1   SEX F
+1   BIRT
+2     DATE Saturday, 26th May 1990
+1   FAMC @F43@
+1   RIN 77
 
 0 @I79@ INDI
 1   NAME Marie-Christine  /von_Reibnitz/
@@ -1249,10 +1248,10 @@ __DATA__
 1   WIFE @I20@
 1   CHIL @I21@
 1   CHIL @I7@
-1   CHIL @I28@
 1   CHIL @I22@
 1   CHIL @I23@
 1   CHIL @I24@
+1   CHIL @I25@
 1   MARR
 2     DATE Thursday, 6th July 1893
 2     PLAC Chapel Royal,St. James Palace
@@ -1375,10 +1374,10 @@ __DATA__
 1   RIN 114
 
 0 @F12@ FAM
-1   HUSB @I25@
+1   HUSB @I26@
 1   WIFE @I9@
-1   CHIL @I26@
 1   CHIL @I27@
+1   CHIL @I28@
 1   DIV Y
 1   MARR
 2     DATE Friday, 6th May 1960
@@ -1386,14 +1385,14 @@ __DATA__
 1   RIN 97
 
 0 @F13@ FAM
-1   HUSB @I25@
+1   HUSB @I26@
 1   MARR
 2     DATE Sunday, 17th December 1978
 1   RIN 136
 
 0 @F20@ FAM
 1   HUSB @I32@
-1   WIFE @I28@
+1   WIFE @I22@
 1   CHIL @I33@
 1   CHIL @I34@
 1   MARR
@@ -1482,7 +1481,7 @@ __DATA__
 1   RIN 130
 
 0 @F31@ FAM
-1   HUSB @I22@
+1   HUSB @I23@
 1   WIFE @I57@
 1   CHIL @I58@
 1   CHIL @I59@
@@ -1506,7 +1505,7 @@ __DATA__
 1   RIN 105
 
 0 @F34@ FAM
-1   HUSB @I23@
+1   HUSB @I24@
 1   WIFE @I64@
 1   CHIL @I65@
 1   CHIL @I66@
@@ -1532,6 +1531,10 @@ __DATA__
 2     DATE 1961
 1   RIN 110
 
+0 @F37@ FAM
+1   CHIL @I68@
+1   RIN 129
+
 0 @F38@ FAM
 1   HUSB @I69@
 1   WIFE @I72@
@@ -1548,10 +1551,6 @@ __DATA__
 1   CHIL @I72@
 1   DIV Y
 1   RIN 135
-
-0 @F37@ FAM
-1   CHIL @I68@
-1   RIN 129
 
 0 @F41@ FAM
 1   HUSB @I73@

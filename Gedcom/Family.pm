@@ -9,44 +9,67 @@
 
 use strict;
 
-require 5.004;
+require 5.005;
 
 package Gedcom::Family;
 
-use Gedcom::Record 1.04;
+use Gedcom::Record 1.05;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.04";
+$VERSION = "1.05";
 @ISA     = qw( Gedcom::Record );
 
 sub husband
 {
   my $self = shift;
-  $self->resolve($self->child_values("HUSB"));
+  my @a = $self->resolve($self->child_values("HUSB"));
+  wantarray ? @a : $a[0]
 }
 
 sub wife
 {
   my $self = shift;
-  $self->resolve($self->child_values("WIFE"));
+  my @a = $self->resolve($self->child_values("WIFE"));
+  wantarray ? @a : $a[0]
+}
+
+sub parents
+{
+  my $self = shift;
+  ($self->husband, $self->wife)
+}
+
+sub number_of_children
+{
+  my ($self) = @_;
+  $self->child_value("NCHI") || $#{[$self->children]}
 }
 
 sub children
 {
   my $self = shift;
-  $self->resolve($self->child_values("CHIL"));
+  my @a = $self->resolve($self->child_values("CHIL"));
+  wantarray ? @a : $a[0]
 }
 
 sub boys
 {
   my $self = shift;
-  grep { $_->child_value("SEX") !~ /^F/i } $self->children
+  my @a = grep { $_->child_value("SEX") !~ /^F/i } $self->children;
+  wantarray ? @a : $a[0]
 }
 
 sub girls
 {
   my $self = shift;
-  grep { $_->child_value("SEX") !~ /^M/i } $self->children
+  my @a = grep { $_->child_value("SEX") !~ /^M/i } $self->children;
+  wantarray ? @a : $a[0]
+}
+
+sub print
+{
+  my $self = shift;
+  $self->SUPER::print; $_->print for @{$self->{children}};
 }
 
 1;
@@ -57,17 +80,19 @@ __END__
 
 Gedcom::Family - a class to manipulate Gedcom families
 
-Version 1.04 - 29th May 1999
+Version 1.05 - 20th July 1999
 
 =head1 SYNOPSIS
 
   use Gedcom::Family;
 
-  my @rel = $f->husband;
-  my @rel = $f->wife;
-  my @rel = $f->children;
-  my @rel = $f->boys;
-  my @rel = $f->girls;
+  my @rel = $f->husband
+  my @rel = $f->wife
+  my @rel = $f->parents
+  my $nch = $f->number_of_children
+  my @rel = $f->children
+  my @rel = $f->boys
+  my @rel = $f->girls
 
 =head1 DESCRIPTION
 
@@ -85,15 +110,23 @@ None yet.
 
 =head2 Individual functions
 
-  my @rel = $f->husband;
-  my @rel = $f->wife;
-  my @rel = $f->children;
-  my @rel = $f->boys;
-  my @rel = $f->girls;
+  my @rel = $f->husband
+  my @rel = $f->wife
+  my @rel = $f->parents
+  my @rel = $f->children
+  my @rel = $f->boys
+  my @rel = $f->girls
 
 Return a list of individuals from family $f.
 
 Each function, even those with a singular name such as husband(),
 returns a list of individuals holding that releation in $f.
+
+=head2 number_of_children
+
+  my $nch = $f->number_of_children
+
+Return the number of children in the family, as specified or from
+counting.
 
 =cut

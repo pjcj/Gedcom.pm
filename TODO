@@ -1,7 +1,9 @@
 - Beef up the documentation.
-- Beef up the testsuite.
+- Beef up the testsuite, including LifeLines tests.
 - Make ged into a real program, rather than just a little demo.
 - Rewrite tkged
 - Provide functions to add data
 - Provide functions to merge data
 - Make constructors better
+- Finish LifeLines.pm
+- Fill in missing tag descriptions in Gedcom.pm
