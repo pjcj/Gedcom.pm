@@ -1,23 +1,23 @@
-#!/usr/bin/perl -w
+#!/usr/local/pkg/perl-5.8.3/bin/perl5.8.3 -w
 
-# Copyright 2001-2003, Paul Johnson (pjcj@cpan.org)
+# Copyright 2001-2004, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.13 - 6th December 2003
+# Version 1.14 - 5th April 2004
 
 use strict;
 
 require 5.005;
 
-use lib "/home/pjcj/g/perl/dev/Gedcom";
+use lib "/var/www/Gedcom";
 
 use CGI qw(:cgi :html);
 
-use Gedcom::CGI 1.13;
+use Gedcom::CGI 1.14;
 
 my $op = param("op");
 
@@ -39,7 +39,7 @@ __END__
 
 main.cgi
 
-Version 1.13 - 6th December 2003
+Version 1.14 - 5th April 2004
 
 =head1 SYNOPSIS
 

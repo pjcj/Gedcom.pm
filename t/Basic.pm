@@ -1,13 +1,13 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1999-2003, Paul Johnson (pjcj@cpan.org)
+# Copyright 1999-2004, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.13 - 6th December 2003
+# Version 1.14 - 5th April 2004
 
 use strict;
 
@@ -16,11 +16,11 @@ require 5.005;
 package Basic;
 
 use vars qw($VERSION);
-$VERSION = "1.13";
+$VERSION = "1.14";
 
 use Test ();
 
-use Gedcom 1.13;
+use Gedcom 1.14;
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
@@ -29,7 +29,7 @@ sub ok
 {
     my @a = @_;
     s/[\r\n]+$/\n/ for @a;
-    Test::ok(@a)
+    &Test::ok(@a)
 }
 
 my @Ged_data = <DATA>;
@@ -236,6 +236,10 @@ sub import
     ok $i->note, "Line 1\nLine 2\nLine 3\nLine 4";
     ok scalar $i->get_value("birth age"), 0;
 
+
+       $i = $ged->get_individual("I83");
+    my $n = $i->resolve($i->note)->full_value;
+    ok $n, "Line 1\nLine 2";
 #   ok $ged->validate;
 
     my $f1 = $gedcom_file . "1";
@@ -245,13 +249,13 @@ sub import
 
     # check the gedcom file is correct
     ok open F1, $f1;
-    ok <F1>, $_ for @Ged_data;
+    ok scalar <F1>, $_ for @Ged_data;
     ok eof;
     ok close F1;
     ok unlink $f1;
   };
 
-  my $tests = 1487;
+  my $tests = 1492;
   my $grammar;
   if ($grammar = delete $args{create_grammar})
   {
@@ -1244,6 +1248,7 @@ __DATA__
 
 0 @I83@ INDI
 1   NAME A2 B2 C2
+1   NOTE @N1@
 1   RIN 84
 
 0 @I84@ INDI
@@ -1654,7 +1659,10 @@ __DATA__
 2     DATE Sunday, 19th September 1971
 1   RIN 124
 
+0 @N1@ NOTE Line 1
+1   CONT Line 2
+
 0 @S1@ SOUR
-1   TEXT Hello
+1   TEXT Source text
 
 0 TRLR

@@ -13,3 +13,5 @@
 - Conversion of notes to and from top level records
 - Include names in index file?
 - Document add_xxx functions.
+- Integrate functions I've been sent and write new ones suggested.
+- Use Gedcom::Date.

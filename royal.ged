@@ -966,6 +966,7 @@
 
 0 @I83@ INDI
 1   NAME A2 B2 C2
+1   NOTE @N1@
 1   RIN 84
 
 0 @I84@ INDI
@@ -1378,5 +1379,8 @@
 
 0 @S1@ SOUR
 1   TEXT Source text
+
+0 @N1@ NOTE Line 1
+1   CONT Line 2
 
 0 TRLR

@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1998-2003, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2004, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -16,8 +16,8 @@ use ExtUtils::Manifest "maniread";
 
 $| = 1;
 
-my $Version = "1.13";
-my $Date    = "6th December 2003";
+my $Version = "1.14";
+my $Date    = "5th April 2004";
 my $Author  = 'pjcj@cpan.org';
 
 my @perlbug = ("perlbug", "-a", $Author,
@@ -212,7 +212,7 @@ COVERDIR = /home/pjcj/g/perl/dev/Devel-Cover
 
 cover :
 \t \$(PERL) -I\$(COVERDIR)/blib/lib -I\$(COVERDIR)/blib/arch \$(COVERDIR)/cover -delete && \\
-   HARNESS_PERL_SWITCHES=-I\$(COVERDIR)/blib/lib\\ -I\$(COVERDIR)/blib/arch\\ -MDevel::Cover=-ignore,Cover make test && \\
+   HARNESS_PERL_SWITCHES=-I\$(COVERDIR)/blib/lib\\ -I\$(COVERDIR)/blib/arch\\ -MDevel::Cover=-ignore,Cover \$(MAKE) test && \\
    \$(PERL) -I\$(COVERDIR)/blib/lib -I\$(COVERDIR)/blib/arch \$(COVERDIR)/cover -report html
 
 ok :

@@ -1,4 +1,4 @@
-# Copyright 1998-2003, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2004, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -16,7 +16,7 @@ package Gedcom::Item;
 use Symbol;
 
 use vars qw($VERSION);
-$VERSION = "1.13";
+$VERSION = "1.14";
 
 sub new
 {
@@ -90,26 +90,23 @@ sub read
         my $record =
           Gedcom::Record->new(gedcom  => $self->{gedcom},
                               tag     => $vals[0],
-                              line    => $vals[2],
-                              cpos    => $vals[3],
+                              line    => $vals[3],
+                              cpos    => $vals[4],
                               grammar => $g->item($vals[0]),
                               fh      => $self->{fh},
                               level   => 0);
-        $record->{xref} = $vals[1] if length $vals[1];
+        $record->{xref}  = $vals[1] if length $vals[1];
+        $record->{value} = $vals[2] if length $vals[2];
         my $class = $self->{gedcom}{types}{$vals[0]};
         bless $record, "Gedcom::$class" if $class;
         push @{$self->{items}}, $record;
       }
       close I or warn "Can't close $if";
     }
-    # use Data::Dumper;
-    # print Dumper $self;
   }
 
   unless (@{$self->{items}})
   {
-    # use Data::Dumper;
-    # print Dumper $self->{items};
     # $#{$self->{items}} = 20000;
     # $#{$self->{items}} = -1;
     # If we have a grammar, then we are reading a gedcom file and must use
@@ -156,8 +153,6 @@ sub read
 
   if ($self->{gedcom}{read_only} && defined $gf && (! defined $gc || $gc > $gf))
   {
-    # print Dumper $self;
-    # $self->{gedcom}->individuals;
     if (! open I, ">$if")
     {
       warn "Can't open $if";
@@ -166,9 +161,7 @@ sub read
     {
       for my $item (@{$self->{items}})
       {
-        print I join("|", map { $item->{$_} || "" } qw(tag xref line cpos));
-        # my $n = $item->tag_value("NAME");
-        # print I "|$n" if defined $n;
+        print I join("|", map { $item->{$_} || "" } qw(tag xref value line cpos));
         print I "\n";
       }
       close I or warn "Can't close $if";
@@ -356,9 +349,7 @@ sub next_item
       {
         # print " -- pushing back\n";
         seek($fh, $bpos, 0);
-        # print "$.\n";
         $. = $bline;
-        # print "$.\n";
       }
     }
     elsif ($line =~ /^\s*[\[\|\]]\s*(?:\/\*.*\*\/\s*)?$/)
@@ -374,11 +365,8 @@ sub next_item
     }
   }
 
-# use Data::Dumper;
 # print "\ncomparing "; $item->print;
-# print Dumper($item);
 # print "with      "; $rec->print if $rec;
-# print Dumper($rec);
   $self->add_items($rec)
     if $rec && defined $rec->{level} && ($rec->{level} > $item->{level});
   $rec;
@@ -389,7 +377,6 @@ sub next_line
   my $self = shift;
   my $fh = $self->{fh};
   my $line = <$fh>;
-# print "read $line";
   $line;
 }
 
@@ -397,9 +384,7 @@ sub next_text_line
 {
   my $self = shift;
   my $line = "";
-# $line = $self->next_line until !defined $line || $line =~ /\S/;
   my $fh = $self->{fh};
-  # print "-- $.\n";
   $line = <$fh> until !defined $line || $line =~ /\S/;
   $line;
 }
@@ -640,10 +625,6 @@ sub full_value
 sub _items
 {
   my $self = shift;
-# use Data::Dumper;
-# print STDERR Dumper $self unless $self->{gedcom}{record};
-# print "_items() $self->{items}\n"; # $self->print;
-# print "level $self->{level}\n";
   $self->{gedcom}{record}->add_items($self, 1)
     if !defined $self->{_items} && $self->{level} >= 0;
   $self->{_items} = 1;
@@ -671,7 +652,7 @@ __END__
 
 Gedcom::Item - a base class for Gedcom::Grammar and Gedcom::Record
 
-Version 1.13 - 6th December 2003
+Version 1.14 - 5th April 2004
 
 =head1 SYNOPSIS
 
