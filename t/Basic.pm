@@ -1,13 +1,13 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1999-2002, Paul Johnson (pjcj@cpan.org)
+# Copyright 1999-2003, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.11 - 7th April 2002
+# Version 1.12 - 2nd February 2003
 
 use strict;
 
@@ -16,14 +16,21 @@ require 5.005;
 package Basic;
 
 use vars qw($VERSION);
-$VERSION = "1.11";
+$VERSION = "1.12";
 
-use Test;
+use Test ();
 
-use Gedcom 1.11;
+use Gedcom 1.12;
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
+
+sub ok
+{
+    my @a = @_;
+    s/[\r\n]+$/\n/ for @a;
+    Test::ok(@a)
+}
 
 my @Ged_data = <DATA>;
 
@@ -242,7 +249,7 @@ sub import
   my $grammar;
   if ($grammar = delete $args{create_grammar})
   {
-    plan tests => $tests + 3;
+    Test::plan tests => $tests + 3;
     system ($^X, ((-d "t") ? "." : "..") . "/parse_grammar", $grammar, 0.1);
     ok $?, 0;
     ok -e "Gedcom/Grammar_0_1.pm";
@@ -250,7 +257,7 @@ sub import
   }
   else
   {
-    plan tests => $tests;
+    Test::plan tests => $tests;
   }
 
   require Engine;

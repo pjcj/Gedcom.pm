@@ -1,4 +1,4 @@
-# Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2003, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -16,7 +16,7 @@ package Gedcom::Item;
 use Symbol;
 
 use vars qw($VERSION);
-$VERSION = "1.11";
+$VERSION = "1.12";
 
 sub new
 {
@@ -433,49 +433,84 @@ sub write_xml
 {
   my $self = shift;
   my ($fh, $level) = @_;
+
+  return if $self->{tag} && $self->{tag} =~ /^(CON[CT]|TRLR)$/;
+
+  my $spaced = 0;
+  my $events = 0;
+
   $level = 0 unless $level;
   my $indent = "  " x $level;
-  my $tag = $level >= 0 && $self->{tag} && $self->{tag} !~ /^CON[CT]$/;
+
+  my $tag = $level >= 0 && $self->{tag};
+
   my $value = $self->{value}
               ? ref $self->{value}
-                ? "$self->{value}{xref}"
-                : $self->resolve_xref($self->{value})
-                  ? "$self->{value}"
-                  : $self->{value}
+                ? $self->{value}{xref}
+                : $self->full_value
               : undef;
+  $value =~ s/\s+$// if defined $value;
+
+  my $sub_items = @{$self->_items};
+
   my $p = "";
   if ($tag)
   {
-    $tag = defined $self->{gedcom}{types}{$self->{tag}} &&
+    $tag = $events &&
+           defined $self->{gedcom}{types}{$self->{tag}} &&
                    $self->{gedcom}{types}{$self->{tag}} eq "Event"
       ? "EVEN"
       : $self->{tag};
+
+    $tag = "GED" if $tag eq "GEDCOM";
+
     $p .= $indent;
     $p .= "<$tag";
+
     if ($tag eq "EVEN")
     {
       $p .= qq( EV="$self->{tag}");
     }
-    elsif ($tag =~ /^(FAM[SC]|SUBM|NOTE|HUSB|WIFE|CHIL)$/)
+    elsif ($tag =~ /^(FAM[SC]|HUSB|WIFE|CHIL|SUBM|NOTE)$/ &&
+           defined $value &&
+           $self->resolve_xref($self->{value}))
     {
-      $p .= qq( REF="$value") if defined $value;
+      $p .= qq( REF="$value");
       $value = undef;
-      $tag = undef unless @{$self->_items};
+      $tag = undef unless $sub_items;
     }
     elsif ($self->{xref})
     {
       $p .= qq( ID="$self->{xref}");
     }
+
     $p .= "/" unless defined $value || $tag;
-    $p .= ">\n";
+    $p .= ">";
+    $p .= "\n"
+      if $sub_items ||
+         (!$spaced &&
+          (!(defined $value || $tag) || $tag eq "EVEN" || $self->{xref}));
   }
-  $p .= "$indent  $value\n" if defined $value;
+
+  if (defined $value)
+  {
+    $p .= "$indent  " if $spaced || $sub_items;
+    $p .= $value;
+    $p .= "\n"        if $spaced || $sub_items;
+  }
+
   $fh->print($p);
-  for my $c (0 .. @{$self->_items} - 1)
+
+  for my $c (0 .. $sub_items - 1)
   {
     $self->{items}[$c]->write_xml($fh, $level + 1);
   }
-  $fh->print("$indent</$tag>\n") if $tag;
+
+  if ($tag)
+  {
+    $fh->print($indent) if $spaced || $sub_items;
+    $fh->print("</$tag>\n");
+  }
 }
 
 sub print
@@ -591,10 +626,13 @@ sub full_value
 {
   my $self = shift;
   my $value = $self->{value};
+  $value =~ s/[\r\n]+$// if defined $value;
   for my $item (@{$self->_items})
   {
-    $value .= "\n$item->{value}" if $item->{tag} eq "CONT";
-    $value .=    $item->{value}  if $item->{tag} eq "CONC";
+    my $v = defined $item->{value} ? $item->{value} : "";
+    $v =~ s/[\r\n]+$//;
+    $value .= "\n$v" if $item->{tag} eq "CONT";
+    $value .=    $v  if $item->{tag} eq "CONC";
   }
   $value
 }
@@ -633,7 +671,7 @@ __END__
 
 Gedcom::Item - a base class for Gedcom::Grammar and Gedcom::Record
 
-Version 1.11 - 7th April 2002
+Version 1.12 - 2nd February 2003
 
 =head1 SYNOPSIS
 

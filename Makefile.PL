@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2003, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -15,8 +15,8 @@ use ExtUtils::MakeMaker;
 
 $| = 1;
 
-my $Version = "1.11";
-my $Date    = "7th April 2002";
+my $Version = "1.12";
+my $Date    = "2nd February 2003";
 my $Author  = 'pjcj@cpan.org';
 
 my @perlbug = ("perlbug", "-a", $Author,
@@ -209,6 +209,13 @@ ppm : ppd pure_all
   -e 's/(ARCHITECTURE NAME=")[^"]*/\$\$1MSWin32-x86-multi-thread/;' \\
   -e 's/(CODEBASE HREF=")[^"]*/\$\$1Gedcom.tar.gz/;' \\
   Gedcom.ppd
+
+COVERDIR = /home/pjcj/g/perl/dev/Devel-Cover-0.2003
+
+cover :
+\t rm -rf cover_db && \\
+   HARNESS_PERL_SWITCHES=-I\$(COVERDIR)/blib/lib\\ -I\$(COVERDIR)/blib/arch\\ -MDevel::Cover=-ignore,Cover make test && \\
+   \$(PERL) -I\$(COVERDIR)/blib/lib -I\$(COVERDIR)/blib/arch \$(COVERDIR)/cover -report html
 
 ok :
 \t \@$Perlbug -okay  || echo "Please send your report manually to $Author"

@@ -1,4 +1,4 @@
-# Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2003, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -13,10 +13,10 @@ require 5.005;
 
 package Gedcom::Family;
 
-use Gedcom::Record 1.11;
+use Gedcom::Record 1.12;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.11";
+$VERSION = "1.12";
 @ISA     = qw( Gedcom::Record );
 
 sub husband
@@ -112,7 +112,7 @@ __END__
 
 Gedcom::Family - a module to manipulate Gedcom families
 
-Version 1.11 - 7th April 2002
+Version 1.12 - 2nd February 2003
 
 =head1 SYNOPSIS
 
@@ -125,6 +125,9 @@ Version 1.11 - 7th April 2002
   my @rel = $f->children;
   my @rel = $f->boys;
   my @rel = $f->girls;
+  $f->add_husband($i);
+  $f->add_wife($i);
+  $f->add_child($i);
 
 =head1 DESCRIPTION
 

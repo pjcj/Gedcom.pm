@@ -1,4 +1,4 @@
-# Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2003, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -16,10 +16,10 @@ package Gedcom::Record;
 use Carp;
 BEGIN { eval "use Date::Manip" }             # We'll use this if it is available
 
-use Gedcom::Item 1.11;
+use Gedcom::Item 1.12;
 
 use vars qw($VERSION @ISA $AUTOLOAD);
-$VERSION = "1.11";
+$VERSION = "1.12";
 @ISA     = qw( Gedcom::Item );
 
 BEGIN
@@ -600,7 +600,7 @@ __END__
 
 Gedcom::Record - a module to manipulate Gedcom records
 
-Version 1.11 - 7th April 2002
+Version 1.12 - 2nd February 2003
 
 =head1 SYNOPSIS
 

@@ -8,3 +8,5 @@
 - Turn children from an array into a hash: key is tag, value is array of items.
 - Separate REs for parsing grammar files and gedcom files.
   Note: I tried this but it didn't seem to provide much of a benefit.
+- Conversion of notes to and from top level records
+- Include names in index file?

@@ -1,4 +1,4 @@
-# Copyright 1998-2002, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2003, Paul Johnson (pjcj@cpan.org)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -15,10 +15,10 @@ package Gedcom::Grammar;
 
 use Data::Dumper;
 
-use Gedcom::Item 1.11;
+use Gedcom::Item 1.12;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.11";
+$VERSION = "1.12";
 @ISA     = qw( Gedcom::Item );
 
 sub structure
@@ -138,7 +138,7 @@ __END__
 
 Gedcom::Grammar - a module to manipulate Gedcom grammars
 
-Version 1.11 - 7th April 2002
+Version 1.12 - 2nd February 2003
 
 =head1 SYNOPSIS
 

@@ -41,6 +41,7 @@ t/lines/namefreq
 t/lines/namefreq.l
 t/lines/namefreq.plx
 t/ged_create.t
+t/grammar_file.t
 royal.ged
 gedcom.vim
 session.vim
