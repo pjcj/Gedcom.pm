@@ -12,11 +12,12 @@ use strict;
 require 5.005;
 
 use ExtUtils::MakeMaker;
+use ExtUtils::Manifest "maniread";
 
 $| = 1;
 
-my $Version = "1.12";
-my $Date    = "2nd February 2003";
+my $Version = "1.13";
+my $Date    = "6th December 2003";
 my $Author  = 'pjcj@cpan.org';
 
 my @perlbug = ("perlbug", "-a", $Author,
@@ -24,11 +25,8 @@ my @perlbug = ("perlbug", "-a", $Author,
 
 my $Perlbug = join " ", map { / / ? "'$_'" : $_ } @perlbug;
 
-
-open M, "MANIFEST" or die "Cannot open MANIFEST: $!";
-my @files    = map { split } <M>;
+my @files    = sort keys %{maniread()};
 my @versions = grep { $_ ne "README" && $_ ne "Makefile.PL" } @files;
-close M or die "Cannot close MANIFEST: $!";
 
 $ExtUtils::MakeMaker::Verbose = 0;
 
@@ -210,10 +208,10 @@ ppm : ppd pure_all
   -e 's/(CODEBASE HREF=")[^"]*/\$\$1Gedcom.tar.gz/;' \\
   Gedcom.ppd
 
-COVERDIR = /home/pjcj/g/perl/dev/Devel-Cover-0.2003
+COVERDIR = /home/pjcj/g/perl/dev/Devel-Cover
 
 cover :
-\t rm -rf cover_db && \\
+\t \$(PERL) -I\$(COVERDIR)/blib/lib -I\$(COVERDIR)/blib/arch \$(COVERDIR)/cover -delete && \\
    HARNESS_PERL_SWITCHES=-I\$(COVERDIR)/blib/lib\\ -I\$(COVERDIR)/blib/arch\\ -MDevel::Cover=-ignore,Cover make test && \\
    \$(PERL) -I\$(COVERDIR)/blib/lib -I\$(COVERDIR)/blib/arch \$(COVERDIR)/cover -report html
 

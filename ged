@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.12 - 2nd February 2003
+# Version 1.13 - 6th December 2003
 
 use strict;
 
@@ -18,10 +18,10 @@ use diagnostics;
 use Data::Dumper;
 $Data::Dumper::Indent = 1;
 
-use Gedcom 1.12;
+use Gedcom 1.13;
 
 use vars qw( $VERSION );
-$VERSION = "1.12";
+$VERSION = "1.13";
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
@@ -37,11 +37,22 @@ sub main()
   (
     gedcom_file     => $gedcom_file,
     # grammar_version => 0.1,
-    # grammar_file    => "gedcom-5.5.grammar",
+    grammar_file    => "gedcom-5.5.aft.grammar",
     callback        => sub { print "." },
     read_only       => 1,
   );
   if (1)
+  {
+    my $age = sub { Date_Cmp(ParseDate($a->get_value("birth date") || ""),
+                             ParseDate($b->get_value("birth date") || "")) };
+    print "\nrenumbering...";
+    my @i = sort { $age->($a) <=> $age->($b) } $ged->individuals;
+    $ged->renumber(xrefs => [ map $_->xref, @i ]);
+    $ged->validate;
+    print "\nwriting...";
+    $ged->write("$gedcom_file.new");
+  }
+  if (0)
   {
     # my @i = $ged->get_individual("I8");
     # my @i = grep $_->rin == 8, $ged->individuals;
@@ -53,6 +64,17 @@ sub main()
     print "[", $i->get_value("fams marriage date"), "]\n";
     print "[", $i->fams->marriage->date, "]\n";
     print "[", $i->get_value(qw(famc marriage date)), "]\n";
+  }
+  if (1)
+  {
+    my $i = $ged->get_individual("I31");
+    my $famc = $i->famc;
+    my $s = $famc->source;
+    print "source: $s\n";
+    my ($source) = grep $_->xref eq $s, $ged->{record}->record("source");
+    print $source->text, "\n";
+    my $s2 = $ged->get_source($s);
+    print $s2->text, "\n";
     return;
   }
   if (0)

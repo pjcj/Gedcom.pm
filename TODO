@@ -1,12 +1,15 @@
-- Beef up the documentation including a more indepth tutorial.
+- Beef up the documentation including a more in depth tutorial.
+  The new(ish) add() functionality needs a tutorial.
 - Beef up the testsuite, including more LifeLines tests.
 - Make ged into a real program, rather than just a little demo.
 - Rewrite tkged.
 - Provide functions to merge data.
 - Finish LifeLines.pm.
+- Add new LifeLines functions.
 - Speed ups.
 - Turn children from an array into a hash: key is tag, value is array of items.
 - Separate REs for parsing grammar files and gedcom files.
   Note: I tried this but it didn't seem to provide much of a benefit.
 - Conversion of notes to and from top level records
 - Include names in index file?
+- Document add_xxx functions.

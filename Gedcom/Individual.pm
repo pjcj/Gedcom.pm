@@ -13,10 +13,10 @@ require 5.005;
 
 package Gedcom::Individual;
 
-use Gedcom::Record 1.12;
+use Gedcom::Record 1.13;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.12";
+$VERSION = "1.13";
 @ISA     = qw( Gedcom::Record );
 
 sub name
@@ -43,7 +43,7 @@ sub surname
 {
   my $self = shift;
   my ($surname) = $self->name =~ m|/([^/]*)/?|;
-  $surname
+  $surname || ""
 }
 
 sub given_names
@@ -301,7 +301,7 @@ __END__
 
 Gedcom::Individual - a module to manipulate Gedcom individuals
 
-Version 1.12 - 2nd February 2003
+Version 1.13 - 6th December 2003
 
 =head1 SYNOPSIS
 

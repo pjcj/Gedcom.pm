@@ -157,7 +157,7 @@ Release 1.09 - 12th February 2001
  - Correct line numbers of errors.
  - Use File::Spec so tests pass under Windows.
  - Allow for creation of ppms.
- - Added Gedcom::CGI and cgi-bin/gedcom.cgi.
+ - Add Gedcom::CGI and cgi-bin/gedcom.cgi.
 
 Release 1.10 - 5th March 2002
  - Correct write_xml() documentation.
@@ -200,11 +200,11 @@ Release 1.10 - 5th March 2002
        add_wife()
        add_child()
  - Add t/ged_create.t
- - Change Gedcom::Record::resolve so that unresolved xrefs do not return
+ - Change Gedcom::Record::resolve() so that unresolved xrefs do not return
    undef in list context.
  - Establish the convention that SUBM xrefs start with SUBM to avoid
    clashes with SOUR.
- - Some reeorganisation of the AUTOLOAD functions.
+ - Some reorganisation of the AUTOLOAD functions.
  - Add baptism and endowment information as default to Gedcom::CGI::indi().
  - Ensure a grammar knows its version number.
  - Always add headers and trailers to a Gedcom file if necessary.
@@ -224,3 +224,11 @@ Release 1.12 - 2nd February 2003
  - Ignore CRLF differences in tests.
  - Tighten up and improve XML output.
  - Add some missing functions to lines2perl (John S. Quarterman).
+
+Release 1.13 - 5th December 2003
+ - Add get_ functions to Gedcom.pm, and some tests for them.
+ - Gedcom::Individual::surname returns "" when no surname is found.
+ - Spell Gedcom::Lifelines::getstrmsg correctly.
+ - Use maniread() to read manifest.
+ - Add Gedcom::Comparison and gedcom_compare (unfinished).
+ - Add gedcom-5.5.aft.grammar for Ancestry Family Tree (Brad Rubenstein).

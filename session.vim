@@ -7,6 +7,7 @@ e Gedcom/Record.pm
 e Gedcom/Individual.pm
 e Gedcom/Family.pm
 e Gedcom/Event.pm
+e Gedcom/Comparison.pm
 e Gedcom/CGI.pm
 e Gedcom/LifeLines.pm
 e CHANGES

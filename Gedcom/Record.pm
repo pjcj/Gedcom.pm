@@ -13,14 +13,15 @@ require 5.005;
 
 package Gedcom::Record;
 
+use vars qw($VERSION @ISA $AUTOLOAD);
+$VERSION = "1.13";
+@ISA     = qw( Gedcom::Item );
+
 use Carp;
 BEGIN { eval "use Date::Manip" }             # We'll use this if it is available
 
-use Gedcom::Item 1.12;
-
-use vars qw($VERSION @ISA $AUTOLOAD);
-$VERSION = "1.12";
-@ISA     = qw( Gedcom::Item );
+use Gedcom::Item       1.13;
+use Gedcom::Comparison 1.13;
 
 BEGIN
 {
@@ -35,7 +36,6 @@ sub DESTROY {}
 sub AUTOLOAD
 {
   my ($self) = @_;                         # don't change @_ because of the goto
-  return if $AUTOLOAD =~ /::DESTROY$/;
   my $func = $AUTOLOAD;
   # print "autoloading $func\n";
   $func =~ s/^.*:://;
@@ -50,8 +50,8 @@ sub AUTOLOAD
     if (wantarray)
     {
       return map
-      { $_ && do { $v = $_->full_value; defined $v && length $v ? $v : $_ } }
-      $self->record([$func, $count]);
+        { $_ && do { $v = $_->full_value; defined $v && length $v ? $v : $_ } }
+        $self->record([$func, $count]);
     }
     else
     {
@@ -574,6 +574,13 @@ sub child_values
   $self->tag_value(@_)
 }
 
+sub compare
+{
+    my $self = shift;
+    my ($r) = @_;
+    Gedcom::Comparison->new($self, $r)
+}
+
 sub summary
 {
   my $self = shift;
@@ -600,7 +607,7 @@ __END__
 
 Gedcom::Record - a module to manipulate Gedcom records
 
-Version 1.12 - 2nd February 2003
+Version 1.13 - 6th December 2003
 
 =head1 SYNOPSIS
 

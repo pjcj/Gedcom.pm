@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.12 - 2nd February 2003
+# Version 1.13 - 6th December 2003
 
 use strict;
 
@@ -19,7 +19,7 @@ BEGIN { Test::plan tests => 161 }
 
 use lib -d "t" ? "t" : "..";
 
-use Gedcom 1.12;
+use Gedcom 1.13;
 use Engine;
 
 sub ok

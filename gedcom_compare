@@ -1,0 +1,56 @@
+#!/usr/local/bin/perl -w
+
+# Copyright 2003, Paul Johnson (pjcj@cpan.org)
+
+# This software is free.  It is licensed under the same terms as Perl itself.
+
+# The latest version of this software should be available from my homepage:
+# http://www.pjcj.net
+
+# Version 1.13 - 6th December 2003
+
+use strict;
+
+require 5.005;
+
+use Data::Dumper;
+$Data::Dumper::Indent = 1;
+
+use Gedcom 1.13;
+
+use vars qw( $VERSION );
+$VERSION = "1.13";
+
+$SIG{__WARN__} = sub { print STDERR "\n@_" };
+
+sub main
+{
+  my ($g1, $g2) = @ARGV;
+
+  $| = 1;
+
+  print "reading $g1 ...";
+  my $ged1 = Gedcom->new
+  (
+    gedcom_file     => $g1,
+    callback        => sub { print "." },
+    read_only       => 0,
+  );
+
+  print "\nreading $g2 ...";
+  my $ged2 = Gedcom->new
+  (
+    gedcom_file     => $g2,
+    callback        => sub { print "." },
+    read_only       => 0,
+  );
+  print "\n";
+
+  # my $comparison = $ged1->{record}->compare($ged2->{record});
+  my $comparison = $ged1->get_individual("I1")->compare($ged2->get_individual("I1"));
+
+  $comparison->print;
+  # print Dumper $comparison;
+}
+
+main

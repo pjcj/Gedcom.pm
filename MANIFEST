@@ -7,6 +7,7 @@ ged
 tkged
 parse_grammar
 lines2perl
+gedcom_compare
 Gedcom.pm
 Gedcom/Item.pm
 Gedcom/Grammar.pm
@@ -14,10 +15,12 @@ Gedcom/Record.pm
 Gedcom/Individual.pm
 Gedcom/Family.pm
 Gedcom/Event.pm
+Gedcom/Comparison.pm
 Gedcom/Grammar_5_5.pm
 Gedcom/LifeLines.pm
 Gedcom/CGI.pm
 gedcom-5.5.grammar
+gedcom-5.5.aft.grammar
 cgi-bin/gedcom.cgi
 t/Engine.pm
 t/Basic.pm
@@ -45,3 +48,4 @@ t/grammar_file.t
 royal.ged
 gedcom.vim
 session.vim
+META.yml                                Module meta-data (added by MakeMaker)

@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.12 - 2nd February 2003
+# Version 1.13 - 6th December 2003
 
 use strict;
 
@@ -16,11 +16,11 @@ require 5.005;
 package Basic;
 
 use vars qw($VERSION);
-$VERSION = "1.12";
+$VERSION = "1.13";
 
 use Test ();
 
-use Gedcom 1.12;
+use Gedcom 1.13;
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
@@ -105,6 +105,12 @@ sub import
     ok $ged->next_xref("I"), "I" . ($inds + 1);
     ok $ged->next_xref("F"), "F" . ($fams + 1);
     ok $ged->next_xref("S"), "S2";
+
+    ok my $i31  = $ged->get_individual("Marion Stein");
+    ok my $famc = $i31->famc;
+    ok my $src  = $famc->source;
+    $src = $ged->get_source($src) unless ref $src;
+    ok $src->text, "Source text";
 
     my ($ind) = $ged->get_individual("Elizabeth II");
     ok $ind;
@@ -245,7 +251,7 @@ sub import
     ok unlink $f1;
   };
 
-  my $tests = 1483;
+  my $tests = 1487;
   my $grammar;
   if ($grammar = delete $args{create_grammar})
   {
