@@ -1,21 +1,17 @@
 NAME
     Gedcom - a class to manipulate Gedcom genealogy files
 
-    Version 1.00 - 8th March 1999
-
-SYNOPSIS
-      use Gedcom;
-      my $ged = Gedcom->new(grammar_file => "gedcom-5.5.grammar",
-                            gedcom_file  => $gedcom_file);
-      return unless $ged->validate;
-      $ged->resolve_xrefs($ged->{xrefs});
-      $ged->normalise_dates;
-      $ged->renumber;
-      $ged->order;
-      $ged->write("$new_gedcom_file");
-
+    Version 1.01 - 27th April 1999
 
 DESCRIPTION
+    Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
+
+    This software is free. It is licensed under the same terms as Perl
+    itself.
+
+    The latest version of this software should be available from my
+    homepage: http://www.transeda.com/pjcj
+
     This module provides for manipulation of Gedcom files. Gedcom is a
     format for storing genealogical information designed by The Church of
     Jesus Christ of Latter-Day Saints (http://www.lds.org). Information
@@ -35,17 +31,22 @@ DESCRIPTION
     virtue of laziness shining through.
 
     The vice of laziness is also shining brightly - I need to document how
-    to use this module in much greater detail. This will happen sometime,
-    but if you would like information in the meantime, feel free to send me
-    mail.
+    to use this module in much greater detail. This is happening - this
+    release has more docuemntation than previously - but if you would like
+    information feel free to send me mail.
 
-    Note that this is the first release of this software - caveat emptor.
+    This module provides some functions which work over the entire Gedcom
+    file, such as reformatting dates, renumbering entries and ordering the
+    entries. It also allows acces to individuals, and then to relations of
+    individuals, for example sons, siblings, spouse, parents and so forth.
+
+    Note that this is an early release of this software - caveat emptor.
 
     Should you find this software useful, or if you make changes to it, or
     if you would like me to make changes to it, please send me mail. I would
     like to have some sort of an idea of the use this software is getting.
-    Apart from being of interest to me, this will guide my decisions when
-    (if :-?) I have to make changes to the interface.
+    Apart from being of interest to me, this will guide my decisions when I
+    feel the need to make changes to the interface.
 
     I couldn't find a nice free program I could use to enter my genealogy,
     and so I wrote a syntax file (ged.vim) and used vim (http://www.vim.org)

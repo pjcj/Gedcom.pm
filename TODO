@@ -1,5 +1,4 @@
 - Beef up the documentation.
 - Beef up the testsuite.
 - Make ged into a real program, rather than just a little demo.
-- Finish tkged - the gui on the front that I haven't released yet.
-  Mail me if you would like more information about this.
+- Finish tkged

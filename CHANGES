@@ -1,0 +1,17 @@
+Gedcom.pm history
+
+Release 1.00 - Initial release
+
+Release 1.01
+ - Add some documentation
+ - Add Individual.pm and Family.pm
+ - Remove get_records() - use get_children() instead
+ - Change get_children() and children() to return a list, rather than a
+   reference to one
+ - Add resolve_xref() and resolve()
+ - Change to profile of collect_xrefs(), resolve_xrefs() and validate()
+ - Add get_individual()
+ - Remove redundant Gedcom::Item::renumber()
+ - Rename child() to child_value() and children() to child_values()
+ - Improve testsuite
+ - Make Date::Manip optional

@@ -13,16 +13,15 @@ require 5.004;
 
 package Gedcom::Grammar;
 
-use Data::Dumper;
-$Data::Dumper::Indent = 1;
 use Carp;
+use Data::Dumper;
 
-use Gedcom::Item 1.00;
+use Gedcom::Item 1.01;
 
 BEGIN
 {
   use vars qw($VERSION @ISA);
-  $VERSION = "1.00";
+  $VERSION = "1.01";
   @ISA = qw( Gedcom::Item );
 }
 
@@ -59,6 +58,7 @@ sub valid_children
       }
       else
       {
+        local $Data::Dumper::Indent = 1;
         confess "What's a " . Dumper $child;
       }
     }
@@ -74,14 +74,42 @@ __END__
 
 Gedcom::Grammar - a class to manipulate Gedcom grammars
 
-Version 1.00 - 8th March 1999
+Version 1.01 - 27th April 1999
 
 =head1 SYNOPSIS
 
-use Gedcom::Grammar;
+  use Gedcom::Grammar;
+
+  my $structures = $grammar->structures()
+  my @children = $grammar->valid_children($structures)
 
 =head1 DESCRIPTION
 
-To be written...
+A selection of subroutines to handle the grammar of a gedcom file.
+
+Derived from Gedcom::Item.
+
+=head1 HASH MEMBERS
+
+Some of the more important hash members are:
+
+=head2 $grammar->{structure}
+
+The name of the grammar structure.
+
+=head1 METHODS
+
+=head2 structures
+
+  my $structures = $grammar->structures()
+
+Return a reference to a hash mapping the names of all child structures
+to the grammar objects.
+
+=head2 valid_children
+
+  my @children = $grammar->valid_children($structures)
+
+Return an array of all the valid children of the grammar item.
 
 =cut

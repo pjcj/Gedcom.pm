@@ -1,0 +1,1291 @@
+#!/usr/local/bin/perl -w
+
+# Copyright 1998-1999, Paul Johnson (pjcj@transeda.com)
+
+# This software is free.  It is licensed under the same terms as Perl itself.
+
+# The latest version of this software should be available from my homepage:
+# http://www.transeda.com/pjcj
+
+# Version 1.01 - 27th April 1999
+
+use strict;
+
+require 5.004;
+
+use diagnostics;
+
+use Tk::FileSelect;
+use Tk::Font;
+use Tk::Listbox;
+use Tk::WaitBox;
+use Tk;
+
+use Carp;
+use Data::Dumper;
+
+use Gedcom 1.01;
+
+use vars qw( $VERSION );
+$VERSION = "1.01";
+
+eval "use Date::Manip";
+Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
+
+my %Options =
+(
+  font_point => 240,
+  font_width => "*",
+);
+
+my %Colour_scheme =
+(
+  background => "grey75",
+  foreground => "blue2",
+);
+
+my $Grammar_file = "gedcom-5.5.grammar";
+my $Grammar;
+my $Ged;
+my $Top;
+my $Rec;
+my $Fontname;
+
+# TODO - put in Gedcom.pm
+my %Tags =
+(
+  BAPL => "Baptism",
+  BIRT => "Birth",
+  BURI => "Burrial",
+  CHR  => "Christening",
+  DEAT => "Death",
+  ENDL => "Endownment",
+  MARR => "Marriage",
+  NAME => "Name",
+  REFN => "Reference",
+  SEX  => "Sex",
+  SLGC => "Sealing to Parents",
+  TITL => "Title",
+
+  FAMC => "Child of Family Id",
+  FAMS => "Family Id",
+
+  DATE => "Date",
+  PLAC => "Place",
+
+  COMM => "Comment",
+  NOTE => "Note",
+);
+
+main();
+
+sub main()
+{
+  $| = 1;
+  $Top = MainWindow->new;
+  $Top->geometry("900x400");
+  my %font_spec =
+  (
+#   foundry  => "adobe",
+    family   => "times",
+    weight   => "bold",
+    slant    => "r",
+    point    => $Options{font_point},
+#   space    => "m",
+#   registry => "iso8859",
+  );
+  my $font = $Top->Font(%font_spec);
+  confess "Cannot allocate font - try changing some parameters" unless $font;
+  $Fontname = $font->Name;
+  $Top->optionAdd('*font' => $Fontname);
+  $Top->setPalette(%Colour_scheme);
+  while (my($col, $val) = each %{$Top->Palette})
+  {
+    # print "setting $col to $val\n";
+    $Top->optionAdd('*' . $col => $val);
+  }
+  $Top->bind("all", "<Delete>", "Backspace");
+  create_windows();
+  load(shift @ARGV); # if @ARGV;
+  MainLoop;
+}
+
+sub load($)
+{
+  my ($gedcom_file) = @_;
+  $Top->Busy;
+  my $cont = 1;
+  my $progress;
+  $progress = $Top->WaitBox(-title         => "Reading...",
+                            -txt1          => "",
+                            -canceltext    => "Cancel",
+                            -cancelroutine => sub { $cont = 0 });
+   my $u = $progress->{SubWidget}{uframe};
+   my $utxt;
+   my @pk = (-expand => 1, -fill => "both");
+   $u->pack(@pk);
+   $u->Label(-textvariable => \$utxt)->pack(@pk);
+   my $width  = 700;
+   my $height = 25;
+   my $canv = $u->Canvas(-width      => $width,
+                         -height     => $height,
+                         -background => "red")
+                ->pack(-expand => 0);
+  $progress->Show;
+  $Top->update;
+  $Ged = Gedcom->new(grammar_file => $Grammar_file,
+                     gedcom_file  => $gedcom_file,
+                     callback     => sub
+    {
+      my ($title, $txt1, $txt2, $current, $total) = @_;
+      if ($total)
+      {
+        my $ratio = $current / $total;
+        $utxt = sprintf("%5.2f%% complete", $ratio * 100);
+        $canv->delete("all");
+        $canv->createLine(0, $height / 2, $ratio * $width, $height / 2,
+                          -width => $height,
+                          -fill  => "green");
+      }
+      $progress->configure(-title => $title,
+                           -txt1  => $txt1,
+                           -txt2  => $txt2);
+      $Top->update;
+      $progress->unShow
+        unless $cont ||= (box("No", "Do you really want to cancel?",
+                              -title => "Cancel",
+                              -buttons => ["Yes", "No"]) eq "No");
+      $cont;
+    });
+  $progress->unShow if $cont;
+  my @individuals = $Ged->{record}->get_children("INDI");
+  if (@individuals)
+  {
+    show_record("", $individuals[0], "full");
+  }
+  $Top->Unbusy;
+}
+
+sub save($)
+{
+  my ($gedcom_file) = @_;
+  $Top->Busy;
+  $Top->update;
+  $Ged->write($gedcom_file);
+  $Top->Unbusy;
+}
+
+sub updown($$)
+{
+  my ($list, $pos) = @_;
+  $list->activate($pos =~ /^[+-]\d+$/ ? $list->index("active") + $pos : $pos);
+  $list->see("active");
+  $list->selectionClear(0, "end");
+  $list->selectionSet("active")
+}
+
+sub select_record($)
+{
+  my ($type) = @_;
+  return undef unless $Ged->{record};
+  $Top->Busy;
+  my @records = $Ged->{record}->get_children($type);
+  # print "records are ", Dumper \@records;
+  unless (exists $Top->{_box})
+  {
+    my $box = $Top->{_box} =
+      $Top->DialogBox(-default_button => "Ok",
+                      -title          => "Select",
+                      -buttons        => [ "Ok", "Cancel" ]);
+    my $frame = $box->add("Frame")->pack(-fill => "both", -expand => 1);
+    my $list = $frame->Scrolled("Listbox",
+                                -scrollbars => "w")
+                                ->pack(-fill => "both", -expand => 1);
+    my $listbox = $Top->{_list} = $list->Subwidget("listbox");
+    my %font_spec =
+    (
+      family   => "courier",
+      weight   => "bold",
+      slant    => "r",
+      point    => $Options{font_point} * .75,
+    );
+    my $font = $Top->Font(%font_spec);
+    confess "Cannot allocate font - try changing some parameters" unless $font;
+    $listbox->configure(-font   => $font,
+                        -width  => 65,
+                        -height => 20);
+    $box->bind("<Double-Button-1>" =>
+               sub { $box->{selected_button} = $listbox->curselection });
+  }
+  $Top->{_list}->delete(0, "end");
+  for my $i (@records)
+  {
+    $Top->{_list}->insert("end", $i->summary)
+  }
+  updown($Top->{_list}, "+0");
+  $Top->Unbusy;
+  my $i = $Top->{_box}->Show;
+  return undef if $i eq "Cancel";
+  $i = $Top->{_list}->curselection if $i eq "Ok";
+  $records[$i];
+}
+
+# TODO - put in Gedcom.pm
+sub get_tag($)
+{
+  my ($tag) = @_;
+  return $tag unless my ($t, $n) = $tag =~ /^([A-z]+)(\d*)$/;
+
+# print "Checking tag for <$t> <$n> => <$Tags{$t}>\n";
+  my $r = (exists($Tags{$t}) ? $Tags{$t} : $t) . $n;
+# print "got <$r>\n";
+  $r;
+}
+
+# TODO - put in Gedcom.pm
+sub get_name($)
+{
+  my ($tag) = @_;
+# print "tag for $tag\n";
+  join(" ", map { get_tag($_) } split(/_/, $tag));
+}
+
+sub create_items(%)
+{
+  my (%a) = @_;
+
+  my $height = $a{height} || 40;
+# print "lines is $a{canv}{_lines}\n";
+  my $y = $a{canv}{_lines}++ * ($height * 1.1);
+  my $width = 850;
+  $a{canv}->configure(-scrollregion => [0, 0, $width, $y + $height]);
+
+# print "size is ($width, $y + $height)\n";
+
+  my $x = 0;
+  for my $item (@{$a{items}})
+  {
+    my $tag = $item->{tag};
+    warn "no record for $tag"
+      unless exists $a{canv}->{_ged}{$tag};
+    my $rec = $a{canv}->{_ged}{$tag};
+    if (exists $item->{widget})
+    {
+      my $widget= $rec->{"_Frame"} =
+                  $a{canv}->Frame(-width  => $width * $item->{relwidth},
+                                  -height => $height);
+      my $w = $item->{widget};
+      my $bind = $rec->{"_$w"} = $widget->$w(%{$item->{options}})
+                                        ->pack(-expand => 1, -fill => "both");
+      $a{canv}->createWindow($width * $x, $y,
+                             -width  => $width * $item->{relwidth},
+                             -height => $height,
+                             -tags   => [ $tag ],
+                             -anchor => "nw", -window => $widget);
+      while (exists $item->{"bind"} && @{$item->{"bind"}})
+      {
+        $bind->bind(splice @{$item->{"bind"}}, 0, 2);
+      }
+    }
+    elsif (exists $item->{item})
+    {
+      my $i = "create" . ucfirst $item->{item};
+      my $inc = $item->{item} eq "text" ? 8 : 0;
+      my $t = "${tag}_$item->{item}";
+      my @tags = ($tag, $t);
+      push (@tags, @{$item->{tags}}) if exists $item->{tags};
+      if ($item->{change})
+      {
+        my $change = $tag . "_change";
+        push @tags, $change;
+        ($rec->{_canvas_text} = $tag) =~ s/(NAME|XREF)1$/value/;
+        # print "canvas text is $rec->{_canvas_text}\n";
+      }
+      $a{canv}->$i($width * $x + $inc, $y + $inc,
+                   -tags   => \@tags,
+                   -anchor => "nw", -font => $Fontname,
+                   -fill   => $item->{colour} || "black",
+                   %{$item->{options}});
+      if (exists $item->{"bind"} && @{$item->{"bind"}})
+      {
+        while (@{$item->{"bind"}})
+        {
+          $a{canv}->bind(splice @{$item->{"bind"}}, 0, 3);
+        }
+      }
+    }
+    else
+    {
+      die "No widget or item specified for ", Dumper $item;
+    }
+    $x += $item->{relwidth};
+    $rec->{$tag =~ /_XREF1$/ ? "xref" : "value"} |= "";
+#   print "$w is ", $rec->{"_$w"},
+#         " and ", $Top->{_canv}{_ged}{$tag}{"_$w"}, "\n";
+  }
+  confess "Width of $x should be 1" unless abs($x - 1) < 0.01;
+}
+
+sub create_record($$)
+{
+  my ($canv, $tag) = @_;
+  # print "creating record for $tag\n";
+  create_items
+  (
+    canv => $canv,
+    items =>
+    [
+      {
+        tag      => $tag,
+        item     => "text",
+        options  => { -text => get_name($tag) },
+        "bind"   => [ $tag, "<1>" => sub { print "qaz\n" } ],
+        relwidth => 0.25,
+      },
+      {
+        widget  => "Entry",
+        tag     => $tag,
+        options => {},
+        relwidth => 0.75,
+      },
+    ]
+  );
+  set_entry($tag);
+}
+
+sub create_person($$$)
+{
+  my ($canv, $label, $tag) = @_;
+  my $ref = "${tag}_XREF1";
+  # print "getting $ref\n";
+  my $xref = $canv->{_ged}{$ref}{xref};
+  my $me = $xref ? $Ged->{xrefs}{$canv->{_ged}{$ref}{xref}} : undef;
+  # print "I am ", Dumper $me;
+  create_items
+  (
+    canv => $canv,
+    items =>
+    [
+      {
+        tag      => "${tag}_NAME1",
+        item     => "text",
+        tags     => [ $tag, "${tag}_title" ],
+        options  => { -text => $label },
+        relwidth => 0.15,
+      },
+      $tag
+      ? {
+          tag      => "${tag}_NAME1",
+          item     => "text",
+          tags     => [ $tag, "${tag}_value" ],
+          change   => 1,
+          options  => { -text => $me ? $me->child_value("NAME1") : ""},
+          colour   => "blue",
+          "bind"   =>
+          [
+            $tag, "<1>" => sub
+            {
+              my $me = $Ged->{xrefs}{$canv->{_ged}{"${tag}_XREF1"}{xref}};
+              # print "me is $me\n";
+              show_record("", $me, "full");
+            },
+
+            $tag, "<3>" => sub
+            {
+              my $ind = select_record("INDI");
+              # print "ind is ", Dumper $ind;
+              return unless $ind;
+
+              if (my ($fam, $person) = $tag =~ /^(_FAM[CS]\d*)_([^_]+)/)
+              {
+                $canv->itemconfigure("${tag}_XREF1_change", -text => $1)
+                  if $ind->{xref} =~ /^\@(.*)\@$/;
+                $canv->itemconfigure("${tag}_NAME1_change",
+                                     -text => $ind->child_value("NAME1"));
+              }
+
+              record_changed();
+            },
+
+            $tag, "<Any-Enter>" => sub
+            {
+              my $c = shift;
+              $canv->itemconfigure("${tag}_title", -fill => "red");
+            },
+
+            $tag, "<Any-Leave>" => sub
+            {
+              my $c = shift;
+              $canv->itemconfigure("${tag}_title", -fill => "black");
+            },
+          ],
+          relwidth => 0.65,
+        }
+      : {
+          tag      => "${tag}_NAME1",
+          widget   => "Entry",
+          options  => {},
+          relwidth => 0.65,
+        },
+      {
+        tag      => "${tag}_XREF1",
+        item     => "text",
+        tags     => [ $tag, "${tag}_title" ],
+        options  => { -text => "Id" },
+        relwidth => 0.05,
+      },
+      $tag
+      ? {
+          tag      => "${tag}_XREF1",
+          item     => "text",
+          tags     => [ $tag, "${tag}_value" ],
+          change   => 1,
+          options  => { -text => $me
+                                   ? do { $me->{xref} =~ /^\@(.*)\@$/; $1 }
+                                   : "" },
+          colour   => "blue",
+          relwidth => 0.15,
+        }
+      : {
+          tag      => "${tag}_XREF1",
+          widget   => "Entry",
+          options  => {},
+          relwidth => 0.15,
+        },
+    ]
+  );
+}
+
+sub create_event($$$)
+{
+  my ($canv, $label, $tag) = @_;
+  create_items
+  (
+    canv => $canv,
+    items =>
+    [
+      {
+        tag      => "${tag}_DATE1",
+        item     => "text",
+        options  => { -text => $label },
+        relwidth => 0.15,
+      },
+      {
+        widget   => "Entry",
+        tag      => "${tag}_DATE1",
+        options  => {},
+        relwidth => 0.2,
+      },
+      {
+        tag      => "${tag}_PLAC1",
+        item     => "text",
+        options  => { -text => "At" },
+        relwidth => 0.05,
+      },
+      {
+        widget   => "Entry",
+        tag      => "${tag}_PLAC1",
+        options  => {},
+        relwidth => 0.6,
+      },
+    ]
+  );
+}
+
+sub create_windows()
+{
+  $Top->Busy;
+  my $top_fr = $Top->Frame->pack(-fill => "both", -expand => 1);
+  my $menu_fr = $Top->{_menu_fr} =
+  $top_fr->Frame(-relief      => "raised",
+                 -borderwidth => 5)
+         ->pack(-fill => "x", -expand => 0);
+  my $main_fr = $top_fr->Frame->pack(-fill => "both", -expand => 1);
+
+  my $load = sub
+  {
+    my $gedcom_file = $Top->FileSelect(-filter => "*.ged")->Show or return;
+    load($gedcom_file);
+  };
+
+  my $save = sub
+  {
+    save_changes();
+    record_changed();
+    my $gedcom_file = $Top->FileSelect(-filter => "*.ged")->Show or return;
+    save($gedcom_file);
+  };
+
+  my $quit = sub
+  {
+    exit;
+  };
+
+  my $iselect = sub
+  {
+    save_changes();
+    show_record("", select_record("INDI"), "full");
+  };
+
+  my $inew = sub
+  {
+    save_changes();
+    my $max = 0;
+    for ($Ged->{record}->get_children("INDI"))
+    {
+      if (my ($val) = $_->{xref} =~ /I(\d+)/)
+      {
+        $max = $val if $val > $max;
+      }
+    }
+    $max++;
+    my $indi_id = "\@I$max\@";
+    my $rec = Gedcom::Record->new
+    (
+      tag     => "INDI",
+      xref    => $indi_id,
+      grammar => $Ged->{grammar}{valid_children}{INDI},
+    );
+    add_record($rec, "_NAME1");
+    add_record($rec, "_BIRT1_DATE1");
+    add_record($rec, "_BIRT1_PLAC1");
+    # print "new record is ", Dumper $rec;
+    splice @{$Ged->{record}{children}}, -1, 0, $rec;
+    $Ged->{xrefs}{$rec->{xref}} = $rec;
+    show_record("", $rec, "full");
+  };
+
+  my $idelete = sub
+  {
+    if (box("No", "Are you sure you want to delete this record?",
+            -title   => "Delete record",
+            -buttons => ["Yes", "No"]) eq "Yes")
+    {
+      my $i = 0;
+      for (; $i < @{$Ged->{record}{children}}; $i++)
+      {
+        last if exists $Ged->{record}{children}[$i]{xref} &&
+                $Ged->{record}{children}[$i]{xref} eq $Rec->{xref};
+      }
+      unless ($i < @{$Ged->{record}{children}})
+      {
+        box("Whoops",
+            "I can't find record " . do { $Rec->{xref} =~ /^\@(.*)\@$/; $1 },
+            -title   => "Unknown record id");
+        return;
+      }
+      delete $Ged->{xrefs}{$Rec->{xref}};
+      splice @{$Ged->{record}{children}}, $i, 1;
+
+      for my $fam ($Ged->{record}->get_children("FAM"))
+      {
+        my $i = 0;
+        for (; $i < @{$fam->{children}}; $i++)
+        {
+          # print "$fam->{tag} $fam->{children}[$i]{tag} ",
+          #       "checking $fam->{children}[$i]{value} eq $Rec->{xref}\n";
+          last if exists $fam->{children}[$i]{value} &&
+                  $fam->{children}[$i]{value} eq $Rec->{xref};
+        }
+        if ($i < @{$fam->{children}})
+        {
+          splice @{$fam->{children}}, $i, 1;
+        }
+      }
+
+      my @individuals = $Ged->{record}->get_children("INDI");
+      if (@individuals)
+      {
+        show_record("", $individuals[0], "full", "no_save");
+      }
+    }
+  };
+
+  my $rsave = sub
+  {
+    save_changes("no_ask");
+    record_changed();
+  };
+
+  my $fselect = sub
+  {
+    save_changes();
+    show_record("", select_record("FAM"), "full");
+  };
+
+  my $file_menu = $Top->{_file_menu} =
+    $menu_fr->Menubutton(-text => "File", -underline => 0)
+            ->pack(-side => "left");
+  $file_menu->command(-label => "Load", -underline => 0, -command => $load);
+  $Top->bind("<Alt-l>", $load);
+  $file_menu->command(-label => "Save", -underline => 2, -command => $save);
+  $Top->bind("<Alt-v>", $save);
+  $file_menu->command(-label => "Quit", -underline => 0, -command => $quit);
+  $Top->bind("<Alt-q>", $quit);
+
+  my $ind_menu = $Top->{_ind_menu} =
+    $menu_fr->Menubutton(-text => "Individual", -underline => 0)
+            ->pack(-side => "left");
+  $ind_menu->command(-label => "Select", -underline => 0, -command => $iselect);
+  $Top->bind("<Alt-e>", $iselect);
+  $ind_menu->command(-label => "New", -underline => 0, -command => $inew);
+  $Top->bind("<Alt-n>", $inew);
+  $ind_menu->command(-label => "Save", -underline => 2, -command => $rsave);
+  $Top->bind("<Alt-v>", $rsave);
+  $ind_menu->command(-label => "Delete", -underline => 0, -command => $idelete);
+  $Top->bind("<Alt-d>", $rsave);
+
+  my $fam_menu = $Top->{_fam_menu} =
+    $menu_fr->Menubutton(-text => "Family", -underline => 5)
+            ->pack(-side => "left");
+  $fam_menu->command(-label => "Select", -underline => 0, -command => $fselect);
+  $Top->bind("<Alt-c>", $fselect);
+  $fam_menu->command(-label => "Save", -underline => 2, -command => $rsave);
+
+# $Top->bind("<Button>" => sub { shift->afterIdle(sub { record_changed() }) });
+  $Top->bind("<Key>" => sub
+  {
+    my $w = shift;
+    my $ev = $w->XEvent;
+#   print "Pressed ", $ev->K, "\n";
+    $w->afterIdle(sub { record_changed() });
+  });
+
+  my $c = $Top->{_canv_frame} =
+     $main_fr->Scrolled("Canvas", -scrollbars => "osoe")
+             ->pack(-fill => "both", -expand => 1);
+  my $canv = $Top->{_canv} = $c->Subwidget("scrolled");
+
+
+  $Top->Unbusy;
+}
+
+sub set_entry($)
+{
+  my ($entry) = @_;
+  # print "entry $entry\n";
+  my $t = $Top->{_canv}{_ged}{$entry};
+  if (exists $t->{_Entry} && $t->{_Entry}->Exists)
+  {
+    $t->{xref} =~ /^\@(.*)\@$/ if $t->{xref};
+    my $val = $t->{value} || $1;
+    $t->{_Entry}->delete(0, "end");
+    $t->{_Entry}->insert(0, $val) if $val;
+  }
+}
+
+sub set_entries()
+{
+  for my $t (keys %{$Top->{_canv}->{_ged}})
+  {
+    set_entry($t);
+  }
+}
+
+sub record_changed()
+{
+  my $changed = 0;
+  for my $tag (sort keys %{$Top->{_canv}{_ged}})
+  {
+    my $t = $Top->{_canv}{_ged}{$tag};
+    # print "checking $tag as ", Dumper $t;
+    if (exists $t->{_Entry} && $t->{_Entry}->Exists)
+    {
+      my $val = "";
+      $val = $1 if (exists($t->{xref}) && $t->{xref} =~ /^\@(.*)\@$/);
+      $val = $t->{value} if (!$val && exists $t->{value});
+      warn "no val for $tag" unless $val;
+      $val = "" unless $val;
+      my $c = $t->{_Entry}->Exists && $t->{_Entry}->get ne $val;
+      $changed |= $c;
+      $t->{_Entry}->configure(-fg => $c ? "red" : $Colour_scheme{foreground})
+        if $t->{_Entry}->Exists;
+      # print " entry ", $c ? "changed" : "same";
+    }
+    elsif (exists $t->{_canvas_text} and
+           my ($fam, $person) = $tag =~ /^(_FAM[CS]\d*)_([^_]+)_XREF1$/)
+    {
+      # print "getting $fam $person from $tag with $t->{_canvas_text}\n";
+      my $me = $Top->{_canv}{_ged}{_XREF1}{xref};
+      # print "me is $me\n";
+      my $id = $Ged->{xrefs}{$me}->child_value($fam);
+      # print "$fam id is $id\n";
+      my $family = $Ged->{xrefs}{$id};
+      # print "family is ", Dumper $family;
+      my $pers = $family->get_child($person);
+      (my $item_tag = $t->{_canvas_text}) =~ s/value/XREF1_change/;
+      my $pid = $Top->{_canv}->itemcget($item_tag, "-text");
+      if ($pid)
+      {
+        my $nid = '@' . $pid . '@';
+        # print "changing from $pers->{value} to $nid\n";
+        my $c = $pers->{value} ne $nid;
+        $changed |= $c;
+        $Top->{_canv}->itemconfigure($t->{_canvas_text},
+                              -fill => $c ? "red" : $Colour_scheme{foreground});
+      }
+      else
+      {
+        # print "$t->{_canvas_text} has gone\n";
+      }
+    }
+    # print "\n";
+  }
+  $changed;
+}
+
+sub save_changes(;$)
+{
+  my ($no_ask) = @_;
+  $Top->Busy;
+  if (record_changed())
+  {
+    if ($no_ask || box("No", "Do you want to save changes to this record?",
+                       -title   => "Save changes",
+                       -buttons => ["Yes", "No"]) eq "Yes")
+    {
+      my $g = $Top->{_canv}{_ged};
+
+      my $ind = $g->{_XREF1};
+
+      for my $tag (sort keys %{$g})
+      {
+        # print "tag $tag\n";
+        my $t = $g->{$tag};
+        if (exists $t->{_Entry} && $t->{_Entry}->Exists)
+        {
+          # print "checking entry for $tag ", Dumper $t;;
+          if (exists $t->{value})
+          {
+            my ($v, $g) = ($t->{value}, $t->{_Entry}->get);
+            if ($v ne $g)
+            {
+              $t->{value} = $g;
+              # print "$tag value <$v> -> <$g> ", Dumper $t;
+            }
+          }
+          elsif (exists $t->{xref})
+          {
+            $t->{xref} = "@" . $t->{_Entry}->get . "@";
+          }
+          else
+          {
+            confess "What do I set it to?";
+          }
+        }
+        elsif (exists $t->{_canvas_text} and
+               my ($fam, $person) = $tag =~ /^(_FAM[CS]\d*)_([^_]+)_XREF1$/)
+        {
+          # print "getting $fam $person from $tag\n";
+          my $me = $Top->{_canv}{_ged}{_XREF1}{xref};
+          # print "me is $me\n";
+          my $id = $Ged->{xrefs}{$me}->child_value($fam);
+          # print "$fam id is $id\n";
+          my $family = $Ged->{xrefs}{$id};
+          # print "family is ", Dumper $family;
+          my $pers = $family->get_child($person);
+          (my $item_tag = $t->{_canvas_text}) =~ s/value/XREF1_change/;
+          my $nid = $Top->{_canv}->itemcget($item_tag, "-text");
+          # print "changing from $pers->{value} to $nid\n";
+          my $xref = "\@$nid\@";
+          if ($pers->{value} ne $xref)
+          {
+            $pers->{value} = $xref;
+
+            # now we need to point the new person at the appropriate family
+            my $new = $Ged->{xrefs}{$pers->{value}};
+            my $fam_tag = add_record($new, $fam);
+            # print "fam_tag is $fam_tag xref $family->{xref}\n";
+            $new->get_child($fam_tag)->{value} = $family->{xref};
+            # print "new is ", Dumper $new;
+          }
+        }
+
+      }
+      $Ged->collect_xrefs();
+    }
+  }
+  $Top->Unbusy;
+}
+
+sub has_entry($)
+{
+  my ($tag) = @_;
+  exists $Top->{_canv}{_ged}{$tag}{_Entry} &&
+  $Top->{_canv}{_ged}{$tag}{_Entry}->Exists;
+}
+
+sub add_record($$)
+{
+  my ($ind, $tag) = @_;
+  my @tags = $tag =~ /_([^_\d]+)(\d*)/g;
+  # print "Tags are ", join(",", @tags), "\n";
+  my $rec = $ind;
+  my $final_tag = "";
+  while (@tags)
+  {
+    my $t = shift @tags;
+    my $n = shift @tags;
+    # print "n is <$n>\n";
+
+    my $child;
+    my $count = 0;
+    for (@{$rec->{children}})
+    {
+      if ($_->{tag} eq $t)
+      {
+        $count++;
+        $child = $_ if !defined $n || $count == $n;
+        last if $n && $count == $n;
+      }
+    }
+    # print "count is <$count>\n";
+    # print "child is <$child>\n";
+    unless ($child)
+    {
+      my %children =
+        map { $_->{tag} => $_ }
+            $rec->{grammar}->valid_children($Ged->{grammar}{structures});
+      $n = 1 unless defined $n;
+      $n = $count + 1 unless $n;
+      # print "n is <$n>\n";
+      while ($count < $n)
+      {
+        $child = Gedcom::Record->new
+        (
+          tag     => $t,
+          grammar => $children{$t},
+        );
+        $count++;
+        push @{$rec->{children}}, $child;
+        my $newtag = "${final_tag}_$t$count";
+        # print "new tag is $newtag\n";
+        $Top->{_canv}{_ged}{$newtag} = $child;
+        # print "adding $t $count in ", Dumper $rec;
+      }
+    }
+    $rec = $child;
+    $final_tag .= "_$t$count";
+  }
+  # print "$final_tag from $tag\n";
+  $final_tag;
+}
+
+sub show_menu_children($;$$)
+{
+  my ($record, $parent, $ind) = @_;
+  # TODO - fix this tag
+  my $tag = defined $parent ? "${parent}_$record->{tag}1" : "";
+  my $canv = $Top->{_canv};
+  my $cascade = [];
+  push @$cascade,
+       [
+         Button   => "Self",
+         -state   => has_entry($tag) ? "disabled" : "normal",
+         -command => sub
+                     {
+                       create_record($canv, $tag);
+                       add_show_menu($ind || $record);
+                     }
+       ]
+    if defined $parent;
+  my %c;
+  push @$cascade,
+       map {
+             my $t = $_->{tag} . ++$c{$_->{tag}};
+             @{$_->{children}}
+               ? [
+                   Cascade    => get_name($t),
+                   -menuitems => show_menu_children($_, $tag, $ind || $record)
+                 ]
+               : do {
+                      my $tg = "${tag}_$t";
+                      [
+                        Button   => get_name($t),
+                        -state   => has_entry($tg) ? "disabled" : "normal",
+                        -command => sub
+                                    {
+                                      create_record($canv, $tg);
+                                      add_show_menu($ind || $record);
+                                    }
+                      ]
+                    }
+           }
+           sort { get_name($a->{tag}) cmp get_name($b->{tag}) }
+                @{$record->{children}};
+# print "returning ", Dumper $cascade;
+  $cascade;
+}
+
+sub add_menu_children($;$$)
+{
+  my ($grammar, $parent, $menu_items) = @_;
+  # print "grammar is $grammar->{tag}\n";
+  my $tag = defined $parent ? "${parent}_$grammar->{tag}1" : "";
+  my $cascade = [];
+  push @$cascade,
+       [
+         Button   => "Self",
+#        -state   => has_entry($tag) ? "disabled" : "normal",
+         -command => sub
+                     {
+                       my $t = add_record($Rec, $tag);
+                       create_record($Top->{_canv}, $t);
+                       add_show_menu($Rec);
+                     }
+       ]
+    if $parent;
+  my %children =
+    map { $_->{tag} => $_ }
+        $grammar->valid_children($Ged->{grammar}{structures});
+  push @$cascade,
+       map {
+             my $c = $children{$_};
+             my $t = $_;
+#            print "child <$t> in <$tag>\n";
+             (@{$c->{children}} &&
+              (($tag =~ tr/_//) < 1) &&
+              ($tag !~ /_${t}\d*_/))
+               ? [
+                   Cascade    => get_name($t),
+                   -menuitems => add_menu_children($c, $tag)
+                 ]
+               : do {
+                      my $tg = "${tag}_${t}1";
+                      [
+                        Button   => get_name($t),
+#                       -state   => has_entry($tg) ? "disabled" : "normal",
+                        -command => sub
+                                    {
+#                                     print "ind is $Rec\n";
+                                      my $t = add_record($Rec, $tg);
+                                      create_record($Top->{_canv}, $t);
+                                      add_show_menu($Rec);
+                                    }
+                      ]
+                    }
+           }
+           sort { get_name($a) cmp get_name($b) } keys %children;
+# print "returning ", Dumper $cascade;
+  if (@$cascade <= 20)
+  {
+    unshift @$cascade, @$menu_items if $menu_items;
+    return $cascade;
+  }
+  my $index = [];
+  while (@$cascade)
+  {
+    my @items = splice(@$cascade, 0, @$cascade > 20 ? 20 : @$cascade);
+    push @$index,
+         [
+           Cascade    => "$items[0][1] - $items[-1][1]",
+           -menuitems => \@items,
+         ];
+  }
+  unshift @$index, @$menu_items if $menu_items;
+  $index;
+}
+
+sub add_show_menu($)
+{
+  my ($ind) = @_;
+  $Top->Busy;
+  $Top->{_show_menu}->destroy if exists $Top->{_show_menu};
+  $Top->{_show_menu} = $Top->{_menu_fr}->Menubutton
+    (
+      -text      => "Show",
+      -underline => 0,
+      -menuitems => show_menu_children($ind)
+    )->pack(-side => "left");
+  $Top->Unbusy;
+}
+
+sub add_add_menu(;$)
+{
+  my ($new) = @_;
+  # print "adding menu for $Rec->{tag}\n";
+  $Top->Busy;
+  if ($new)
+  {
+    $Top->{_add_menu}{$Rec->{tag}}->destroy;
+    delete $Top->{_add_menu}{$Rec->{tag}};
+  }
+  unless (exists $Top->{_add_menu}{$Rec->{tag}})
+  {
+    # my $fams_id = $Rec->child_value("FAMS");
+    # my $fams = $fams_id ? $Ged->{xrefs}{$fams_id} : undef;
+    my $extras =
+    {
+      INDI =>
+      [
+        [
+          Button   => "Husband",
+#         -state   => $fams && $fams->get_child("_HUSB")
+#                       ? "disabled"
+#                       : "normal",
+          -command => sub { create_fams("_WIFE", "_HUSB", "_FAMS") }
+        ],
+        [
+          Button   => "Wife",
+#         -state   => $fams && $fams->get_child("_WIFE")
+#                       ? "disabled"
+#                       : "normal",
+          -command => sub { create_fams("_HUSB", "_WIFE", "_FAMS") }
+        ],
+        [
+          Button   => "Child",
+          -command => sub { create_fams("_HUSB", "_CHIL0", "_FAMC") }
+        ],
+      ],
+    };
+
+    $Top->{_add_menu}{$Rec->{tag}} = $Top->{_menu_fr}->Menubutton
+    (
+      -text      => "Add",
+      -underline => 0,
+      -menuitems => add_menu_children
+      (
+        $Ged->{grammar}{valid_children}{$Rec->{tag}},
+        undef,
+        $extras->{$Rec->{tag}} || []
+      )
+    )->pack(-side => "left");
+  }
+
+  for (values %{$Top->{_add_menu}})
+  {
+    $_->configure(-state => "disabled");
+  }
+  $Top->{_add_menu}{$Rec->{tag}}->configure(-state => "normal");
+
+  $Top->Unbusy;
+}
+
+sub create_fams($$$)
+{
+  my ($me, $child, $fam_type) = @_;
+  my $fams_id = $Rec->child_value("FAMS");
+  unless ($fams_id)
+  {
+    # TODO - this should be in Gedcom.pm
+    my $max = 0;
+    for ($Ged->{record}->get_children("FAM"))
+    {
+      if (my ($val) = $_->{xref} =~ /F(\d+)/)
+      {
+        $max = $val if $val > $max;
+      }
+    }
+    $max++;
+    $fams_id = "\@F$max\@";
+    my $fam = Gedcom::Record->new
+    (
+      tag     => "FAM",
+      xref    => $fams_id,
+      grammar => $Ged->{grammar}{valid_children}{FAM},
+    );
+    # print "new record is ", Dumper $fam;
+    splice @{$Ged->{record}{children}}, -1, 0, $fam;               # before TRLR
+    $Ged->{xrefs}{$fam->{xref}} = $fam;
+    my $me_ref = $Rec->{xref};                    # TODO should be current value
+    my $fam_tag = add_record($Rec, "_FAMS");
+    $Rec->get_child($fam_tag)->{value} = $fams_id;
+    my $me_tag = add_record($fam, $me);
+    $fam->get_child($me_tag)->{value} = $me_ref;
+  }
+  my $fams = $fams_id ? $Ged->{xrefs}{$fams_id} : undef;
+  die "No family $fams_id" unless defined $fams;
+
+  my $child_tag = add_record($fams, $child);
+  $fams->get_child($child_tag)->{value} = "";
+  show_record("", $Rec, "full");
+};
+
+sub show_record($$;$$)
+{
+  my ($prefix, $rec, $full, $no_save) = @_;
+
+  # print "showing ", Dumper $rec;
+
+  save_changes() if $full && !$no_save;
+  $Rec = $rec unless $prefix;
+
+  my $canv = $Top->{_canv};
+  $Top->Busy;
+  $canv->{_lines} = 0;
+  $canv->delete("all");
+
+  if ($full)
+  {
+    $canv->Walk(sub { shift->destroy });
+    for my $record (values %{$canv->{_ged}})
+    {
+      for (qw( Entry Label Button ))
+      {
+        delete $record->{"_$_"};
+      }
+    }
+    delete $canv->{_ged};
+  }
+  if (!$rec ||
+        exists $canv->{_ged}{_XREF1}{xref} &&
+        $canv->{_ged}{_XREF1}{xref} eq $rec->{xref})
+  {
+    $Top->Unbusy;
+    return;
+  }
+
+  my $key = $prefix . "_XREF1";
+  $canv->{_ged}{$key} = $rec;
+
+  show_children($prefix, $rec, $full);
+
+  if ($full)
+  {
+    if ($rec->{tag} eq "INDI")
+    {
+      my $fams_id = $rec->child_value("FAMS");
+      my $famc_id = $rec->child_value("FAMC");
+
+      my $fams = $fams_id ? $Ged->{xrefs}{$fams_id} : undef;
+      my $famc = $famc_id ? $Ged->{xrefs}{$famc_id} : undef;
+
+      create_person($canv, "Name", "");
+      create_event ($canv, "Born", "_BIRT1");
+      create_event ($canv, "Died", "_DEAT1")
+        if $rec->get_child("DEAT");
+      # print "displaying rec $rec->{xref} fams ", Dumper $fams;
+      if ($fams)
+      {
+        my $husb = $fams->child_value("HUSB");
+        create_person($canv, "Husband", "_FAMS1_HUSB1")
+          if defined $husb && $husb ne $rec->{xref};
+        my $wife = $fams->child_value("WIFE");
+        create_person($canv, "Wife", "_FAMS1_WIFE1")
+          if defined $wife && $wife ne $rec->{xref};
+        create_event ($canv, "Married", "_FAMS1_MARR1")
+          if $fams->get_child("MARR");
+      }
+      create_person($canv, "Father", "_FAMC1_HUSB1")
+        if $famc && $famc->get_child("HUSB");
+      create_person($canv, "Mother", "_FAMC1_WIFE1")
+        if $famc && $famc->get_child("WIFE");
+      if ($fams)
+      {
+        for (1 .. $fams->child_values("CHIL"))
+        {
+          create_person($canv, "Child", "_FAMS1_CHIL$_");
+        }
+      }
+    }
+    elsif ($rec->{tag} eq "FAM")
+    {
+      # print "showing a full family record ", Dumper $rec;
+    }
+
+    # print "setting ", join(", ", sort keys %{$canv->{_ged}}), "\n";
+    set_entries();
+
+    add_add_menu();
+    add_show_menu($rec);
+
+    record_changed();
+  }
+  $Top->Unbusy;
+}
+
+sub show_children($$$)
+{
+  my ($prefix, $ind, $full) = @_;
+  my %counts;
+  for my $child (@{$ind->{children}})
+  {
+    my $key = $prefix . "_" . $child->{tag} . ++$counts{$child->{tag}};
+    # print "key $key for ", Dumper $child;
+    # print "setting $key to $child->{value}\n" if exists $child->{value};
+    if (exists $child->{grammar}{value} &&
+        $child->{grammar}{value} eq '@<XREF:INDI>@')
+    {
+      if ($full)
+      {
+        show_record($key, $Ged->{xrefs}{$child->{value}});
+      }
+    }
+    elsif (exists $child->{grammar}{value} &&
+           $child->{grammar}{value} eq '@<XREF:FAM>@')
+    {
+      if ($full)
+      {
+        show_children($key, $Ged->{xrefs}{$child->{value}}, 1);
+      }
+    }
+    else
+    {
+      $Top->{_canv}{_ged}{$key} = $child;
+      show_children($key, $child) if exists $child->{children};
+    }
+  }
+}
+
+sub box($@)
+{
+  my ($button, $text, @params) = @_;
+  my $box = $Top->DialogBox(-default_button => $button,
+                            -buttons        => [ $button ],
+                            @params);
+  my $label = $box->add("Label")->pack(-fill => "both", -expand => 1);
+  $label->configure(-text => $text);
+  $box->Show;
+}
+
+__END__
+
+=head1 NAME
+
+tkged - an interactive program to manipulate Gedcom genealogy files
+
+Version 1.01 - 27th April 1999
+
+=head1 SYNOPSIS
+
+  tkged gedcom_file.ged
+
+=head1 DESCRIPTION
+
+This is a pre-alpha version of tkged.  It doesn't work properly, some
+parts are not implemented, and the parts that are have got bugs.  Most
+of it has been written late at night, with a baby in one arm, and so it
+is not written very well, there is no documentation, and I am not
+particularly proud of most of it.
+
+Much of the functionality has now been broken out into member functions,
+and a lot more should be.  In a way, I am using tkged to show me what
+member functions may be required.
+
+If that sounds like it was supposed to put you off, you are right.  I
+didn't even include this program until version 1.01, but under the
+principle of "release it early, release it often", I decided to include
+it because:
+
+=over 4
+
+=item *
+
+It will show how the use Gedcom.pm
+
+=item *
+
+I want to improve it, but I don't want people to duplicate the work
+
+=item *
+
+It actually has some utility as it is
+
+=back
+
+If you would like to use it, then please do, and I would welcome any
+feedback.
+
+Good luck...
+
+=cut
