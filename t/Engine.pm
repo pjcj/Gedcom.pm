@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.14 - 5th April 2004
+# Version 1.15 - 3rd May 2005
 
 use strict;
 
@@ -16,9 +16,9 @@ require 5.005;
 package Engine;
 
 use vars qw($VERSION);
-$VERSION = "1.14";
+$VERSION = "1.15";
 
-use Gedcom 1.14;
+use Gedcom 1.15;
 
 sub test
 {

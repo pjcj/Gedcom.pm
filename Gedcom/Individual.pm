@@ -13,10 +13,10 @@ require 5.005;
 
 package Gedcom::Individual;
 
-use Gedcom::Record 1.14;
+use Gedcom::Record 1.15;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.14";
+$VERSION = "1.15";
 @ISA     = qw( Gedcom::Record );
 
 sub name
@@ -301,7 +301,7 @@ __END__
 
 Gedcom::Individual - a module to manipulate Gedcom individuals
 
-Version 1.14 - 5th April 2004
+Version 1.15 - 3rd May 2005
 
 =head1 SYNOPSIS
 
