@@ -1,0 +1,15 @@
+\.org$
+\.bak$
+~$
+^Makefile$
+^Makefile\.old$
+^blib
+^pm_to_blib$
+\.version$
+\.gz$
+^cover_db/
+core$
+.out$
+Gedcom/Grammar_0_1.pm
+/\.index$
+t/lines/.*\.p$

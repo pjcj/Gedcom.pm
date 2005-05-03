@@ -1,5 +1,9 @@
 1,999bd
 e Makefile.PL
+e MANIFEST
+e CHANGES
+e TODO
+e BGS
 e Gedcom.pm
 e Gedcom/Item.pm
 e Gedcom/Grammar.pm
@@ -10,13 +14,9 @@ e Gedcom/Event.pm
 e Gedcom/Comparison.pm
 e Gedcom/CGI.pm
 e Gedcom/LifeLines.pm
-e CHANGES
-e TODO
-e MANIFEST
 e parse_grammar
 e lines2perl
 e gedcom-5.5.grammar
 e t/Basic.pm
 e ged
-e tkged
 e #1
