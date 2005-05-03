@@ -3,7 +3,7 @@ e Makefile.PL
 e MANIFEST
 e CHANGES
 e TODO
-e BGS
+e BUGS
 e Gedcom.pm
 e Gedcom/Item.pm
 e Gedcom/Grammar.pm

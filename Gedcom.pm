@@ -761,9 +761,7 @@ There is a low volume mailing list available for discussing the use of
 Perl in conjunction with genealogical work.  This is an appropriate
 forum for discussing Gedcom.pm and if you use or are interested in this
 module I would encourage you to join the list.  To subscribe to the
-regular list, send a message to majordomo@icomm.ca and put subscribe
-S<perl-gedcom> as the body of the message. To get on the digest version
-of the list, put subscribe S<perl-gedcom-digest>.
+regular list, send an empty message to S<perl-gedcom-subscribe@perl.org>.
 
 To store my genealogy I wrote a syntax file (gedcom.vim) and used vim
 (http://www.vim.org) to enter the data, and Gedcom.pm to validate and
