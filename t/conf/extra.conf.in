@@ -1,0 +1,15 @@
+# Copyright 2005, Paul Johnson (paul@pjcj.net)
+
+# This file will be Include-d by @t_conf_file@
+UseCanonicalName Off
+<Perl>
+    BEGIN { $Gedcom::ROOT = "@top_dir@" }
+</Perl>
+
+Include "@t_conf@/gedcom.conf"
+
+<IfDefine COVER>
+    <Perl>
+        use Devel::Cover qw(-select \.conf$);
+    </Perl>
+</IfDefine>

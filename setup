@@ -1,0 +1,4 @@
+gedcom=/usr/local/pkg/gedcom-1
+export PATH=$gedcom/perl-5.8.7/bin:$PATH
+export APACHE_TEST_APXS=$gedcom/apache_1.3.31/bin/apxs
+export APACHE_TEST_COLOR=1
