@@ -17,9 +17,9 @@ BEGIN
 {
     eval
     q{
+        use 5.006;
         use Apache::Test;
         use Apache::TestUtil;
-        use Apache::TestRequest qw( GET_BODY GET );
         use LWP::Simple;
     };
 
