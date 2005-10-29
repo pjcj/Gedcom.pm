@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 # Copyright 1999-2005, Paul Johnson (pjcj@cpan.org)
 
@@ -13,11 +13,29 @@ use strict;
 
 use lib -d "t" ? "t" : "..";
 
-use LWP::Simple;
-use Test::More "no_plan";
+BEGIN
+{
+    eval
+    q{
+        use Apache::Test;
+        use Apache::TestUtil;
+        use Apache::TestRequest qw( GET_BODY GET );
+        use LWP::Simple;
+    };
+
+    if (my $e = $@)
+    {
+        eval "use Test::More skip_all => q[mod_perl not fully installed [$e]]";
+    }
+}
+
+Apache::TestRequest::module('default');
+
+my $config   = Apache::Test::config();
+my $hostport = Apache::TestRequest::hostport($config) || "";
 
 my $ws   = "/ws/plain/royal";
-my $root = "http://localhost:8529$ws";
+my $root = "http://$hostport$ws";
 
 sub ws { join "", map "$ws/$_\n",                  @_ }
 sub rs { join "", map {chomp(my $t = $_); "$t\n" } @_ }
@@ -34,8 +52,12 @@ my @tests =
 EOR
 );
 
+plan tests => scalar @tests;
+
 for (@tests)
 {
     my $q = $root . $_->[0];
-    is get($q), $_->[1], $q;
+    # t_debug("-- $q");
+    # t_debug("++ ", get($q));
+    ok t_cmp get($q), $_->[1], $q;
 }

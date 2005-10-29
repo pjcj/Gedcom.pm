@@ -14,11 +14,12 @@ require 5.005;
 use ExtUtils::MakeMaker;
 use ExtUtils::Manifest "maniread";
 
-eval q(
+eval
+q{
     use Apache::TestMM qw(test clean);
     Apache::TestMM::filter_args();
     Apache::TestMM::generate_script("t/TEST");
-);
+};
 
 $| = 1;
 
@@ -218,9 +219,9 @@ tst :: pure_all test_clean run_tests
 COVERDIR = /home/pjcj/g/perl/dev/Devel-Cover
 
 cover :
-\t \$(PERL) -I\$(COVERDIR)/blib/lib -I\$(COVERDIR)/blib/arch \$(COVERDIR)/cover -delete && \\
-   HARNESS_PERL_SWITCHES=-I\$(COVERDIR)/blib/lib\\ -I\$(COVERDIR)/blib/arch\\ -MDevel::Cover=-ignore,Cover \$(MAKE) test && \\
-   \$(PERL) -I\$(COVERDIR)/blib/lib -I\$(COVERDIR)/blib/arch \$(COVERDIR)/cover -report html
+\t \$(PERL) -Mblib=\$(COVERDIR) \$(COVERDIR)/cover -delete && \\
+   HARNESS_PERL_SWITCHES=-Mblib=\$(COVERDIR)\\ -MDevel::Cover=-ignore,Cover \$(MAKE) test && \\
+   \$(PERL) -Mblib=\$(COVERDIR) \$(COVERDIR)/cover -report html
 
 restart : all
 \t t/TEST -stop && rm -f t/logs/*log && t/TEST -start
