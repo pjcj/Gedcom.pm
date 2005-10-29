@@ -193,7 +193,7 @@ sub AUTOLOAD
   # print "autoloading $func\n";
   $func =~ s/^.*:://;
   my $tag;
-  carp "Undefined subroutine $func called"
+  croak "Undefined subroutine $func called"
     if $func !~ /^(add|get)_(.*)$/ ||
        !($tag = $Funcs{lc $2}) ||
        !exists $Top_tag_order{$tag};
@@ -207,7 +207,7 @@ sub AUTOLOAD
       unless ($tag =~ /^(HEAD|TRLR)$/)
       {
         my $x = @_ ? shift : $tag eq "SUBM" ? "SUBM" : substr $tag, 0, 1;
-        carp "Invalid xref $x requested in $func"
+        croak "Invalid xref $x requested in $func"
           unless $x =~ /^[^\W\d_]+(\d*)$/;
         $x = $self->next_xref($x) unless length $1;
         $r->{xref} = $x;
@@ -524,17 +524,20 @@ sub order
   @{$self->{record}{items}} = sort $sort_sub @{$self->{record}->_items}
 }
 
-sub individuals
+sub items
 {
   my $self = shift;
-  grep { ref eq "Gedcom::Individual" } @{$self->{record}->_items}
+  @{$self->{record}->_items}
 }
 
-sub families
-{
-  my $self = shift;
-  grep { ref eq "Gedcom::Family" } @{$self->{record}->_items}
-}
+sub heads        { grep $_->tag eq "HEAD",           shift->items }
+sub submitters   { grep $_->tag eq "SUBM",           shift->items }
+sub individuals  { grep ref eq "Gedcom::Individual", shift->items }
+sub families     { grep ref eq "Gedcom::Family",     shift->items }
+sub notes        { grep $_->tag eq "NOTE",           shift->items }
+sub repositories { grep $_->tag eq "REPO",           shift->items }
+sub sources      { grep $_->tag eq "SOUR",           shift->items }
+sub trailers     { grep $_->tag eq "TRLR",           shift->items }
 
 sub get_individual
 {
@@ -639,6 +642,13 @@ sub next_xref
     $last = $1 if defined $c->{xref} and $c->{xref} =~ /$re/ and $1 > $last;
   }
   $type . ++$last
+}
+
+sub top_tag
+{
+  my $self = shift;
+  my ($tag) = @_;
+  $Top_tag_order{$tag}
 }
 
 1;

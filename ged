@@ -44,6 +44,33 @@ sub main()
   );
   if (1)
   {
+    $ged->resolve_xrefs;
+    print "\nmerging notes...";
+    my @notes = grep $_->tag eq "NOTE", $ged->{record}->items;
+    my %notes;
+    my @dups;
+    for my $note (@notes)
+    {
+        my $text = $note->full_value;
+        if (exists $notes{$text})
+        {
+            print "NOTE ", $note->xref, " matches $notes{$text}\n";
+            $note->{xref} = $notes{$text};
+            push @dups, $note;
+        }
+        else
+        {
+            $notes{$text} = $note->xref;
+        }
+    }
+    $ged->unresolve_xrefs;
+    $_->delete for @dups;
+    $ged->validate;
+    print "\nwriting...";
+    $ged->write("$gedcom_file.new");
+  }
+  if (0)
+  {
     my $age = sub { Date_Cmp(ParseDate($a->get_value("birth date") || ""),
                              ParseDate($b->get_value("birth date") || "")) };
     print "\nrenumbering...";

@@ -393,6 +393,7 @@ sub write
 {
   my $self = shift;
   my ($fh, $level, $flush) = @_;
+  $level ||= 0;
   my @p;
   push(@p, $level . "  " x $level)         unless $flush || $level < 0;
   push(@p, "\@$self->{xref}\@")            if     defined $self->{xref} &&
