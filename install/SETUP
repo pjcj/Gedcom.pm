@@ -1,0 +1,24 @@
+Build perl, apache, mod_perl and the required modules:
+
+    Download perl, apache and mod_perl into /src/dir
+    Build everything:
+
+        $ cd install
+        $ perl ./buildperl /src/dir perl-5.8.5 /usr/local/pkg/gedcom-1
+
+    Change /src/dir, perl-5.8.5, /usr/local/pkg/gedcom-1 to the
+    location of your downloaded source tarballs, the version of perl you
+    will be installing and the location to which the packages will be
+    installed respectively.
+
+Run tests:
+
+    $ make test
+
+Start the server:
+
+    $ make restart
+
+Stop the server:
+
+    $ make stop
