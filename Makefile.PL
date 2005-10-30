@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 # Copyright 1998-2005, Paul Johnson (pjcj@cpan.org)
 

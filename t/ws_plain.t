@@ -45,10 +45,38 @@ my @tests =
     [ "?search=Elizabeth_II", ws "I9"                                    ],
     [ "/i9/name",             rs "Elizabeth_II Alexandra Mary /Windsor/" ],
     [ "/i9/children",         ws qw( I11 I15 I19 I23 )                   ],
-    [ "/i9/birth",            rs <<"EOR"                                 ],
+    [ "/i9/birth",            rs <<'EOR'                                 ],
 1   BIRT
 2     DATE Wednesday, 21st April 1926
 2     PLAC 17 Bruton St.,London,W1,England
+EOR
+    [ "/i9/write",            rs <<'EOR'                                 ],
+0 @I9@ INDI
+1   NAME Elizabeth_II Alexandra Mary/Windsor/
+1   TITL Queen of England
+1   SEX F
+1   BIRT
+2     DATE Wednesday, 21st April 1926
+2     PLAC 17 Bruton St.,London,W1,England
+1   FAMS @F6@
+1   FAMC @F4@
+1   RIN 10
+
+EOR
+    [ "/i9/write_xml",        rs <<'EOR'                                 ],
+<INDI ID="I9">
+  <NAME>Elizabeth_II Alexandra Mary/Windsor/</NAME>
+  <TITL>Queen of England</TITL>
+  <SEX>F</SEX>
+  <BIRT>
+    <DATE>Wednesday, 21st April 1926</DATE>
+    <PLAC>17 Bruton St.,London,W1,England</PLAC>
+  </BIRT>
+  <FAMS REF="F6"/>
+  <FAMC REF="F4"/>
+  <RIN>10</RIN>
+</INDI>
+
 EOR
 );
 
