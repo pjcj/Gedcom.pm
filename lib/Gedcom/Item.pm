@@ -53,7 +53,7 @@ sub read
 
 # $self->{fh} = FileHandle->new($self->{file})
   $self->{fh} = gensym;
-  open $self->{fh}, $self->{file} or die "Can't open file $self->{file}: $!";
+  open $self->{fh}, $self->{file} or die "Can't open file $self->{file}: $!\n";
   binmode $self->{fh};
 
   # find out how big the file is

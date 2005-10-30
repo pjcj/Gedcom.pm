@@ -45,10 +45,24 @@ my @tests =
     [ "?search=Elizabeth_II", ws "I9"                                    ],
     [ "/i9/name",             rs "Elizabeth_II Alexandra Mary /Windsor/" ],
     [ "/i9/children",         ws qw( I11 I15 I19 I23 )                   ],
+    [ "/i9/birth/date",       "Wednesday, 21st April 1926\n"             ],
     [ "/i9/birth",            rs <<'EOR'                                 ],
 1   BIRT
 2     DATE Wednesday, 21st April 1926
 2     PLAC 17 Bruton St.,London,W1,England
+EOR
+    [ "/i9",                  rs <<'EOR'                                 ],
+0 @I9@ INDI
+1   NAME Elizabeth_II Alexandra Mary/Windsor/
+1   TITL Queen of England
+1   SEX F
+1   BIRT
+2     DATE Wednesday, 21st April 1926
+2     PLAC 17 Bruton St.,London,W1,England
+1   FAMS @F6@
+1   FAMC @F4@
+1   RIN 10
+
 EOR
     [ "/i9/write",            rs <<'EOR'                                 ],
 0 @I9@ INDI
@@ -78,9 +92,12 @@ EOR
 </INDI>
 
 EOR
+    [ "/i0",                  "Can't get record [i0]\n"                  ],
+    [ "/I9/__error__",        "Invalid action [__error__]\n"             ],
+    [ "",                     "No xref or parameters specified\n"        ],
 );
 
-plan tests => scalar @tests;
+plan tests => scalar @tests + 2;
 
 for (@tests)
 {
@@ -89,3 +106,12 @@ for (@tests)
     # t_debug("++ ", get($q));
     ok t_cmp get($q), $_->[1], $q;
 }
+
+ok t_cmp get("http://$hostport/ws/plain/"),
+         "No GEDCOM file specified\n",
+         "No GEDCOM file specified";
+
+ok t_cmp get("http://$hostport/ws/plain/__error__"),
+         "Can't open file /home/pjcj/g/perl/Gedcom/__error__.ged: " .
+             "No such file or directory\n",
+         "GEDCOM file does not exist";

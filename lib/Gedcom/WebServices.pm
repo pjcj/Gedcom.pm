@@ -109,23 +109,23 @@ sub __plain
 
     my @params = split "/", $path;
 
-    my $file = shift @params or die "No GEDCOM file specified";
+    my $file = shift @params or die "No GEDCOM file specified\n";
     my $gedcom_file = "$Gedcom::ROOT/$file.ged";
     my $ged = $self->{ged} = Gedcom->new(gedcom_file => $gedcom_file,
                                          read_only   => 1);
-    die "Can't open gedcom file [$gedcom_file]" unless $ged;
+    die "Can't open gedcom file [$gedcom_file]\n" unless $ged;
 
     my @ret;
     if (@params)
     {
         my $xref = shift @params;
-        my $rec = $ged->resolve_xref($xref) || $ged->resolve_xref(uc $xref);
-        die "Can't get record [$xref]" unless $rec;
+        my $rec = $ged->resolve_xref($xref) || $ged->resolve_xref(uc $xref) ||
+                  die "Can't get record [$xref]\n";
 
         if (@params)
         {
             my $action = shift @params;
-            die "Invalid action [$action]" unless $rec->can($action);
+            die "Invalid action [$action]\n" unless $rec->can($action);
 
             if ($Gedcom::Funcs{lc $action} && @params)
             {
@@ -154,7 +154,7 @@ sub __plain
     }
     else
     {
-        die "No xref or parameters specified";
+        die "No xref or parameters specified\n";
     }
 
     # print @ret . "\n";

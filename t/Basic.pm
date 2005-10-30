@@ -255,7 +255,7 @@ sub import
     ok unlink $f1;
   };
 
-  my $tests = 1492;
+  my $tests = 1493;
   my $grammar;
   if ($grammar = delete $args{create_grammar})
   {
@@ -282,6 +282,7 @@ sub import
 __DATA__
 0 HEAD
 1   SOUR PAF 2.2
+2     VERS 2.2
 1   DEST PAF
 1   DATE Friday, 20th November 1992
 1   FILE ROYALS.GED

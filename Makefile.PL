@@ -236,13 +236,13 @@ stop : all
 runtestcover : all
 \t rm -f t/logs/*log && \\
    DEVEL_COVER=1 t/TEST -defines COVER -one-process -verbose && \\
-   cover
+   cover -report html_basic
 
 mytestcover : all
 \t cover -delete && \\
    rm -f t/logs/*log && \\
    DEVEL_COVER=1 t/TEST -defines COVER -one-process && \\
-   cover
+   cover -report html_basic
 
 # cover : mytestcover
 
