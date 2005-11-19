@@ -15,7 +15,7 @@ use System "sys:dsys: command, error";
 
 my $Usage =
     "Usage: $0 /src/dir perl_version /installation " .
-    "       [perl|modules|manual|apache|mod_perl";
+    "       [perl|modules|manual|apache|mod_perl|coverage";
 
 my $Src_dir      = shift   || die "$Usage\n";
 my $Perl_src     = shift   || die "$Usage\n";
@@ -66,7 +66,7 @@ sub build ($$$)
     $opts =
     {
         "unpack" => sub { dsys uncompress($src) . " $src | tar xf -" },
-        dir      => sub { $src =~ m|.*/(.*)\.tar\.gz$|; $1 },
+        dir      => sub { $src =~ m|.*/(.*)\.tar\.| && $1 },
         config   => sub { dsys "$Perl Makefile.PL" },
         make     => sub { dsys "make" },
         test     => sub { sys  "make test" }, # some modules fail their tests...
@@ -90,7 +90,7 @@ sub feed ($$)
     my ($command, $input) = @_;
     open COMMAND, "| $command" or die "Cannot run $command:$!\n";
     print COMMAND $input;
-    close COMMAND or die "Cannot run $command:$!\n";
+     close COMMAND or die "Cannot run $command:$!\n";
 }
 
 sub main ()
@@ -114,9 +114,16 @@ sub main ()
         my @opts =
         (
           "-Dperladmin='paul\@pjcj.net'",
-          "-Dcc=gcc",
           "-Dprefix=$Perl_installation",
+          "-Dusedevel",
         );
+
+        push @opts,
+        (
+            "-Dccflags='-fprofile-arcs -ftest-coverage'",
+            "-Dldflags='-fprofile-arcs -ftest-coverage'",
+            "-Doptimize='-g -O0'",
+        ) if building "coverage";
 
         dsys "sh ./Configure -des @opts";
 
@@ -134,50 +141,83 @@ sub main ()
     print "<$restart>\n";
     exec $restart if $^X ne $Perl;
 
-    my $apache   = "apache_1.3.31";
-    my $mod_perl = "mod_perl-1.29";
+    # my $apache   = "apache_1.3.34";
+    my $apache   = "httpd-2.0.55";
 
-    build $apache,
-          $Src_dir,
-          {
-              config  => sub {},
-              make    => sub {},
-              test    => sub {},
-              install => sub {},
-          }
-        if building "apache";
+    if ($apache =~ /apache/)
+    {
+        my $mod_perl = "mod_perl-1.29";
 
-    build $mod_perl,
-          $Src_dir,
-          {
-              config => sub
+        build $apache,
+              $Src_dir,
               {
-                  dsys "$Perl Makefile.PL" .
-                       " APACHE_SRC=../$apache/src" .
-                       " DO_HTTPD=1 USE_APACI=1 PREP_HTTPD=1 EVERYTHING=1";
-              },
-          }
-        if building "mod_perl";
+                  config  => sub {},
+                  make    => sub {},
+                  test    => sub {},
+                  install => sub {},
+              }
+            if building "apache";
 
-    build $apache,
-          $Src_dir,
-          {
-              "unpack" => sub {},
-              config   => sub
+        build $mod_perl,
+              $Src_dir,
               {
-                  dsys "./configure" .
-                       " --prefix=$Installation/$apache" .
-                       " --enable-module=so" .
-                       " --enable-module=rewrite" .
-                       " --activate-module=src/modules/perl/libperl.a";
-              },
-          }
-        if building "apache";
+                  config => sub
+                  {
+                      dsys "$Perl Makefile.PL" .
+                           " APACHE_SRC=../$apache/src" .
+                           " DO_HTTPD=1 USE_APACI=1 PREP_HTTPD=1 EVERYTHING=1";
+                  },
+              }
+            if building "mod_perl";
+
+        build $apache,
+              $Src_dir,
+              {
+                  "unpack" => sub {},
+                  config   => sub
+                  {
+                      dsys "./configure" .
+                           " --prefix=$Installation/$apache" .
+                           " --enable-module=so" .
+                           " --enable-module=rewrite" .
+                           " --activate-module=src/modules/perl/libperl.a";
+                  },
+              }
+            if building "apache";
+    }
+    else
+    {
+        my $mod_perl = "mod_perl-2.0.2";
+
+        build $apache,
+              $Src_dir,
+              {
+                  config   => sub
+                  {
+                      dsys "./configure" .
+                           " --prefix=$Installation/$apache";
+                  },
+              }
+            if building "apache";
+
+        build $mod_perl,
+              $Src_dir,
+              {
+                  config => sub
+                  {
+                      dsys "$Perl Makefile.PL" .
+                           " MP_APXS=$Installation/$apache/bin/apxs";
+                  },
+              }
+            if building "mod_perl";
+    }
+
 
     if (building "modules")
     {
         my @first =
         qw(
+            Data::Dump::Streamer
         );
 
         my @manual =
@@ -199,6 +239,11 @@ sub main ()
             Image::Size
             Template
             HTML::Lint
+            Date::Manip
+            Parse::RecDescent
+            Roman
+            JSON
+            Test::JSON
             Test::WWW::Mechanize
             Devel::Cover
         );
@@ -210,11 +255,13 @@ sub main ()
         my $config =
         {
 
-            LWP                => { test => sub {} },
-            "Apache::Compress" => { test => sub {} },
-            "Apache::Filter"   => { test => sub {} },
-            "Apache::Request"  => { test => sub {} },
-            "Apache::TEST"     => { test => sub {} },
+            LWP                    => { test => sub {} },
+            "Apache::Compress"     => { test => sub {} },
+            "Apache::Filter"       => { test => sub {} },
+            "Apache::Request"      => { test => sub {} },
+            "Apache::TEST"         => { test => sub {} },
+            "Data::Dump::Streamer" =>
+                { config => sub { dsys "$Perl Makefile.PL DDS" } },
         };
 
         my $f = "$Perl_installation/.cpan";
@@ -289,7 +336,7 @@ EOF
             # CPAN::Shell->expandany($_)->install;
         };
 
-        $install->($_) for @first;
+        # $install->($_) for @first;
 
         for my $mod (@first)
         {

@@ -21,11 +21,13 @@ BEGIN
         use Apache::Test ":withtestmore";
         use Apache::TestUtil;
         use LWP::Simple;
+        use Test::JSON;
     };
 
     if (my $e = $@)
     {
-        eval "use Test::More skip_all => q[mod_perl not fully installed [$e]]";
+        eval "use Test::More skip_all => " .
+             "q[mod_perl or Test::JSON not fully installed [$e]]";
     }
 }
 
@@ -36,7 +38,7 @@ Apache::TestRequest::module('default');
 my $config   = Apache::Test::config();
 my $hostport = Apache::TestRequest::hostport($config) || "";
 
-my $ws   = "/ws/plain/royal";
+my $ws   = "/ws/json/royal";
 my $root = "http://$hostport$ws";
 
 sub ws { join "", map "$ws/$_\n",                  @_ }
@@ -98,6 +100,17 @@ EOR
     [ "/I9/__error__",        "Invalid action [__error__]\n"             ],
     [ "",                     "No xref or parameters specified\n"        ],
 );
+
+plan tests => 2;
+
+is_valid_json get("http://$hostport/ws/json/royal/i9/name"),
+              "... json well formed";
+
+is_json get("http://$hostport/ws/json/royal/i9/name"),
+        '{"result":"Elizabeth_II Alexandra Mary /Windsor/"}',
+        "... json correct";
+
+__END__
 
 plan tests => scalar @tests + 2;
 

@@ -47,6 +47,18 @@ sub copy
   $item
 }
 
+sub hash
+{
+  my $self = shift;
+  my $item  = {};
+  for my $key (qw(level xref tag value pointer min max))
+  {
+    $item->{$key} = $self->{$key} if exists $self->{$key}
+  }
+  $item->{items} = [ map { $_->hash } @{$self->_items} ];
+  $item
+}
+
 sub read
 {
   my $self = shift;

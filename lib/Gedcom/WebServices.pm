@@ -84,11 +84,12 @@ sub _parse_uri
     my $r      = shift;
     my $uri    = $r->parsed_uri;
     my $path   = $uri->path;
-    print STDERR "path $path\n";
-    if ($path =~ s|^/ws/plain/||)
+    # print STDERR "parse path $path\n";
+    if ($path =~ s!^/ws/(plain|json)/!!)
     {
         $r->notes(PATH => $path);
-        $r->uri("/plain");
+        # print STDERR "parse new path [$1]\n";
+        $r->uri("/$1");
     }
     DECLINED
 }
@@ -100,20 +101,25 @@ sub _error
     print $msg;
 }
 
-sub __plain
+sub _process
 {
     my $self = shift;
+    my ($type) = @_;
 
     my $path = $self->{r}->notes("path");
-    print STDERR "plain [$path]\n";
+    # print STDERR "$type [$path]\n";
 
     my @params = split "/", $path;
 
     my $file = shift @params or die "No GEDCOM file specified\n";
     my $gedcom_file = "$Gedcom::ROOT/$file.ged";
+    # print STDERR "gedcom_file $gedcom_file\n";
+
     my $ged = $self->{ged} = Gedcom->new(gedcom_file => $gedcom_file,
                                          read_only   => 1);
     die "Can't open gedcom file [$gedcom_file]\n" unless $ged;
+
+    # print STDERR "params @params\n";
 
     my @ret;
     if (@params)
@@ -129,23 +135,36 @@ sub __plain
 
             if ($Gedcom::Funcs{lc $action} && @params)
             {
-                print STDERR "Calling get_value($action, @params)\n";
+                # print STDERR "Calling get_value($action, @params)\n";
                 @ret = $rec->get_value($action, @params);
             }
             elsif ($action =~ /^write(?:_xml)?/)
             {
-                print STDERR "Calling $action(STDOUT)\n";
+                # print STDERR "Calling $action(STDOUT)\n";
                 $rec->$action(\*STDOUT);
             }
             else
             {
-                print STDERR "Calling $action(@params)\n";
+                # print STDERR "Calling $action(@params)\n";
                 @ret = $rec->$action(@params);
             }
         }
         else
         {
-            $rec->write(\*STDOUT);
+            if ($type eq "plain")
+            {
+                $rec->write(\*STDOUT);
+            }
+            elsif ($type eq "json")
+            {
+                my $r = $rec->hash;
+                # use DDS; print Dump $r;
+                print JSON->new->objToJson({ rec => $r });
+            }
+            else
+            {
+                die "unrecognised type: $type";
+            }
         }
     }
     elsif (my $search = $self->{r}->param("search"))
@@ -165,19 +184,54 @@ sub __plain
         {
             if (defined $_->{xref})
             {
-                print "/ws/plain/$file/", $_->xref, "\n";
+                print "/ws/$type/$file/", $_->xref, "\n";
             }
             else
             {
-                $_->write(\*STDOUT, @params + 1);
+                if ($type eq "plain")
+                {
+                    $_->write(\*STDOUT, @params + 1);
+                }
+                elsif ($type eq "json")
+                {
+                    print JSON->new->objToJson($_);
+                }
+                else
+                {
+                    die "unrecognised type: $type";
+                }
             }
         }
         else
         {
-            print "$_\n";
+            if ($type eq "plain")
+            {
+                print "$_\n";
+            }
+            elsif ($type eq "json")
+            {
+                print JSON->new->objToJson({ result => $_ });
+            }
+            else
+            {
+                die "unrecognised type: $type";
+            }
         }
     }
     print "\n" unless @ret;
+}
+
+sub __plain
+{
+    my $self = shift;
+    $self->_process("plain");
+}
+
+sub __json
+{
+    my $self = shift;
+    require JSON;
+    $self->_process("json");
 }
 
 1;

@@ -56,6 +56,7 @@ t/read_only.t
 t/resolve.t
 t/resolve_read_only.t
 t/TEST.PL
+t/ws_json.t
 t/ws_plain.t
 tkged
 TODO
