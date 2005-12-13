@@ -85,7 +85,7 @@ sub _parse_uri
     my $uri    = $r->parsed_uri;
     my $path   = $uri->path;
     # print STDERR "parse path $path\n";
-    if ($path =~ s!^/ws/(plain|json)/!!)
+    if ($path =~ s!^/ws/(plain|json|xml)/!!)
     {
         $r->notes(PATH => $path);
         # print STDERR "parse new path [$1]\n";
@@ -138,11 +138,11 @@ sub _process
                 # print STDERR "Calling get_value($action, @params)\n";
                 @ret = $rec->get_value($action, @params);
             }
-            elsif ($action =~ /^write(?:_xml)?/)
-            {
+            # elsif ($action =~ /^write(?:_xml)?/)
+            # {
                 # print STDERR "Calling $action(STDOUT)\n";
-                $rec->$action(\*STDOUT);
-            }
+                # $rec->$action(\*STDOUT);
+            # }
             else
             {
                 # print STDERR "Calling $action(@params)\n";
@@ -155,10 +155,15 @@ sub _process
             {
                 $rec->write(\*STDOUT);
             }
+            elsif ($type eq "xml")
+            {
+                my $r = $rec->hash;
+                $rec->write_xml(\*STDOUT);
+            }
             elsif ($type eq "json")
             {
                 my $r = $rec->hash;
-                # use DDS; print Dump $r;
+                # use DDS; print STDERR Dump $r;
                 print JSON->new->objToJson({ rec => $r });
             }
             else
@@ -192,9 +197,15 @@ sub _process
                 {
                     $_->write(\*STDOUT, @params + 1);
                 }
+                elsif ($type eq "xml")
+                {
+                    $_->write_xml(\*STDOUT);
+                }
                 elsif ($type eq "json")
                 {
-                    print JSON->new->objToJson($_);
+                    my $r = $_->hash;
+                    # use DDS; print STDERR Dump $r;
+                    print JSON->new->objToJson($r);
                 }
                 else
                 {
@@ -204,13 +215,19 @@ sub _process
         }
         else
         {
+            my $result = @params ? $params[-1] : "result";
             if ($type eq "plain")
             {
                 print "$_\n";
             }
+            elsif ($type eq "xml")
+            {
+                $result = uc $result;
+                print "<$result>$_</$result>\n";
+            }
             elsif ($type eq "json")
             {
-                print JSON->new->objToJson({ result => $_ });
+                print JSON->new->objToJson({ $result => $_ });
             }
             else
             {
@@ -225,6 +242,12 @@ sub __plain
 {
     my $self = shift;
     $self->_process("plain");
+}
+
+sub __xml
+{
+    my $self = shift;
+    $self->_process("xml");
 }
 
 sub __json

@@ -175,7 +175,8 @@ sub baptism
   return unless $indi;
   $indi->tag_record("BAPM") ||
   $indi->tag_record("BAPL") ||
-  $indi->tag_record("CHR")
+  $indi->tag_record("CHR")  ||
+  $indi->tag_record("CHRA")
 }
 
 sub burial

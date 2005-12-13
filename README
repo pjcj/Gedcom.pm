@@ -45,7 +45,8 @@ DESCRIPTION
     The vice of laziness is also shining brightly - I need to document how
     to use this module in much greater detail. This is happening - this
     release has more documentation than the previous ones - but if you would
-    like information feel free to send me mail.
+    like information feel free to send me mail or better still, ask on the
+    mailing list.
 
     This module provides some functions which work over the entire Gedcom
     file, such as reformatting dates, renumbering entries and ordering the

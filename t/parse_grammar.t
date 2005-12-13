@@ -11,7 +11,7 @@
 
 use strict;
 
-use lib -d "t" ? "t" : "..";
+use lib -d "t" ? ("t", "lib") : "../lib";
 
 use Basic (create_grammar => "gedcom-5.5.grammar",
            resolve        => "unresolve_xrefs",

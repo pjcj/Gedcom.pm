@@ -61,10 +61,10 @@ sub import
     ok $ged->validate;
 
     $ged->$resolve();
-#   ok $ged->validate;
+    ok $ged->validate;
 
     $ged->normalise_dates if $INC{"Date/Manip.pm"};
-#   ok $ged->validate;
+    ok $ged->validate;
 
     my $fams = 47;
     my $inds = 91;
@@ -76,17 +76,17 @@ sub import
     ok rins ($ged->families   ), i($inds + 2 .. $fams + $inds + 1);
 
     %xrefs = $ged->renumber;
-#   ok $ged->validate;
+    ok $ged->validate;
 
     $ged->$resolve();
-#   ok $ged->validate;
+    ok $ged->validate;
 
     ok $xrefs{INDI}, 91;
     ok $xrefs{FAM},  47;
     ok $xrefs{SUBM}, 1;
 
     $ged->order;
-#   ok $ged->validate;
+    ok $ged->validate;
 
     ok xrefs($ged->individuals), i(1 .. $inds);
     ok rins ($ged->individuals),
@@ -160,10 +160,10 @@ sub import
     ok rins($ged->resolve_xref($ind_xref)), "10";
 
     %xrefs = $ged->renumber(xrefs => [$ind_xref]);
-#   ok $ged->validate;
+    ok $ged->validate;
 
     $ged->$resolve();
-#   ok $ged->validate;
+    ok $ged->validate;
 
     ok $xrefs{INDI}, 91;
     ok $xrefs{FAM},  47;
@@ -240,7 +240,7 @@ sub import
        $i = $ged->get_individual("I83");
     my $n = $i->resolve($i->note)->full_value;
     ok $n, "Line 1\nLine 2";
-#   ok $ged->validate;
+    ok $ged->validate;
 
     my $f1 = $gedcom_file . "1";
     $ged->write($f1);
@@ -255,14 +255,14 @@ sub import
     ok unlink $f1;
   };
 
-  my $tests = 1493;
+  my $tests = 1501;
   my $grammar;
   if ($grammar = delete $args{create_grammar})
   {
     Test::plan tests => $tests + 3;
     system ($^X, ((-d "t") ? "." : "..") . "/parse_grammar", $grammar, 0.1);
     ok $?, 0;
-    ok -e "Gedcom/Grammar_0_1.pm";
+    ok -e "lib/Gedcom/Grammar_0_1.pm";
     $args{grammar_version} = 0.1;
   }
   else
@@ -275,7 +275,7 @@ sub import
 
   if ($grammar)
   {
-    ok unlink ((-d "t") ? "." : "..") . "/Gedcom/Grammar_0_1.pm";
+    ok unlink ((-d "t") ? "." : "..") . "/lib/Gedcom/Grammar_0_1.pm";
   }
 }
 

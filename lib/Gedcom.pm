@@ -739,7 +739,8 @@ suppose this is the virtue of laziness shining through.
 The vice of laziness is also shining brightly - I need to document how
 to use this module in much greater detail.  This is happening - this
 release has more documentation than the previous ones - but if you would
-like information feel free to send me mail.
+like information feel free to send me mail or better still, ask on the
+mailing list.
 
 This module provides some functions which work over the entire Gedcom
 file, such as reformatting dates, renumbering entries and ordering the
@@ -790,8 +791,8 @@ simple, this will involve a statement such as
 
 It is now possible to access the records within the gedcom file.  Each
 individual and family is a record.  Records can contain other records.
-For example, an individual is a record.  The birth information is
-a sub-record of the individual, and the date of birth is a sub-record of
+For example, an individual is a record.  The birth information is a
+sub-record of the individual, and the date of birth is a sub-record of
 the birth record.
 
 Some records, such as the birth record, are simply containers for other

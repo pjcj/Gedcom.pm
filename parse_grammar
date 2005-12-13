@@ -49,7 +49,7 @@ sub main()
 
   (my $v = $version) =~ tr/./_/;
   my $g   = "Grammar_$v";
-  my $gpm = "Gedcom/$g.pm";
+  my $gpm = "lib/Gedcom/$g.pm";
   print "\nwriting $gpm ...\n";
   open(G, ">$gpm") or die "Can't open $gpm: $!";
 

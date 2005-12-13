@@ -198,8 +198,8 @@ grammar :
 @versions : Makefile.PL
 \t \$(SET_VERSION) @versions
 
-README : Gedcom.pm
-\t TERMCAP= COLUMNS=80 pod2text Gedcom.pm | \\
+README : lib/Gedcom.pm
+\t TERMCAP= COLUMNS=80 pod2text lib/Gedcom.pm | \\
   \$(PERL) -n \\
   -e 'print if (/NAME/ ... /^[A-Z ]+\$\$/) =~ /^\\d+\$\$/;' \\
   -e 'print if (/DESCRIPTION/ ... /^[A-Z ]+\$\$/) =~ /^\\d+\$\$/;' \\
