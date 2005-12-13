@@ -25,7 +25,8 @@ BEGIN
 
     if (my $e = $@)
     {
-        eval "use Test::More skip_all => q[mod_perl not fully installed [$e]]";
+        eval "use Test::More skip_all => q[mod_perl not fully installed]";
+        #eval "use Test::More skip_all => q[mod_perl not fully installed [$e]]";
     }
 }
 

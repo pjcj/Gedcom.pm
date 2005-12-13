@@ -27,7 +27,8 @@ BEGIN
     if (my $e = $@)
     {
         eval "use Test::More skip_all => " .
-             "q[mod_perl or Test::JSON not fully installed [$e]]";
+             "q[mod_perl or Test::JSON not fully installed]";
+             # "q[mod_perl or Test::JSON not fully installed [$e]]";
 
     }
 }
