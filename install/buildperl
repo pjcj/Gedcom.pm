@@ -217,6 +217,10 @@ sub main ()
     {
         my @first =
         qw(
+        );
+
+        my @last =
+        qw(
             Data::Dump::Streamer
         );
 
@@ -246,6 +250,8 @@ sub main ()
             Test::JSON
             Test::WWW::Mechanize
             Devel::Cover
+            B::Utils
+            Data::Dump::Streamer
         );
 
         my @not_so_hot =
@@ -304,7 +310,7 @@ sub main ()
   'tar' => q[/bin/tar],
   'term_is_latin' => q[1],
   'unzip' => q[/usr/bin/unzip],
-  'urllist' => [q[ftp://ftp.demon.co.uk/pub/CPAN/], q[ftp://ftp.mirrorservice.org/sites/ftp.funet.fi/pub/languages/perl/CPAN/], q[ftp://usit.shef.ac.uk/pub/packages/CPAN/]],
+  'urllist' => [q[ftp://ftp.demon.co.uk/pub/CPAN/], q[ftp://ftp.mirrorservice.org/sites/ftp.funet.fi/pub/languages/perl/CPAN/], q[ftp://usit.shef.ac.uk/pub/packages/CPAN/], q[ftp://ftp.funet.fi/pub/languages/perl/CPAN/]],
   'wget' => q[/usr/bin/wget],
 };
 1;
@@ -338,7 +344,9 @@ EOF
 
         # $install->($_) for @first;
 
-        for my $mod (@first)
+        $install->($_) for @modules;
+
+        for my $mod (@last)
         {
             # my @mods = CPAN::Complete::cpl_any($mod);
             # print "Mods for $mod are: @mods\n";
@@ -367,8 +375,6 @@ EOF
             };
             build $mod, $b, $c;
         }
-
-        $install->($_) for @modules;
     }
 }
 
