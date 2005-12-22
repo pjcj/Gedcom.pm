@@ -23,8 +23,8 @@ q{
 
 $| = 1;
 
-my $Version  = "1.15";
-my $Date     = "3rd May 2005";
+my $Version  = "1.1502";
+my $Date     = "20th December 2005";
 my $Author   = 'pjcj@cpan.org';
 
 my @perlbug  = ("perlbug", "-a", $Author,
@@ -39,14 +39,15 @@ $ExtUtils::MakeMaker::Verbose = 0;
 
 WriteMakefile
 (
-    NAME     => "Gedcom",
-    VERSION  => $Version,
-    AUTHOR   => 'Paul Johnson (pjcj@cpan.org)',
-    ABSTRACT => "Interface to genealogy GEDCOM files",
-    DIR      => [],
-    dist     => { COMPRESS => "gzip --best --force" },
-    clean    => { FILES => join " ",  map { "$_.version" } @versions },
-    depend   => { distdir => "@files" },
+    NAME      => "Gedcom",
+    VERSION   => $Version,
+    AUTHOR    => 'Paul Johnson (pjcj@cpan.org)',
+    ABSTRACT  => "Interface to genealogy GEDCOM files",
+    DIR       => [],
+    EXE_FILES => [ "cgi-bin/gedcom.cgi" ],
+    dist      => { COMPRESS => "gzip --best --force" },
+    clean     => { FILES => join " ",  map { "$_.version" } @versions },
+    depend    => { distdir => "@files" },
 );
 
 print "\n";
@@ -193,13 +194,13 @@ tags : @files
 
 grammar :
 \t \$(PERL) parse_grammar gedcom-5.5.grammar
-\t \$(SET_VERSION) -e 's/^ +//' Gedcom/Grammar_5_5.pm
+\t \$(SET_VERSION) -e 's/^ +//' lib/Gedcom/Grammar_5_5.pm
 
 @versions : Makefile.PL
 \t \$(SET_VERSION) @versions
 
 README : lib/Gedcom.pm
-\t TERMCAP= COLUMNS=80 pod2text lib/Gedcom.pm | \\
+\t TERMCAP= COLUMNS=80 pod2text -s lib/Gedcom.pm | \\
   \$(PERL) -n \\
   -e 'print if (/NAME/ ... /^[A-Z ]+\$\$/) =~ /^\\d+\$\$/;' \\
   -e 'print if (/DESCRIPTION/ ... /^[A-Z ]+\$\$/) =~ /^\\d+\$\$/;' \\
@@ -224,27 +225,32 @@ cover :
    \$(PERL) -Mblib=\$(COVERDIR) \$(COVERDIR)/cover -report html
 
 restart : all
-\t t/TEST -stop && rm -f t/logs/*log && t/TEST -start
+\t t/TEST -stop && rm -f t/logs/*log && t/TEST -start \$(TEST_OPTIONS)
 
 restart_cover : all
 \t t/TEST -stop && cover && rm -f t/logs/*log && \\
-   t/TEST -defines COVER -one-process -start
+   t/TEST -defines COVER -one-process -start \$(TEST_OPTIONS)
 
 stop : all
 \t t/TEST -stop
 
 runtestcover : all
 \t rm -f t/logs/*log && \\
-   DEVEL_COVER=1 t/TEST -defines COVER -one-process -verbose && \\
+   DEVEL_COVER=1 t/TEST -defines COVER -one-process -verbose \$(TEST_OPTIONS) && \\
    cover -report html_basic
 
 mytestcover : all
 \t cover -delete && \\
    rm -f t/logs/*log && \\
-   DEVEL_COVER=1 t/TEST -defines COVER -one-process && \\
+   DEVEL_COVER=1 t/TEST -defines COVER -one-process \$(TEST_OPTIONS) && \\
    cover -report html_basic
 
 # cover : mytestcover
+
+cgi : all install
+\t cp `dirname \$(PERL)`/gedcom.cgi cgi-bin && \\
+   rm *.ged && \\
+   ln -s ../ged/* .
 
 ok :
 \t \@$Perlbug -okay  || echo "Please send your report manually to $Author"

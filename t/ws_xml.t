@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.15 - 3rd May 2005
+# Version 1.1502 - 20th December 2005
 
 use strict;
 
@@ -47,7 +47,7 @@ my @tests =
 (
     [ "?search=Elizabeth_II", ws "I9"                                    ],
     [ "/i9/name",             rs <<'EOR'                                 ],
-<RESULT>Elizabeth_II Alexandra Mary /Windsor/</RESULT>
+<NAME>Elizabeth_II Alexandra Mary /Windsor/</NAME>
 EOR
     [ "/i9/children",         ws qw( I11 I15 I19 I23 )                   ],
     [ "/i9/birth/date",       rs <<'EOR'                                 ],

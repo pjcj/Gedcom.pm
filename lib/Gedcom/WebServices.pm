@@ -10,7 +10,7 @@ our $VERSION = "1.15";
 
 package Gedcom::WebServices;
 
-use Gedcom 1.15;
+use Gedcom 1.1502;
 
 use Apache::Constants qw( OK DECLINED );
 use Apache::Request;
@@ -130,23 +130,18 @@ sub _process
 
         if (@params)
         {
-            my $action = shift @params;
+            my ($action, @parms) = @params;
             die "Invalid action [$action]\n" unless $rec->can($action);
 
-            if ($Gedcom::Funcs{lc $action} && @params)
+            if ($Gedcom::Funcs{lc $action} && @parms)
             {
-                # print STDERR "Calling get_value($action, @params)\n";
-                @ret = $rec->get_value($action, @params);
+                # print STDERR "Calling get_value(@params)\n";
+                @ret = $rec->get_value(@params);
             }
-            # elsif ($action =~ /^write(?:_xml)?/)
-            # {
-                # print STDERR "Calling $action(STDOUT)\n";
-                # $rec->$action(\*STDOUT);
-            # }
             else
             {
                 # print STDERR "Calling $action(@params)\n";
-                @ret = $rec->$action(@params);
+                @ret = $rec->$action(@parms);
             }
         }
         else
@@ -195,7 +190,7 @@ sub _process
             {
                 if ($type eq "plain")
                 {
-                    $_->write(\*STDOUT, @params + 1);
+                    $_->write(\*STDOUT, scalar @params);
                 }
                 elsif ($type eq "xml")
                 {
@@ -265,14 +260,182 @@ __END__
 
 Gedcom::WebServices - Basic web service routines for Gedcom.pm
 
-Version 1.15 - 3rd May 2005
+Version 1.1502 - 20th December 2005
 
 =head1 SYNOPSIS
 
-  use Gedcom::WebServices;
+ wget -qO - http://www.example.com/ws/plain/my_family/i9/name
 
 =head1 DESCRIPTION
 
-=head1 METHODS
+This module provides web service access to a GEDCOM file in conjunction with
+mod_perl.  Using it, A request for imformation can be made in the form of a URL
+specifying the GEDCOM file to be used, which information is required and the
+format in which the information is to be delivered.  This information is then
+returned in the specified format.
+
+There are currently three supported formats:
+
+=over
+
+=item *
+
+plain - no markup
+
+=item *
+
+XML
+
+=item *
+
+JSON
+
+=back
+
+=head2 URLs
+
+The format of the URLs used to access the web services are:
+
+ $BASEURL/$FORMAT/$GEDCOM/$XREF/requested/information
+ $BASEURL/$FORMAT/$GEDCOM?search=search_criteria
+
+=over
+
+=item BASEURL
+
+The base URL to access the web services.
+
+=item FORMAT
+
+The format in which to return the results.
+
+=item GEDCOM
+
+The name of the GEDCOM file to use (the extension .ged is assumed).
+
+=item XREF
+
+The xref of the record about which information is required.  XREFs can be
+obtained initially from a search, and subsequently from certain queries.
+
+
+=item requested/information
+
+The information requested.  This is in the same format as that taken by the
+get_value method.
+
+=item search_criteria
+
+An individual to search for.  This is in the same format as that taken by the
+get_individual method.
+
+=back
+
+=head1 EXAMPLES
+
+ $ wget -qO - 'http://pjcj.sytes.net:8585/ws/plain/royal92?search=elizabeth_ii'
+ /ws/plain/royal92/I52
+
+ $ wget -qO - http://pjcj.sytes.net:8585/ws/plain/royal92/I52
+ 0 @I52@ INDI
+ 1   NAME Elizabeth_II Alexandra Mary/Windsor/
+ 1   TITL Queen of England
+ 1   SEX F
+ 1   BIRT
+ 2     DATE 21 APR 1926
+ 2     PLAC 17 Bruton St.,London,W1,England
+ 1   FAMS @F14@
+ 1   FAMC @F12@
+
+ $ wget -qO - http://pjcj.sytes.net:8585/ws/plain/royal92/I52/name
+ Elizabeth_II Alexandra Mary /Windsor/
+
+ $ wget -qO - http://pjcj.sytes.net:8585/ws/plain/royal92/I52/birth/date
+ 21 APR 1926
+
+ $ wget -qO - http://pjcj.sytes.net:8585/ws/plain/royal92/I52/children
+ /ws/plain/royal92/I58
+ /ws/plain/royal92/I59
+ /ws/plain/royal92/I60
+ /ws/plain/royal92/I61
+
+ $ wget -qO - http://pjcj.sytes.net:8585/ws/json/royal92/I52/name
+ {"name":"Elizabeth_II Alexandra Mary /Windsor/"}
+
+ $ wget -qO - http://pjcj.sytes.net:8585/ws/xml/royal92/I52/name
+ <NAME>Elizabeth_II Alexandra Mary /Windsor/</NAME>
+
+ $ wget -qO - http://pjcj.sytes.net:8585/ws/xml/royal92/I52
+ <INDI ID="I52">
+   <NAME>Elizabeth_II Alexandra Mary/Windsor/</NAME>
+   <TITL>Queen of England</TITL>
+   <SEX>F</SEX>
+   <BIRT>
+     <DATE>21 APR 1926</DATE>
+     <PLAC>17 Bruton St.,London,W1,England</PLAC>
+   </BIRT>
+   <FAMS REF="F14"/>
+   <FAMC REF="F12"/>
+ </INDI>
+
+=head1 CONFIGURATION
+
+Add a section similar to the following to your mod_perl config:
+
+ PerlWarn On
+ PerlTaintCheck On
+
+ PerlPassEnv GEDCOM_TEST
+
+ <IfDefine GEDCOM_TEST>
+     <Perl>
+         $Gedcom::TEST = 1;
+     </Perl>
+ </IfDefine>
+
+ <Perl>
+     use Apache::Status;
+
+     $ENV{PATH} = "/bin:/usr/bin";
+     delete @ENV{"IFS", "CDPATH", "ENV", "BASH_ENV"};
+
+     $Gedcom::DATA = $Gedcom::ROOT;  # location of data stored on server
+
+     use lib "$Gedcom::ROOT/blib/lib";
+     use Gedcom::WebServices;
+
+     my $handlers =
+     [ qw
+       (
+           plain
+           xml
+           json
+       )
+     ];
+
+     eval Gedcom::WebServices::_set_handlers($handlers);
+     # use Apache::PerlSections; print STDERR Apache::PerlSections->dump;
+ </Perl>
+
+ PerlTransHandler Gedcom::WebServices::_parse_uri
+
+=head1 BUGS
+
+Very probably.
+
+See the BUGS file.  And the TODO file.
+
+=head1 VERSION
+
+Version 1.1502 - 20th December 2005
+
+=head1 LICENCE
+
+Copyright 2005, Paul Johnson (pjcj@cpan.org)
+
+This software is free.  It is licensed under the same terms as Perl itself.
+
+The latest version of this software should be available from my homepage:
+http://www.pjcj.net
 
 =cut

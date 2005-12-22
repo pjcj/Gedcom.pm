@@ -14,10 +14,10 @@ require 5.005;
 package Gedcom::Comparison;
 
 use vars qw($VERSION $Indent);
-$VERSION = "1.15";
+$VERSION = "1.1502";
 $Indent  = 0;
 
-use Gedcom::Item 1.15;
+use Gedcom::Item 1.1502;
 
 my %cache;
 
@@ -145,7 +145,7 @@ __END__
 
 Gedcom::Comparison - a module to compare Gedcom records
 
-Version 1.15 - 3rd May 2005
+Version 1.1502 - 20th December 2005
 
 =head1 SYNOPSIS
 
