@@ -138,7 +138,7 @@ sub main ()
 
     chdir $top or die "Can't chdir $top: $!";
     my $restart = "yes '' | $Perl $0 $Src_dir $Perl_src $Installation $Options";
-    print "<$restart>\n";
+   print "<$restart [$^X] [$Perl]>\n";
     exec $restart if $^X ne $Perl;
 
     # my $apache   = "apache_1.3.34";
@@ -386,5 +386,7 @@ print "perl dir is $Perl_dir\n";
 
 $Perl_installation .= "$Installation/$Perl_dir";
 $Perl = "$Perl_installation/bin/perl";
+$Perl = <${Perl}5*> unless -e $Perl;
+die "Can't find perl under $Perl_installation" unless -e $Perl;
 
 main

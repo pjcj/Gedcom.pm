@@ -363,7 +363,8 @@ children_statement   : "children" "(" expression "," scalar "," scalar ")"
                        {
                          # warn "item is ", ::Dumper \@item;
                          "$item[7] = 0;\n" .
-                         "LOOP: for $item[5] ($item[3]" . "->children)\n" .
+                         "LOOP: for $item[5] ( " .
+                           "do { my \$e = $item[3]; \$e ? \$e->children : ()} )\n" .
                          "{\n" .
                          "  $item[7]++;\n" .
                          ::indent(::indent($item[10])) .

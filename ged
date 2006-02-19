@@ -44,6 +44,26 @@ sub main()
   );
   if (1)
   {
+    my $i = $ged->get_individual("I1");
+    print "NOTE  [", exists $i->get_record("note")->{grammar}{value}, "]\n";
+    print "BIRT  [", exists $i->get_record("birt")->{grammar}{value}, "]\n";
+  }
+  if (0)
+  {
+    # use DDS; print STDERR Dump $ged;
+    my $i = $ged->get_individual("I8");
+    print $i->{grammar}->valid_items->{NAME}[0]{max};
+    print $i->{grammar}->valid_items->{SEX}[0]{max};
+    print "\n";
+    for ($i->items)
+    {
+        my $t = $_->{tag};
+        my $vi = $i->{grammar}->valid_items;
+        print "$t: $vi->{$t}[0]{min} - $vi->{$t}[0]{max}\n";
+    }
+  }
+  if (0)
+  {
     print "\nchanging BIRT to CHR...";
     my $i = $ged->get_individual("I8");
     for ($i->items)
@@ -127,7 +147,7 @@ sub main()
 # print "\nnormalising dates...";
 # $ged->normalise_dates("%E %b %Y");
 # sleep 6000;
-  if (1)
+  if (0)
   {
     print "\nwriting xml...";
     $ged->write_xml("$gedcom_file.xml");
