@@ -17,6 +17,8 @@ use vars qw($VERSION $Indent);
 $VERSION = "1.1502";
 $Indent  = 0;
 
+BEGIN { eval "use Date::Manip" }             # We'll use this if it is available
+
 use Gedcom::Item 1.1502;
 
 my %cache;
@@ -25,6 +27,8 @@ sub new
 {
   my $class     = shift;
   my ($r1, $r2) = @_;
+  $r1           = "" unless defined $r1;
+  $r2           = "" unless defined $r2;
 
   my $key ="$r1--$r2";
 
@@ -37,6 +41,11 @@ sub new
   };
 
   bless $self, $class;
+
+  if (!%cache && !$INC{"Date/Manip.pm"})
+  {
+    warn "Date::Manip.pm may be required to accurately compare dates\n";
+  }
 
   $cache{$key} = $self->_compare
 }
@@ -51,15 +60,35 @@ sub _compare
   my $r1 = $self->{record1};
   my $r2 = $self->{record2};
 
+  my ($v1, $v2) = ($r1->{value}, $r2->{value});
+
   # The values match if neither record has a value, or if both do and
   # they are the same.
 
-  my ($v1, $v2) = ($r1->{value}, $r2->{value});
-  $self->{value_match} = !(defined $v1 ^ defined $v2);
-  $self->{value_match} &&= $v1 eq $v2 if defined $v1;
+  if (0)
+  {
+      $self->{value_match} = !(defined $v1 ^ defined $v2);
+      $self->{value_match} &&= $v1 eq $v2 if defined $v1;
+  }
+  else
+  {
+      if ($r1->tag eq "DATE")
+      {
+          my $err;
+          my $d = DateCalc($v1, $v2, \$err, 1);
+          print "**** [$v1] [$v2] $d\n";
+          my @d = split ":", $d;
+          $self->{value_match} = grep (!($_ + 0), @d) / @d;
+      }
+      else
+      {
+          $self->{value_match} = !(defined $v1 ^ defined $v2);
+          $self->{value_match} &&= $v1 eq $v2 if defined $v1;
+      }
+  }
 
-  my @r1 = $r1->items;
-  my @r2 = $r2->items;
+  my @r1 = $r1 && UNIVERSAL::isa($r1, "Gedcom::Item") ? $r1->items : ();
+  my @r2 = $r2 && UNIVERSAL::isa($r2, "Gedcom::Item") ? $r2->items : ();
 
   TAG1:
   for my $i1 (@r1)
@@ -76,7 +105,8 @@ sub _compare
 
     if ($match[2])
     {
-      push @{$self->{$match[2]->identical ? "identical" : "conflict"}}, $match[2];
+      push @{$self->{$match[2]->identical ? "identical" : "conflict"}},
+           $match[2];
       splice @r2, $match[0], 1;
       next
     }

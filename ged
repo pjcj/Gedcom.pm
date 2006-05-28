@@ -44,6 +44,15 @@ sub main()
   );
   if (1)
   {
+      $ged = Gedcom->new(grammar_version => 5.5 );
+      my $record=$ged->add_source();
+      my $obje=$record->add("obje");
+      $obje->add("form", "png");
+      $obje->add("file", "somefile");
+      $ged->write("$gedcom_file.new");
+  }
+  if (0)
+  {
     my $i = $ged->get_individual("I1");
     print "NOTE  [", exists $i->get_record("note")->{grammar}{value}, "]\n";
     print "BIRT  [", exists $i->get_record("birt")->{grammar}{value}, "]\n";

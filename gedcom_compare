@@ -46,8 +46,8 @@ sub main
   );
   print "\n";
 
-  my $comparison = $ged1->{record}->compare($ged2->{record});
-  # my $comparison = $ged1->get_individual("I1")->compare($ged2->get_individual("I2"));
+  # my $comparison = $ged1->{record}->compare($ged2->{record});
+  my $comparison = $ged1->get_individual("I1")->compare($ged2->get_individual("I0003"));
 
   $comparison->print;
   # print Dumper $comparison;

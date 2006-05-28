@@ -41,6 +41,7 @@ sub item
   my ($tag) = @_;
   return unless defined $tag;
   my $valid_items = $self->valid_items;
+  # use Data::Dumper; print "[$tag] -- ", Dumper($self), Dumper $valid_items;
   return unless exists $valid_items->{$tag};
   map { $_->{grammar} } @{$valid_items->{$tag}}
 }

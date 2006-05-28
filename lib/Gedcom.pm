@@ -383,8 +383,8 @@ sub write
 
 sub write_xml
 {
-  my $self  = shift;
-  my $file  = shift or die "No filename specified";
+  my $self = shift;
+  my $file = shift or die "No filename specified";
   $self->{fh} = FileHandle->new($file, "w") or die "Can't open $file: $!";
   $self->{fh}->print(<<'EOH');
 <?xml version="1.0" encoding="utf-8"?>
