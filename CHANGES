@@ -2,6 +2,7 @@ Gedcom.pm history
 
 Release 1.16 -
  - Allow family to be undef in children_statement in lines2perl.
+ - Add basic web services.
 
 Release 1.15 - 3rd May 2005
  - Update mailing list information.
