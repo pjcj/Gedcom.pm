@@ -14,12 +14,15 @@ require 5.005;
 use ExtUtils::MakeMaker;
 use ExtUtils::Manifest "maniread";
 
-eval
-q{
-    use Apache::TestMM qw(test clean);
-    Apache::TestMM::filter_args();
-    Apache::TestMM::generate_script("t/TEST");
-};
+if (0)
+{
+    eval
+    q{
+        use Apache::TestMM qw(test clean);
+        Apache::TestMM::filter_args();
+        Apache::TestMM::generate_script("t/TEST");
+    };
+}
 
 $| = 1;
 
