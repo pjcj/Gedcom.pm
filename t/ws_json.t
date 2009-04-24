@@ -15,6 +15,13 @@ use lib -d "t" ? "t" : "..";
 
 BEGIN
 {
+    unless ($ENV{DEVEL_COVER_WS_TESTS})
+    {
+        eval "use Test::More skip_all => " .
+             "q[\$DEVEL_COVER_WS_TESTS is not set]";
+
+    }
+
     eval
     q{
         use 5.006;
