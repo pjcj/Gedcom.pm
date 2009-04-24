@@ -196,7 +196,7 @@ tags : @files
 \t ptags @files
 
 grammar :
-\t \$(PERL) parse_grammar gedcom-5.5.grammar
+\t \$(PERL) -Mblib parse_grammar gedcom-5.5.grammar
 \t \$(SET_VERSION) -e 's/^ +//' lib/Gedcom/Grammar_5_5.pm
 
 @versions : Makefile.PL
