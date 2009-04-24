@@ -1,0 +1,12 @@
+*.org
+*.bak
+*~
+*.version
+Makefile
+Makefile.old
+blib/
+lib/Gedcom/Grammar_0_1.pm
+pm_to_blib
+*.ged.index
+t/TEST
+t/lines/*.p
