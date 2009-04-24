@@ -26,8 +26,8 @@ if (0)
 
 $| = 1;
 
-my $Version  = "1.1502";
-my $Date     = "20th December 2005";
+my $Version  = "1.16";
+my $Date     = "24th April 2009";
 my $Author   = 'pjcj@cpan.org';
 
 my @perlbug  = ("perlbug", "-a", $Author,

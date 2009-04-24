@@ -20,10 +20,10 @@ BEGIN
   eval "use Roman ()";
 }
 
-use Gedcom 1.1502;
+use Gedcom 1.16;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = "1.1502";
+$VERSION = "1.16";
 @ISA     = qw( Exporter );
 @EXPORT  = qw
 (
@@ -1262,7 +1262,7 @@ __END__
 
 Gedcom::LifeLines - functions for lines2perl
 
-Version 1.1502 - 20th December 2005
+Version 1.16 - 24th April 2009
 
 =head1 SYNOPSIS
 

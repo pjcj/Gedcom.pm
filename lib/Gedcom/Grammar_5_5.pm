@@ -14,7 +14,7 @@
 # Edit parse_grammar or Makefile.PL to increase the legibility of this file.
 # (Removal of the leading spaces nearly halves the size of the file.)
 
-# Version 1.1502 - 20th December 2005
+# Version 1.16 - 24th April 2009
 
 use strict;
 
