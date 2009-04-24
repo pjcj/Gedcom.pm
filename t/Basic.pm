@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1999-2009, Paul Johnson (pjcj@cpan.org)
+# Copyright 1999-2009, Paul Johnson (paul@pjcj.net)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -297,7 +297,7 @@ __DATA__
 2     CONC should use the original if you want royal genealogy.  Contact me
 2     CONC if you cannot locate the original.
 2     CONC
-2     CONC Paul Johnson (pjcj@cpan.org)
+2     CONC Paul Johnson (paul@pjcj.net)
 2     CONC
 2     CONC >> In a message to Cliff Manis (cmanis@csoftec.csf.com)
 2     CONC >> Denis Reid wrote the following:

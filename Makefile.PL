@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# Copyright 1998-2009, Paul Johnson (pjcj@cpan.org)
+# Copyright 1998-2009, Paul Johnson (paul@pjcj.net)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
@@ -28,7 +28,7 @@ $| = 1;
 
 my $Version  = "1.16";
 my $Date     = "24th April 2009";
-my $Author   = 'pjcj@cpan.org';
+my $Author   = 'paul@pjcj.net';
 
 my @perlbug  = ("perlbug", "-a", $Author,
                            "-s", "Installation of Gedcom $Version");
@@ -44,7 +44,7 @@ WriteMakefile
 (
     NAME      => "Gedcom",
     VERSION   => $Version,
-    AUTHOR    => 'Paul Johnson (pjcj@cpan.org)',
+    AUTHOR    => 'Paul Johnson (paul@pjcj.net)',
     ABSTRACT  => "Interface to genealogy GEDCOM files",
     DIR       => [],
     EXE_FILES => [ "cgi-bin/gedcom.cgi" ],

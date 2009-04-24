@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl -w
 
-# Copyright 1999-2009, Paul Johnson (pjcj@cpan.org)
+# Copyright 1999-2009, Paul Johnson (paul@pjcj.net)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
