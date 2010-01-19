@@ -1,12 +1,6 @@
+# From the original MANIFEST.SKIP
 \.org$
-\.bak$
-~$
-^Makefile$
-^Makefile\.old$
-^blib
-^pm_to_blib$
 \.version$
-\.gz$
 ^cover_db/
 core$
 ^install/build/
@@ -23,3 +17,31 @@ core$
 t/lines/.*\.p$
 ^gedcom/
 Gedcom/Grammar_0_1.pm$
+
+# Avoid version control files.
+\bRCS\b
+\bCVS\b
+,v$
+\B\.svn\b
+\B\.git\b
+.gitignore
+
+# Avoid Makemaker generated and utility files.
+\bMakefile$
+\bblib
+\bMakeMaker-\d
+\bpm_to_blib$
+\bblibdirs$
+^MANIFEST\.SKIP$
+
+# Avoid temp and backup files.
+~$
+\.tmp$
+\.old$
+\.bak$
+\#$
+\b\.#
+\.DS_Store$
+
+# No tarballs!
+\.gz$
