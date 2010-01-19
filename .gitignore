@@ -10,3 +10,5 @@ pm_to_blib
 *.ged.index
 t/TEST
 t/lines/*.p
+MANIFEST*
+!MANIFEST.SKIP
