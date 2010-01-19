@@ -648,11 +648,11 @@ Derived from Gedcom::Item.
 
 Some of the more important hash members are:
 
-=head2 $record->{new_xref}
+=head2 $record-E<gt>{new_xref}
 
 Used by renumber().
 
-=head2 $record->{recursed}
+=head2 $record-E<gt>{recursed}
 
 Used by renumber().
 
@@ -747,7 +747,7 @@ Parse a Gedcom record.
 
 Match a Gedcom::Record against a Gedcom::Grammar.  Warn of any
 mismatches, and associate the Gedcom::Grammar with the Gedcom::Record as
-$record->{grammar}.  Do this recursively.
+$record-E<gt>{grammar}.  Do this recursively.
 
 =head2 collect_xrefs
 
@@ -843,157 +843,3 @@ description in lower case, the function will not be pre-declared and you
 will need to qualify it or C<use subs>.
 
 =cut
-
-=begin if we cannot make the min/max assumptions specified in
-       Gedcom::Grammar::valid_items
-
-use as:
-  my @items = @{$ged->{record}{items}};
-  my ($m, $w) =
-   $ged->{record}->validate_structure($ged->{record}{grammar}, \@items, 1);
-  warn $w if $w;
-
-sub validate_grammar
-{
-  my $self = shift;
-  my ($grammar, $items, $all) = @_;
-  $I++;
-  my $min = $grammar->min;
-  my $max = $grammar->max;
-  $all++ unless $max;
-  my $matches = 0;
-  my $warn = "";
-  my $value = $grammar->{tag};
-  print "  " x $I, " looking for ", $all == 1 ? "all" : $max if $D;
-  if ($value)
-  {
-    print " $value, $min -> $max\n" if $D;
-    for (my $c = 0;
-         $c <= $#$items && ($all == 1 || !$max || $matches < $max);)
-    {
-      if ($items->[$c]{tag} eq $value)
-      {
-        my $w = $items->[$c]->validate_syntax2;
-        $warn .= $w;
-        splice @$items, $c, 1;
-        $matches++;
-      }
-      else
-      {
-        $c++;
-      }
-    }
-  }
-  else
-  {
-    # TODO - require Data::Dumper
-    die "What's a " . Data::Dumper->new([$grammar], ["grammar"])
-      unless ($value) = $grammar->{value} =~ /<<(.*)>>/;
-    die "Can't find $value in gedcom structures"
-      unless my $s = $grammar->structure($value);
-    $grammar->{structure} = $s;
-    print " $value, $min -> $max\n" if $D;
-    my ($m, $w);
-    do
-    {
-      ($m, $w) = $self->validate_structure($s, $items, $all);
-      if ($m)
-      {
-        $matches += $m;
-        $warn .= $w;
-      }
-    } while $m && ($all == 1 || !$max || $matches < $max);
-  }
-  $I--;
-  ($matches, $warn)
-}
-
-sub validate_structure
-{
-  my $self = shift;
-  my ($structure, $items, $all) = @_;
-  $all = 0 unless defined $all;
-  $I++;
-  print "  " x $I . "validate_structure($structure->{structure}, $all)\n" if $D;
-  my $warn = "";
-  my $total_matches = 0;
-  for my $item (@{$structure->{items}})
-  {
-    my $min = $item->min;
-    my $max = $item->max;
-    my ($matches, $w) = $self->validate_grammar($item, $items, $all);
-    $warn .= $w;
-    my $file = $self->{gedcom}{record}{file};
-    my $value = $item->{tag} || $item->{structure}{structure};
-    my $msg = "$file:$self->{line}: $self->{tag}" .
-              (defined $self->{xref} ? " $self->{xref} " : "") .
-              " has $matches $value" . ($matches == 1 ? "" : "s");
-    print "  " x $I . "$msg - minimum is $min maximum is $max\n" if $D;
-    if ($structure->{selection})
-    {
-      if ($matches)
-      {
-        $warn .= "$msg - minimum is $min\n" if $matches < $min;
-        $warn .= "$msg - maximum is $max\n" if $matches > $max && $max;
-        $total_matches += $matches;                   # only one item is allowed
-        last;
-      }
-    }
-    else
-    {
-      $warn .= "$msg - minimum is $min\n" if $matches < $min;
-      $warn .= "$msg - maximum is $max\n" if $matches > $max && $max;
-      $total_matches = 1 if $matches;                   # all items are required
-    }
-  }
-  print "  " x $I . "returning $total_matches matches\n" if $D;
-  $I--;
-  ($total_matches, $warn)
-}
-
-sub validate_syntax2
-{
-  my $self = shift;
-  $self->{gedcom}{validate_callback}->($self)
-    if defined $self->{gedcom}{validate_callback};
-  my $items = [ @{$self->{items}} ];
-  $I++;
-  my $grammar = $self->{grammar};
-  print "  " x $I . "validate_syntax2($grammar->{tag})\n" if $D;
-  my $warn = "";
-  my $file = $self->{gedcom}{record}{file};
-  my $here = "$file:$self->{line}: $self->{tag}" .
-             (defined $self->{xref} ? " $self->{xref}" : "");
-  for my $item (@$items)
-  {
-    print "  " x $I . "level $item->{level} on $self->{level}\n" if $D;
-    $warn .= "$here: Can't add level $item->{level} to $self->{level}\n"
-      if $item->{level} > $self->{level} + 1;
-  }
-  for my $item (@{$grammar->{items}})
-  {
-    my $min = $item->min;
-    my $max = $item->max;
-    my ($matches, $w) = $self->validate_grammar($item, $items, 1);
-    $warn .= $w;
-    my $value = $item->{tag} || $item->{structure}{structure};
-    my $msg = "$here has $matches $value" . ($matches == 1 ? "" : "s");
-    print "  " x $I . "$msg - minimum is $min maximum is $max\n" if $D;
-    $warn .= "$msg - minimum is $min\n" if $matches < $min;
-    $warn .= "$msg - maximum is $max\n" if $matches > $max && $max;
-  }
-  if (@$items)
-  {
-    my %tags = map { $_ => 1 } $grammar->items;
-    for my $c (@$items)
-    {
-      my $tag = $c->{tag};
-      my $msg = exists $tags{$tag} ? "an extra" : "not a";
-      $warn .= "$file:$c->{line}: $tag is $msg item of $self->{tag}\n"
-        unless $tag eq "CONT" || $tag eq "CONC" || substr($tag, 0, 1) eq "_";
-    }
-  }
-  $I--;
-  $warn
-}
-=end

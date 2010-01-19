@@ -1,5 +1,8 @@
 Gedcom.pm history
 
+Release 1.17 - TO BE RELEASED
+ - POD fixes. (RT #31321)
+
 Release 1.16 - 24th April 2009
  - Allow family to be undef in children_statement in lines2perl.
  - Add basic web services.

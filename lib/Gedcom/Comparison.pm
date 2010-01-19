@@ -185,4 +185,4 @@ Version 1.16 - 24th April 2009
 
 =head1 METHODS
 
-=end
+=cut
