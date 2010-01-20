@@ -1,3 +1,4 @@
+[pjcj]
 - Beef up the documentation including a more in depth tutorial.
   The new(ish) add() functionality needs a tutorial.
 - Beef up the testsuite, including more LifeLines tests.
@@ -15,3 +16,15 @@
 - Document add_xxx functions.
 - Integrate functions I've been sent and write new ones suggested.
 - Use Gedcom::Date.
+
+[bricas]
+- tidy up Makefile.PL
+  + remove "if 0" sections
+  + perlbug stuff truly necessary?
+  + remove version and date munging
+  + pick through remaining MY::postamble() stuff
+  + better way to handle optional deps?
+- tidy up dist dirs
+  + installable script in script/
+  + related scripts/files in another folder (etc/?)
+  + must sure test-related files stay under t/
