@@ -1,33 +1,17 @@
-#!/usr/local/bin/perl -w
-
-# Copyright 2002-2009, Paul Johnson (paul@pjcj.net)
-
-# This software is free.  It is licensed under the same terms as Perl itself.
-
-# The latest version of this software should be available from my homepage:
-# http://www.pjcj.net
-
-# Version 1.16 - 24th April 2009
-
 use strict;
+use warnings;
 
-use lib -d "t" ? "t" : "..";
+use Test::More tests => 112;
+use File::Temp ();
 
-require 5.005;
+use Gedcom;
 
-use Test;
+my $ged_fh = File::Temp->new();
+my $ged_fn = $ged_fh->filename;
 
-use Gedcom 1.16;
-
-$SIG{__WARN__} = sub {};
-
-sub main()
 {
-  plan tests => 115;
-
-  ok my $gedcom_file = "gedcompm.ged";
-  $| = 1;
-  ok my $ged = Gedcom->new;
+  my $ged = Gedcom->new;
+  isa_ok( $ged, 'Gedcom' );
 
   ok my $i1 = $ged->add_individual("O5");
   ok $i1->add("name", "Fred /Bloggs/");
@@ -82,25 +66,28 @@ sub main()
   ok $ged->renumber;
   ok $ged->order;
 
-  $ged->write($gedcom_file);
+  $ged->write($ged_fn);
 
-  ok !$ged->validate;
-  ok -e $gedcom_file;
+  {
+    my $w = 0;
+    local $SIG{ __WARN__ } = sub { $w++ };
+
+    ok !$ged->validate, 'Gedcom file is not valid';
+    is $w, 2, '2 warnings thrown';
+  }
+
+  ok -e $ged_fn, "$ged_fn exists";
 
   # check the gedcom file is correct
-  ok open F1, $gedcom_file;
   my @ged_data = <DATA>;
   for (@ged_data)
   {
-    my $f = <F1>;
-    ok $f, $_ unless /Ignore/;
+    my $f = <$ged_fh>;
+    is $f, $_, "line $. matches" unless m{Ignore};
   }
-  ok eof;
-  ok close F1;
-  ok unlink $gedcom_file;
-}
 
-main
+  ok eof, 'No more lines to compare';
+}
 
 __DATA__
 0 HEAD

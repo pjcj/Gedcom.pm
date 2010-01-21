@@ -270,13 +270,25 @@ sub import
     Test::plan tests => $tests;
   }
 
-  require Engine;
-  Engine->test(%args, subroutine => $basic_test);
+  my $g = _new_gedcom( \%args );
+  $basic_test->( $g, %args );
 
   if ($grammar)
   {
     ok unlink ((-d "t") ? "." : "..") . "/lib/Gedcom/Grammar_0_1.pm";
   }
+}
+
+sub _new_gedcom {
+  my $args = shift;
+  $args->{gedcom_file} = (-d "t" ? "" : "../") . "royal.ged"
+    unless defined $args->{gedcom_file};
+  $args->{read_only} = 1
+    unless defined $args->{read_only};
+
+  my $ged = Gedcom->new(%$args);
+
+  return $ged;
 }
 
 __DATA__

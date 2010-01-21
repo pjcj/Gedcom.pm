@@ -1,80 +1,58 @@
-#!/usr/local/bin/perl -w
-
-# Copyright 1999-2009, Paul Johnson (paul@pjcj.net)
-
-# This software is free.  It is licensed under the same terms as Perl itself.
-
-# The latest version of this software should be available from my homepage:
-# http://www.pjcj.net
-
-# Version 1.16 - 24th April 2009
-
 use strict;
+use warnings;
 
-require 5.005;
+use Test::More tests => 161;
 
-use Test ();
+use Gedcom;
 
-BEGIN { Test::plan tests => 161 }
+sub date_eq {
+    my @dates = @_;
+    s{[\r\n]+$}{\n} for @dates;
 
-use lib -d "t" ? "t" : "..";
-
-use Gedcom 1.16;
-use Engine;
-
-sub ok
-{
-    my @a = @_;
-    s/[\r\n]+$/\n/ for @a;
-    Test::ok(@a)
+    is( $dates[ 0 ], $dates[ 1 ] );
 }
 
-my $Test = sub
-{
-  my $ged = shift;
-  ok($ged);
+my $ged = Gedcom->new( gedcom_file => 'royal.ged', readonly => 1 );
+isa_ok( $ged, 'Gedcom' );
 
-  my @birthdates = <DATA>;
-  my @b = @birthdates;
+my @birthdates = <DATA>;
+
+{
+  my @dates = @birthdates;
 
   # Look at each individual.
-  for my $i ($ged->individuals)
-  {
+  for my $i ($ged->individuals) {
     # Look at each birth record.
     # There will generally be one birth record, but there may be none,
     # or more than one.
-    for my $b ($i->birth)
-    {
+    for my $b ($i->birth) {
       # Look at each date in the birth record.
       # Again, there will generally be only one date, but there may be
       # none, or more than one.
-      for my $d ($b->date)
-      {
-        ok($i->name . " was born on $d\n", shift @b);
+      for my $d ($b->date) {
+        date_eq( $i->name . " was born on $d\n", shift @dates );
       }
     }
   }
+}
 
+{
   # Here's a newer, better way of doing the same thing.
-  @b = @birthdates;
-  for my $i ($ged->individuals)
-  {
-    for my $bd ($i->get_value(qw(birth date)))
-    {
-      ok($i->name . " was born on $bd\n", shift @b);
+  my @dates = @birthdates;
+  for my $i ($ged->individuals) {
+    for my $d ($i->get_value(qw(birth date))) {
+      date_eq($i->name . " was born on $d\n", shift @dates);
     }
   }
+}
 
-  ok($ged->get_individual("Edward_VIII")->get_value(qw(birth date)),
-     "Saturday, 23rd June 1894");
+date_eq($ged->get_individual("Edward_VIII")->get_value(qw(birth date)),
+ "Saturday, 23rd June 1894");
 
-  my $i = $ged->get_individual("B1 C1");
-  ok($i->get_value("birth date"), "Saturday, 1st January 2000");
-  ok($i->get_value(["birth", 2], "date"), "Sunday, 2nd January 2000");
-  ok($i->birth(2)->date, "Sunday, 2nd January 2000");
-};
-
-Engine->test(subroutine => $Test);
+my $i = $ged->get_individual("B1 C1");
+is_deeply( [ $i->get_value("birth date") ], [ "Saturday, 1st January 2000", "Sunday, 2nd January 2000" ] );
+date_eq($i->get_value(["birth", 2], "date"), "Sunday, 2nd January 2000");
+date_eq($i->birth(2)->date, "Sunday, 2nd January 2000");
 
 __DATA__
 Edward_VII /Wettin/ was born on Tuesday, 9th November 1841
