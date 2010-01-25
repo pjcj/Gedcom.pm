@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 161;
+use Test::More tests => 162;
 
 use Gedcom;
 
@@ -50,7 +50,13 @@ date_eq($ged->get_individual("Edward_VIII")->get_value(qw(birth date)),
  "Saturday, 23rd June 1894");
 
 my $i = $ged->get_individual("B1 C1");
+
+# list context
 is_deeply( [ $i->get_value("birth date") ], [ "Saturday, 1st January 2000", "Sunday, 2nd January 2000" ] );
+
+# scalar context
+date_eq( scalar $i->get_value("birth date"), "Saturday, 1st January 2000" );
+
 date_eq($i->get_value(["birth", 2], "date"), "Sunday, 2nd January 2000");
 date_eq($i->birth(2)->date, "Sunday, 2nd January 2000");
 
