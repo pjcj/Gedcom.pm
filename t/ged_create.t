@@ -1,15 +1,13 @@
 use strict;
 use warnings;
 
-use Test::More tests => 112;
-use File::Temp ();
+use Test::More tests => 115;
 
 use Gedcom;
 
-my $ged_fh = File::Temp->new();
-my $ged_fn = $ged_fh->filename;
-
 {
+  my $gedcom_file = "gedcompm.ged";
+
   my $ged = Gedcom->new;
   isa_ok( $ged, 'Gedcom' );
 
@@ -66,7 +64,7 @@ my $ged_fn = $ged_fh->filename;
   ok $ged->renumber;
   ok $ged->order;
 
-  $ged->write($ged_fn);
+  $ged->write($gedcom_file);
 
   {
     my $w = 0;
@@ -76,17 +74,20 @@ my $ged_fn = $ged_fh->filename;
     is $w, 2, '2 warnings thrown';
   }
 
-  ok -e $ged_fn, "$ged_fn exists";
+  ok -e $gedcom_file, "$gedcom_file exists";
 
   # check the gedcom file is correct
+  ok open F1, $gedcom_file;
   my @ged_data = <DATA>;
   for (@ged_data)
   {
-    my $f = <$ged_fh>;
+    my $f = <F1>;
     is $f, $_, "line $. matches" unless m{Ignore};
   }
 
   ok eof, 'No more lines to compare';
+  ok close F1;
+  ok unlink $gedcom_file;
 }
 
 __DATA__
