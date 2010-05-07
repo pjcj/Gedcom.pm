@@ -12,3 +12,4 @@ t/TEST
 t/lines/*.p
 MANIFEST*
 !MANIFEST.SKIP
+*.tar.gz
