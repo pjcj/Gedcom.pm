@@ -514,6 +514,10 @@ sub normalise_dates
     warn "Date::Manip.pm is required to use normalise_dates()";
     return;
   }
+  if( eval { Date::Manip->VERSION( 6 ); } ) {
+    warn "Unable to normalize dates with Date::Manip version 6. Please downgrade to version 5.";
+    return;
+  }
   my $format = shift || "%A, %E %B %Y";
   if (defined $self->{tag} && $self->{tag} =~ /^date$/i)
   {
