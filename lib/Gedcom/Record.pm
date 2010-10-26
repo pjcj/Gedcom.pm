@@ -514,8 +514,8 @@ sub normalise_dates
     warn "Date::Manip.pm is required to use normalise_dates()";
     return;
   }
-  if( eval { Date::Manip->VERSION( 6 ); } ) {
-    warn "Unable to normalize dates with Date::Manip version 6. Please downgrade to version 5.";
+  if( eval { Date::Manip->VERSION( 6 ); } and !eval { Date::Manip->VERSION( 6.13 ); } ) {
+    warn "Unable to normalize dates with this version of Date::Manip. Please upgrade to version 6.13.";
     return;
   }
   my $format = shift || "%A, %E %B %Y";
