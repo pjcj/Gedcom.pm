@@ -16,6 +16,8 @@
 - Document add_xxx functions.
 - Integrate functions I've been sent and write new ones suggested.
 - Use Gedcom::Date.
+- Provide method to tag a subset of the records and copy them en masse keeping
+  all references intact.
 
 [bricas]
 - tidy up Makefile.PL
