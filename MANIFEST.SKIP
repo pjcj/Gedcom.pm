@@ -33,6 +33,7 @@ Gedcom/Grammar_0_1.pm$
 \bpm_to_blib$
 \bblibdirs$
 ^MANIFEST\.SKIP$
+MYMETA.*
 
 # Avoid temp and backup files.
 ~$
