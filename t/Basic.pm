@@ -242,7 +242,7 @@ sub import
     ok $n, "Line 1\nLine 2";
     ok $ged->validate;
 
-    my $f1 = $gedcom_file . "1";
+    my $f1 = $gedcom_file . $$;
     $ged->write($f1);
     ok $ged->validate;
     ok -e $f1;
