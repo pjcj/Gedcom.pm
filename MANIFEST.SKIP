@@ -46,3 +46,6 @@ MYMETA.*
 
 # No tarballs!
 \.gz$
+
+# Avoid distributions
+^Gedcom-\d\.\d\d/

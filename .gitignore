@@ -13,3 +13,4 @@ t/lines/*.p
 MANIFEST.SKIP
 *.tar.gz
 MYMETA.*
+Gedcom-*/
