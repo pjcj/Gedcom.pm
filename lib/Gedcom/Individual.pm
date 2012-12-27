@@ -72,7 +72,11 @@ sub sex
 {
   my $self = shift;
   my $sex = $self->tag_value("SEX");
-  $sex =~ /^F/i ? "F" : $sex =~ /^M/i ? "M" : "U";
+  if(defined $sex){
+    $sex =~ /^F/i ? "F" : $sex =~ /^M/i ? "M" : "U";
+  }else{
+    "U";
+  }
 }
 
 sub father
@@ -123,6 +127,26 @@ sub siblings
   wantarray ? @a : $a[0]
 }
 
+sub half_siblings
+{
+  my $self = shift;
+  my @all_siblings_multiple = map { $_->children } ( map { $_->fams } $self->parents );
+  my @excludelist = ($self, $self->siblings);
+  my @a = grep {
+      my $cur = $_;
+      my $half_sibling=1;
+      foreach my $test(@excludelist){
+        if($cur->{xref} eq $test->{xref} ){
+          $half_sibling=0;
+          last;
+        }
+      }
+      push @excludelist, $cur if($half_sibling); # in order to avoid multiple output
+      $half_sibling;
+    } @all_siblings_multiple;
+  wantarray ? @a : $a[0]
+}
+
 sub older_siblings
 {
   my $self = shift;
@@ -156,10 +180,24 @@ sub brothers
   wantarray ? @a : $a[0]
 }
 
+sub half_brothers
+{
+  my $self = shift;
+  my @a = grep { $_->tag_value("SEX") !~ /^F/i } $self->half_siblings;
+  wantarray ? @a : $a[0]
+}
+
 sub sisters
 {
   my $self = shift;
   my @a = grep { $_->tag_value("SEX") !~ /^M/i } $self->siblings;
+  wantarray ? @a : $a[0]
+}
+
+sub half_sisters
+{
+  my $self = shift;
+  my @a = grep { $_->tag_value("SEX") !~ /^M/i } $self->half_siblings;
   wantarray ? @a : $a[0]
 }
 
@@ -308,6 +346,11 @@ Version 1.16 - 24th April 2009
   use Gedcom::Individual;
 
   my $name = $i->name;
+  my $cased_name = $i->cased_name;
+  my $surname = $i->surname;
+  my $given_names = $i->given_names;
+  my $soundex = $i->soundex;
+  my $sex = $i->sex;
   my @rel = $i->father;
   my @rel = $i->mother;
   my @rel = $i->parents;
@@ -315,8 +358,11 @@ Version 1.16 - 24th April 2009
   my @rel = $i->wife;
   my @rel = $i->spouse;
   my @rel = $i->siblings;
+  my @rel = $i->half_siblings;
   my @rel = $i->brothers;
+  my @rel = $i->half_brothers;
   my @rel = $i->sisters;
+  my @rel = $i->half_sisters;
   my @rel = $i->children;
   my @rel = $i->sons;
   my @rel = $i->daughters;
@@ -386,10 +432,13 @@ Return the sex of the individual, "M", "F" or "U".
   my @rel = $i->wife;
   my @rel = $i->spouse;
   my @rel = $i->siblings;
+  my @rel = $i->half_siblings;
   my @rel = $i->older_siblings;
   my @rel = $i->younger_siblings;
   my @rel = $i->brothers;
+  my @rel = $i->half_brothers;
   my @rel = $i->sisters;
+  my @rel = $i->half_sisters;
   my @rel = $i->children;
   my @rel = $i->sons;
   my @rel = $i->daughters;
@@ -415,7 +464,7 @@ Delete $i from the data structure.
 This function will also set $i to undef.  This is to remind you that the
 individual cannot be used again.
 
-Returns true iff $i was successfully deleted.
+Returns true if $i was successfully deleted.
 
 =head2 Family functions
 
