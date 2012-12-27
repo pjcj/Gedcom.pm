@@ -1,4 +1,4 @@
-# Copyright 1999-2009 by Paul Johnson (paul@pjcj.net)
+# Copyright 1999-2012 by Paul Johnson (paul@pjcj.net)
 
 # documentation at __END__
 

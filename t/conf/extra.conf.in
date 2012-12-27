@@ -1,4 +1,4 @@
-# Copyright 2005-2009, Paul Johnson (paul@pjcj.net)
+# Copyright 2005-2012, Paul Johnson (paul@pjcj.net)
 
 # This file will be Include-d by @t_conf_file@
 UseCanonicalName Off
