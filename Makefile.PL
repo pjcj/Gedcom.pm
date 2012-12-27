@@ -42,15 +42,45 @@ $ExtUtils::MakeMaker::Verbose = 0;
 
 WriteMakefile
 (
-    NAME      => "Gedcom",
-    VERSION   => $Version,
-    AUTHOR    => 'Paul Johnson (paul@pjcj.net)',
-    ABSTRACT  => "Interface to genealogy GEDCOM files",
-    DIR       => [],
-    EXE_FILES => [ "cgi-bin/gedcom.cgi" ],
-    dist      => { COMPRESS => "gzip --best --force" },
-    clean     => { FILES => join " ",  map { "$_.version" } @versions },
-    depend    => { distdir => "@files" },
+    NAME       => "Gedcom",
+    VERSION    => $Version,
+    AUTHOR     => 'Paul Johnson (paul@pjcj.net)',
+    ABSTRACT   => "Interface to genealogy GEDCOM files",
+    DIR        => [],
+    EXE_FILES  => [ "cgi-bin/gedcom.cgi" ],
+    META_MERGE => {
+        license => [ "perl_5" ],
+        release_status => "stable",
+        prereqs => {
+            runtime => {
+                recommends => {
+                    "Date::Manip"       => 0,
+                    "Text::Soundex"     => 0,
+                    "Parse::RecDescent" => 0,
+                    "Roman"             => 0,
+                },
+            },
+        },
+        resources => {
+            license    => [ "http://dev.perl.org/licenses/" ],
+            bugtracker => {
+                web  => "https://github.com/pjcj/Gedcom.pm/issues",
+            },
+            repository => {
+                type => "git",
+                url  => "http://github.com/pjcj/Gedcom.pm",
+                web  => "http://github.com/pjcj/Gedcom.pm",
+            },
+            x_mailing_list => "http://lists.perl.org/list/perl-gedcom.html",
+        },
+        "meta-spec" => {
+            version => 2,
+            url     => "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+        },
+    },
+    dist       => { COMPRESS => "gzip --best --force" },
+    clean      => { FILES => join " ",  map { "$_.version" } @versions },
+    depend     => { distdir => "@files" },
 );
 
 print "\n";
