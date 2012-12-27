@@ -42,7 +42,7 @@ sub main()
     # callback        => sub { print "." },
     # read_only       => 1,
   );
-  if (1)
+  if (0)
   {
       $ged = Gedcom->new(grammar_version => 5.5 );
       my $record=$ged->add_source();
