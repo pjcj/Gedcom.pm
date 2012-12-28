@@ -1,7 +1,8 @@
 Gedcom.pm history
 
 Release 1.17 - TO BE RELEASED
- - POD fixes. (RT #31321)
+ - Lots of clean-ups (Brian Cassidy).
+ - POD fixes (Brian Cassidy) (rt 31321).
  - Add half-sibling/-brothers/-sisters (Michael H. Ionescu) (github 1).
  - Make sex() tolerant of missing information (Michael H. Ionescu) (github 1).
  - Select correct grammar when adding items (rt 82196).
