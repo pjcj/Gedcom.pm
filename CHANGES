@@ -5,6 +5,7 @@ Release 1.17 - TO BE RELEASED
  - Add half-sibling/-brothers/-sisters (Michael H. Ionescu) (github 1).
  - Make sex() tolerant of missing information (Michael H. Ionescu) (github 1).
  - Select correct grammar when adding items (rt 82196).
+ - Some doc fixes (rt 76519).
 
 Release 1.16 - 24th April 2009
  - Allow family to be undef in children_statement in lines2perl.
@@ -214,7 +215,7 @@ Release 1.03 - 13th May 1999
  - Add validate_syntax() to Gedcom::Record.pm.
  - Rename Record::validate() to Record::validate_semantics().
  - Add min(), max() and children() to Gedcom::Grammar.pm.
- - Add GEDC and SUBM to royal.ged to accomodate validate_syntax().
+ - Add GEDC and SUBM to royal.ged to accommodate validate_syntax().
  - Fix bug which prevented writing of @s around xref values.
 
 Release 1.02 - 5th May 1999

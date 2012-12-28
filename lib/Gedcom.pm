@@ -831,7 +831,7 @@ there is no value, as is the case for the birth record, then the record
 itself is returned.  If there is a value, but the record itself is
 required, then the get_record() function can be used.
 
-Information must be accesed through the Gedcom structure so, for
+Information must be accessed through the Gedcom structure so, for
 example, the birthdate is accessed via the date record from the birth
 record within an individual.
 
@@ -901,7 +901,7 @@ specified on the command line.
 
 I have not gone the whole hog with data encapsulation and such within
 this module.  Maybe I should have done.  Maybe I will.  For now though,
-the data is accessable though hash members.  This is partly because
+the data is accessible though hash members.  This is partly because
 having functions to do this is a little slow, especially on my old
 DECstation, and partly because of laziness again.  I'm not too sure
 whether this is good or bad laziness yet.  Time will tell no doubt.
@@ -967,7 +967,7 @@ of the gedcom file needs to be read, for example to validate it, or to
 write it out in a different format, then this option should not be used.
 
 When using the read_only option an index file is kept which can also
-speed up operations.  It's usage should be transparant, but will require
+speed up operations.  It's usage should be transparent, but will require
 write access to the directory containing the gedcom file.  If you access
 individuals only by their xref (eg I20) then the index file will allow
 only the relevant parts of the gedcom file to be read.

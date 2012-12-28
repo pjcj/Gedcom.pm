@@ -566,7 +566,7 @@ sub renumber
   my ($args, $recurse) = @_;
   # TODO - add the xref if there is supposed to be one
   return if exists $self->{recursed} or not defined $self->{xref};
-  # we can't actaully change the xrefs until the end
+  # we can't actually change the xrefs until the end
   my $x = $self->{tag} eq "SUBM" ? "SUBM" : substr $self->{tag}, 0, 1;
   $self->{new_xref} = $x . ++$args->{$self->{tag}}
     unless exists $self->{new_xref};

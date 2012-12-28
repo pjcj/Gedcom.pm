@@ -269,7 +269,7 @@ Version 1.16 - 24th April 2009
 =head1 DESCRIPTION
 
 This module provides web service access to a GEDCOM file in conjunction with
-mod_perl.  Using it, A request for imformation can be made in the form of a URL
+mod_perl.  Using it, A request for information can be made in the form of a URL
 specifying the GEDCOM file to be used, which information is required and the
 format in which the information is to be delivered.  This information is then
 returned in the specified format.

@@ -778,7 +778,7 @@ The subroutine takes five parameters:
   $current:   A count of how far through the file we are
   $total:     The extent of the file
 
-The subroutine should return true iff the file shuld continue to be
+The subroutine should return true iff the file should continue to be
 read.
 
 =head2 copy
@@ -943,7 +943,7 @@ the value() function and probably the items() function.
 
   my $sub_items = $item->_items;
 
-Return a reference to alist of all the sub-items, reading them from the
+Return a reference to a list of all the sub-items, reading them from the
 Gedcom file if they have not already been read.
 
 It should not be necessary to use this function.  See items().

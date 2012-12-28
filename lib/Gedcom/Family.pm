@@ -155,7 +155,7 @@ None yet.
 Return a list of individuals from family $f.
 
 Each function, even those with a singular name such as husband(),
-returns a list of individuals holding that releation in $f.
+returns a list of individuals holding that relation in $f.
 
 =head2 number_of_children
 
@@ -173,7 +173,7 @@ counting.
 Add the specified individual to the family in the appropriate position.
 
 These functions also take care of the references from the individual
-back to the family, and are to be prefered to the low level addition
+back to the family, and are to be preferred to the low level addition
 functions which do not do this.
 
 =cut

@@ -1139,14 +1139,14 @@ sub siblingset
 sub ancestorset
 {
   my ($set) = @_;
-  # TODO - set the data appropriatly
+  # TODO - set the data appropriately
   [ map { my $c = $_->[0]; map { [ $_ => 0 ] } $c->ancestors } @$set ]
 }
 
 sub descendentset
 {
   my ($set) = @_;
-  # TODO - set the data appropriatly
+  # TODO - set the data appropriately
   [ map { my $c = $_->[0]; map { [ $_ => 0 ] } $c->descendents } @$set ]
 }
 
