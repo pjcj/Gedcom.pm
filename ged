@@ -44,6 +44,20 @@ sub main()
   );
   if (0)
   {
+    my $i = $ged->get_individual("I1");
+    # my $obj = $ged->add_obje();
+    my $obj1 = $i->add("OBJE", 12);
+    # use DDS; print STDERR Dump $obj;
+    my $obj2 = $i->add("OBJE");
+    $obj2->add("FORM", "qqq");
+    $obj2->add("FILE", "rrr");
+    print "\nvalidating...";
+    $ged->validate;
+    print "\nwriting...";
+    $ged->write("$gedcom_file.new");
+  }
+  if (0)
+  {
       $ged = Gedcom->new(grammar_version => 5.5 );
       my $record=$ged->add_source();
       my $obje=$record->add("obje");

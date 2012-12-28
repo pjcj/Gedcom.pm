@@ -143,7 +143,20 @@ sub add_record
   }
   elsif (my @g = $self->{grammar}->item($args{tag}))
   {
-    $self->parse($record, $g[0]);
+    # use DDS; print Dump \@g;
+    my $grammar = $g[0];
+    for my $g (@g)
+    {
+      # print "testing $args{val} against $g->{value}\n";
+      if (( defined $args{val} &&  $g->{value}) ||
+          (!defined $args{val} && !$g->{value}))
+      {
+        # print "match\n";
+        $grammar = $g;
+        last;
+      }
+    }
+    $self->parse($record, $grammar);
   }
   else
   {
@@ -163,6 +176,7 @@ sub add
 
   my @funcs = map { ref() ? $_ : split } @_;
   $funcs[-1] = [$funcs[-1], 0] unless ref $funcs[-1];
+  push @{$funcs[-1]}, $val;
   my $r = $self->get_and_create(@funcs);
 
   if (defined $val)
@@ -207,11 +221,13 @@ sub get_and_create
   my $self = shift;
   my @funcs = @_;
 
+  # use DDS; print "get_and_create: " , Dump \@funcs;
+
   my $rec = $self;
   for my $f (0 .. $#funcs)
   {
-    my ($func, $count) = ($funcs[$f], 1);
-    ($func, $count) = @$func if ref $func eq "ARRAY";
+    my ($func, $count, $val) = ($funcs[$f], 1);
+    ($func, $count, $val) = @$func if ref $func eq "ARRAY";
     $count--;
 
     if (ref $func)
@@ -229,18 +245,19 @@ sub get_and_create
       $record = $func;
     }
 
-    # print "$func [$count]\n";
+    # print "$func [$count] - $record\n";
 
     my @records = $rec->tag_record($record);
 
     if ($count < 0)
     {
-      $rec = $rec->add_record(tag => $record);
+      $rec = $rec->add_record(tag => $record, val => $val);
     }
     elsif ($#records < $count)
     {
       my $new;
-      $new = $rec->add_record(tag => $record) for (0 .. @records - $count);
+      $new = $rec->add_record(tag => $record, val => $val)
+        for (0 .. @records - $count);
       $rec = $new;
     }
     else
