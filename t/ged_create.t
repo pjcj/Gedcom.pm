@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 115;
+use Test::More tests => 119;
 
 use Gedcom;
 
@@ -56,6 +56,11 @@ use Gedcom;
   ok $i5->add("name", "Susan /Bloggs/");
   ok $i5->add("christening date", "11 May 1778");
   ok $i5->add("sex", "F");
+
+  my $obj1 = $i5->add("OBJE", 12);
+  my $obj2 = $i5->add("OBJE");
+  $obj2->add("FORM", "qqq");
+  $obj2->add("FILE", "rrr");
 
   ok $f1->add_wife($i5);
 
@@ -151,6 +156,10 @@ __DATA__
 1   CHR
 2     DATE 11 May 1778
 1   SEX F
+1   OBJE 12
+1   OBJE
+2     FORM qqq
+2     FILE rrr
 1   FAMS F1
 
 0 @N1@ NOTE
