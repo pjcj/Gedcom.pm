@@ -50,3 +50,6 @@ tmp/
 
 # Avoid distributions
 ^Gedcom-\d\.\d\d/
+
+# Coverage
+^cover_db/
