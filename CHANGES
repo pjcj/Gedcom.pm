@@ -7,6 +7,8 @@ Release 1.17 - TO BE RELEASED
  - Make sex() tolerant of missing information (Michael H. Ionescu) (github 1).
  - Select correct grammar when adding items (rt 82196).
  - Some doc fixes (rt 76519).
+ - Change and document method for specifying a top-level xref.
+ - Always use correct grammar for notes (rt 45391).
 
 Release 1.16 - 24th April 2009
  - Allow family to be undef in children_statement in lines2perl.
