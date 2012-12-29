@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.16 - 24th April 2009
+# Version 1.17 - 29th December 2012
 
 use strict;
 

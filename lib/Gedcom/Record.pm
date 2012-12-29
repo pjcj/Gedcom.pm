@@ -14,14 +14,14 @@ require 5.005;
 package Gedcom::Record;
 
 use vars qw($VERSION @ISA $AUTOLOAD);
-$VERSION = "1.16";
+$VERSION = "1.17";
 @ISA     = qw( Gedcom::Item );
 
 use Carp;
 BEGIN { eval "use Date::Manip" }             # We'll use this if it is available
 
-use Gedcom::Item       1.16;
-use Gedcom::Comparison 1.16;
+use Gedcom::Item       1.17;
+use Gedcom::Comparison 1.17;
 
 BEGIN
 {
@@ -648,7 +648,7 @@ __END__
 
 Gedcom::Record - a module to manipulate Gedcom records
 
-Version 1.16 - 24th April 2009
+Version 1.17 - 29th December 2012
 
 =head1 SYNOPSIS
 

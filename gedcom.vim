@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language:     Gedcom
 " Maintainer:   Paul Johnson (paul@pjcj.net)
-" Version 1.16 - 24th April 2009
+" Version 1.17 - 29th December 2012
 
 syntax clear
 

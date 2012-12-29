@@ -10,7 +10,7 @@ our $VERSION = "1.15";
 
 package Gedcom::WebServices;
 
-use Gedcom 1.16;
+use Gedcom 1.17;
 
 use Apache::Constants qw( OK DECLINED );
 use Apache::Request;
@@ -260,7 +260,7 @@ __END__
 
 Gedcom::WebServices - Basic web service routines for Gedcom.pm
 
-Version 1.16 - 24th April 2009
+Version 1.17 - 29th December 2012
 
 =head1 SYNOPSIS
 
@@ -427,7 +427,7 @@ See the BUGS file.  And the TODO file.
 
 =head1 VERSION
 
-Version 1.16 - 24th April 2009
+Version 1.17 - 29th December 2012
 
 =head1 LICENCE
 

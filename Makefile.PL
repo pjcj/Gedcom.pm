@@ -26,8 +26,8 @@ if (0)  # For automating webservices testing
 
 $| = 1;
 
-my $Version  = "1.16";
-my $Date     = "24th April 2009";
+my $Version  = "1.17";
+my $Date     = "29th December 2012";
 my $Author   = 'paul@pjcj.net';
 
 my @perlbug  = ("perlbug", "-a", $Author,
