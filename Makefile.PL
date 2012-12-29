@@ -230,10 +230,7 @@ grammar : pure_all gedcom-5.5.grammar
 
 README : lib/Gedcom.pm
 \t TERMCAP= COLUMNS=80 pod2text -s lib/Gedcom.pm | \\
-  \$(PERL) -n \\
-  -e 'print if (/NAME/ ... /^[A-Z ]+\$\$/) =~ /^\\d+\$\$/;' \\
-  -e 'print if (/DESCRIPTION/ ... /^[A-Z ]+\$\$/) =~ /^\\d+\$\$/;' \\
-  > README
+  \$(PERL) utils/makeh make_readme > README
 
 ppm : ppd pure_all
 \t tar cf Gedcom.tar blib

@@ -22,6 +22,15 @@ my $Command = {
             print;
         }
     },
+    make_readme => sub {
+        my ($command) = @_;
+        local @ARGV;
+        while (<>)
+        {
+            print if (/NAME/        ... /^[A-Z ]+$/) =~ /^\d+$/;
+            print if (/DESCRIPTION/ ... /^[A-Z ]+$/) =~ /^\d+$/;
+        }
+    },
 };
 
 sub main
