@@ -45,7 +45,21 @@ sub main()
   if (0)
   {
     my $i = $ged->get_individual("I1");
-    # my $obj = $ged->add_obje();
+    my $n2 = $ged->add_note({ xref => "NN2" }, "top level");
+    $n2->add("cont", "line 2");
+    my $note1 = $i->add("note", "qaz");
+    $note1->add("cont", "q2");
+    my $note2 = $i->add("note", $n2);
+    $note2->add("cont", "q3");
+    $ged->order;
+    print "\nvalidating...";
+    $ged->validate;
+    print "\nwriting...";
+    $ged->write("$gedcom_file.new");
+  }
+  if (0)
+  {
+    my $i = $ged->get_individual("I1");
     my $obj1 = $i->add("OBJE", 12);
     # use DDS; print STDERR Dump $obj;
     my $obj2 = $i->add("OBJE");
