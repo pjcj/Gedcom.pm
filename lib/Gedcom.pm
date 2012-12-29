@@ -203,17 +203,32 @@ sub AUTOLOAD
     *$func = sub
     {
       my $self = shift;
-      my $r = $self->add_record(tag => $tag);
+      my ($arg, $val) = @_;
+      my $xref;
+      if (ref $arg)
+      {
+        $xref = $arg->{xref};
+      }
+      else
+      {
+        $val = $arg;
+      }
+      my $record = $self->add_record(tag => $tag, val => $val);
+      if (defined $val && $tag eq "NOTE")
+      {
+        $record->{value} = $val;
+      }
+      $xref = $tag eq "SUBM" ? "SUBM" : substr $tag, 0, 1
+        unless defined $xref;
       unless ($tag =~ /^(HEAD|TRLR)$/)
       {
-        my $x = @_ ? shift : $tag eq "SUBM" ? "SUBM" : substr $tag, 0, 1;
-        croak "Invalid xref $x requested in $func"
-          unless $x =~ /^[^\W\d_]+(\d*)$/;
-        $x = $self->next_xref($x) unless length $1;
-        $r->{xref} = $x;
-        $self->{xrefs}{$r->{xref}} = $r;
+        croak "Invalid xref $xref requested in $func"
+          unless $xref =~ /^[^\W\d_]+(\d*)$/;
+        $xref = $self->next_xref($xref) unless length $1;
+        $record->{xref} = $xref;
+        $self->{xrefs}{$xref} = $record;
       }
-      $r
+      $record
     };
   }
   else
@@ -1175,6 +1190,14 @@ Return the next available xref with the specified prefix.
        add_trailer
 
 Create and return a new record of the specified type.
+
+Normally you will not want to pass any arguments to the function.  Those
+functions which have an xref (ie not header or trailer) accept an optional
+first argument { xref => $x } which will use $x as the xref rather than
+letting the module automatically choose the xref.
+
+add_note also accepts an optional second argument which is the text to be used
+on the first line of the note.
 
 =head2 get_record
 

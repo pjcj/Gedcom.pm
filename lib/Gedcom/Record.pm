@@ -147,7 +147,8 @@ sub add_record
     my $grammar = $g[0];
     for my $g (@g)
     {
-      # print "testing $args{val} against $g->{value}\n";
+      # print "testing ", $args{val}  // "undef", " against ",
+                        # $g->{value} // "undef", "\n";
       if (( defined $args{val} &&  $g->{value}) ||
           (!defined $args{val} && !$g->{value}))
       {

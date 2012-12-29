@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 119;
+use Test::More tests => 122;
 
 use Gedcom;
 
@@ -44,11 +44,13 @@ use Gedcom;
   ok $f1->add_child($i3);
   ok $f1->add_child($i4);
 
-  ok my $n1 = $ged->add_note;
+  ok my $n1 = $ged->add_note("First line");
   ok $n1->add("cont", "This is a note.");
   ok $n1->add("cont", "Please take notice.");
   ok $n1->add("conc", "There's more.  O");
   ok $n1->add("conc", "k, that's it.");
+
+  ok my $n2 = $ged->add_note({ xref => "N100" }, "Note 2");
 
   ok $i2->delete;
 
@@ -162,10 +164,12 @@ __DATA__
 2     FILE rrr
 1   FAMS F1
 
-0 @N1@ NOTE
+0 @N1@ NOTE First line
 1   CONT This is a note.
 1   CONT Please take notice.
 1   CONC There's more.  O
 1   CONC k, that's it.
+
+0 @N2@ NOTE Note 2
 
 0 TRLR
