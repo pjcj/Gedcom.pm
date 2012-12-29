@@ -8,7 +8,9 @@ Release 1.17 - TO BE RELEASED
  - Select correct grammar when adding items (rt 82196).
  - Some doc fixes (rt 76519).
  - Change and document method for specifying a top-level xref.
- - Always use correct grammar for notes (rt 45391).
+ - Always use correct grammar for notes (based on code from Jonathan Kamens)
+   (rt 45391).
+ - Clean up Makefile.PL (rt 6681).
 
 Release 1.16 - 24th April 2009
  - Allow family to be undef in children_statement in lines2perl.
