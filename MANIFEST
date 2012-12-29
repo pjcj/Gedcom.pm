@@ -2,6 +2,7 @@
 cgi-bin/gedcom.cgi
 CHANGES
 ged
+gedcom-5.5.1.grammar
 gedcom-5.5.aft.grammar
 gedcom-5.5.grammar
 gedcom.vim
@@ -16,6 +17,7 @@ lib/Gedcom/Event.pm
 lib/Gedcom/Family.pm
 lib/Gedcom/Grammar.pm
 lib/Gedcom/Grammar_5_5.pm
+lib/Gedcom/Grammar_5_5_1.pm
 lib/Gedcom/Individual.pm
 lib/Gedcom/Item.pm
 lib/Gedcom/LifeLines.pm

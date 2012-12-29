@@ -12,6 +12,7 @@ Release 1.17 - TO BE RELEASED
    (rt 45391).
  - Clean up Makefile.PL (rt 6681).
  - Handle UTF-8 encoded files and BOMs (rt 79507).
+ - Add grammar for version 5.5.1.
 
 Release 1.16 - 24th April 2009
  - Allow family to be undef in children_statement in lines2perl.

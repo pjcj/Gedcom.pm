@@ -693,7 +693,7 @@ Version 1.16 - 24th April 2009
 
   my $ged = Gedcom->new;
   my $ged = Gedcom->new($gedcom_file);
-  my $ged = Gedcom->new(grammar_version => 5.5,
+  my $ged = Gedcom->new(grammar_version => "5.5.1",
                         gedcom_file     => $gedcom_file,
                         read_only       => 1,
                         callback        => $cb);
@@ -964,7 +964,7 @@ See Gedcom::Record.pm for more details.
 
   my $ged = Gedcom->new($gedcom_file);
 
-  my $ged = Gedcom->new(grammar_version => 5.5,
+  my $ged = Gedcom->new(grammar_version => "5.5.1",
                         gedcom_file     => $gedcom_file,
                         read_only       => 1,
                         callback        => $cb);
@@ -979,11 +979,12 @@ supply a gedcom_file parameter then you will get an empty Gedcom object,
 empty that is apart from a few mandatory records.
 
 You may optionally pass grammar_version as the version number of the
-gedcom grammar you want to use.  At the moment only version 5.5 is
-available.  If you do not specify a grammar version, you may specify a
+gedcom grammar you want to use.  There are two versions available, 5.5
+and 5.5.1.  If you do not specify a grammar version, you may specify a
 grammar file as grammar_file.  Usually, you will do neither of these,
-and in this case the grammar version will default to the latest
-available version, currently 5.5.
+and in this case the grammar version will default to the latest full
+available version, currently 5.5.  5.5.1 is only a draft, but it is
+available if you specify it.
 
 The read_only parameter indicates that the Gedcom data structure will be
 used primarily for read_only operations.  In this mode the gedcom file

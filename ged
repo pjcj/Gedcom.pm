@@ -37,8 +37,8 @@ sub main()
   (
     $gedcom_file,
     # gedcom_file     => $gedcom_file,
-    # grammar_version => 0.1,
-    # grammar_file    => "gedcom-5.5.aft.grammar",
+    # grammar_version => "5.5.1",
+    # grammar_file    => "gedcom-5.5.1.grammar",
     # callback        => sub { print "." },
     # read_only       => 1,
   );

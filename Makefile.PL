@@ -220,10 +220,11 @@ sub MY::postamble
 tags : @files
 \t ptags @files
 
-grammar : pure_all gedcom-5.5.grammar
+grammar : pure_all gedcom-5.5.grammar gedcom-5.5.1.grammar
 \t \$(PERL) -Mblib parse_grammar gedcom-5.5.grammar
-\t \$(PERL) utils/makeh set_version $Version "$Date" lib/Gedcom/Grammar_5_5.pm
-\t \$(PERL) -pi -e 's/^ +//' lib/Gedcom/Grammar_5_5.pm
+\t \$(PERL) -Mblib parse_grammar gedcom-5.5.1.grammar
+\t \$(PERL) utils/makeh set_version $Version "$Date" lib/Gedcom/Grammar_5_5*.pm
+\t \$(PERL) -pi -e 's/^ +//' lib/Gedcom/Grammar_5_5*.pm
 
 @versions : Makefile.PL
 \t \$(PERL) utils/makeh set_version $Version "$Date" @versions
