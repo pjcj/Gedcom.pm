@@ -1,6 +1,6 @@
 Gedcom.pm history
 
-Release 1.17 - TO BE RELEASED
+Release 1.17 - 29th December 2012
  - Lots of clean-ups (Brian Cassidy).
  - POD fixes (Brian Cassidy) (rt 31321).
  - Add half-sibling/-brothers/-sisters (Michael H. Ionescu) (github 1).
