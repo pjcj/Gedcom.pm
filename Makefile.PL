@@ -14,7 +14,7 @@ require 5.005;
 use ExtUtils::MakeMaker;
 use ExtUtils::Manifest "maniread";
 
-if (0)
+if (0)  # For automating webservices testing
 {
     eval
     q{
@@ -232,23 +232,7 @@ README : lib/Gedcom.pm
 \t TERMCAP= COLUMNS=80 pod2text -s lib/Gedcom.pm | \\
   \$(PERL) utils/makeh make_readme > README
 
-ppm : ppd pure_all
-\t tar cf Gedcom.tar blib
-\t gzip --best --force Gedcom.tar
-\t \$(PERL) -pi.bak \\
-  -e 's/(OS NAME=")[^"]*/\$\$1MSWin32/;' \\
-  -e 's/(ARCHITECTURE NAME=")[^"]*/\$\$1MSWin32-x86-multi-thread/;' \\
-  -e 's/(CODEBASE HREF=")[^"]*/\$\$1Gedcom.tar.gz/;' \\
-  Gedcom.ppd
-
-tst :: pure_all test_clean run_tests
-
-COVERDIR = /home/pjcj/g/perl/dev/Devel-Cover
-
-cover :
-\t \$(PERL) -Mblib=\$(COVERDIR) \$(COVERDIR)/cover -delete && \\
-   HARNESS_PERL_SWITCHES=-Mblib=\$(COVERDIR)\\ -MDevel::Cover=-ignore,Cover \$(MAKE) test && \\
-   \$(PERL) -Mblib=\$(COVERDIR) \$(COVERDIR)/cover -report html
+# Webservies section
 
 restart : all
 \t t/TEST -stop && rm -f t/logs/*log && t/TEST -start \$(TEST_OPTIONS)
@@ -277,6 +261,8 @@ cgi : all install
 \t cp `dirname \$(PERL)`/gedcom.cgi cgi-bin && \\
    rm *.ged && \\
    ln -s ../ged/* .
+
+# Reports
 
 ok :
 \t \@$Perlbug -okay  || echo "Please send your report manually to $Author"
