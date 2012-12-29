@@ -400,7 +400,7 @@ sub write
   my $flush = shift;
   $self->{fh} = FileHandle->new($file, "w") or die "Can't open $file: $!";
   binmode $self->{fh}, ":encoding(UTF-8)"
-    if $self->{encoding} eq "utf-8" && $[ >= 5.8;
+    if $self->{encoding} eq "utf-8" && $] >= 5.8;
   $self->{record}->write($self->{fh}, -1, $flush);
   $self->{fh}->close or die "Can't close $file: $!";
 }
@@ -411,7 +411,7 @@ sub write_xml
   my $file = shift or die "No filename specified";
   $self->{fh} = FileHandle->new($file, "w") or die "Can't open $file: $!";
   binmode $self->{fh}, ":encoding(UTF-8)"
-    if $self->{encoding} eq "utf-8" && $[ >= 5.8;
+    if $self->{encoding} eq "utf-8" && $] >= 5.8;
   $self->{fh}->print(<<'EOH');
 <?xml version="1.0" encoding="utf-8"?>
 

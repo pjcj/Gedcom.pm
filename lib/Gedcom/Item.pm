@@ -90,7 +90,7 @@ sub read
 
   # print "encoding is [$encoding]\n";
   $self->{gedcom}->set_encoding($encoding) if $self->{gedcom};
-  if ($encoding eq "utf-8" && $[ >= 5.8)
+  if ($encoding eq "utf-8" && $] >= 5.8)
   {
     binmode $fh,    ":encoding(UTF-8)";
     binmode STDOUT, ":encoding(UTF-8)";
