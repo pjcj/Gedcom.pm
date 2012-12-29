@@ -200,6 +200,9 @@ sub main()
       print "." if $t && !$x{$t}++;
     };
     $ged->validate($vcb);
+    print "\nwriting...";
+    $ged->write("$gedcom_file.new");
+    print "\n";
   }
   if (@ARGV)
   {

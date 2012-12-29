@@ -263,6 +263,7 @@ sub new
     read_only => 0,
     types     => {},
     xrefs     => {},
+    encoding  => "ansel",
     @_
   };
 
@@ -368,7 +369,7 @@ EOH
         $l1->add("VERS", $self->{grammar}{version});
         $l1->add("FORM", "LINEAGE-LINKED");
       $l0->add("DATE", $date);
-      $l0->add("CHAR", "ANSEL");
+      $l0->add("CHAR", uc ($self->{encoding} || "ansel"));
       my $s = $r->get_record("subm");
       unless ($s)
       {
@@ -386,12 +387,20 @@ EOH
   $self
 }
 
+sub set_encoding
+{
+  my $self = shift;
+  ($self->{encoding}) = @_;
+}
+
 sub write
 {
   my $self  = shift;
   my $file  = shift or die "No filename specified";
   my $flush = shift;
   $self->{fh} = FileHandle->new($file, "w") or die "Can't open $file: $!";
+  binmode $self->{fh}, ":encoding(UTF-8)"
+    if $self->{encoding} eq "utf-8" && $[ >= 5.8;
   $self->{record}->write($self->{fh}, -1, $flush);
   $self->{fh}->close or die "Can't close $file: $!";
 }
@@ -401,6 +410,8 @@ sub write_xml
   my $self = shift;
   my $file = shift or die "No filename specified";
   $self->{fh} = FileHandle->new($file, "w") or die "Can't open $file: $!";
+  binmode $self->{fh}, ":encoding(UTF-8)"
+    if $self->{encoding} eq "utf-8" && $[ >= 5.8;
   $self->{fh}->print(<<'EOH');
 <?xml version="1.0" encoding="utf-8"?>
 
@@ -696,6 +707,7 @@ Version 1.16 - 24th April 2009
   $ged->normalise_dates;
   my %xrefs = $ged->renumber;
   $ged->order;
+  $ged->set_encoding("utf-8");
   $ged->write($new_gedcom_file, $flush);
   $ged->write_xml($new_xml_file);
   my @individuals = $ged->individuals;
@@ -1011,6 +1023,17 @@ arguments:
   $total is the number of operations that need to be performed
 
 If the subroutine returns false, the operation is aborted.
+
+=head2 set_encoding
+
+  $ged->set_encoding("utf-8");
+
+Valid arguments are "ansel" and "utf-8".  Defaults to "ansel" but is set to
+"utf-8" if the gedcom data was read from a file which was deemed to contain
+UTF-8, either due to the presence of a BOM or as specified by a CHAR item.
+
+Set the encoding for the gedcom file.  Calling this directly doesn't alter the
+CHAR item, but does affect the way in which files are written.
 
 =head2 write
 
