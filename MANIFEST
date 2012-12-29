@@ -60,4 +60,5 @@ t/ws_xml.t
 tkged
 TODO
 utils/all_versions
+utils/makeh
 utils/session.vim

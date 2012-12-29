@@ -217,20 +217,16 @@ EOM
 sub MY::postamble
 {
     qq[
-SET_VERSION = \$(PERL) -pi.version \\
-  -e 's/(^\\s*\\\$\$VERSION = ")\\d+\\.\\d+(";)/\$\${1}$Version\$\$2/;' \\
-  -e 's/(Version )\\d+\\.\\d+( - ).*/\$\${1}$Version\$\${2}$Date/;' \\
-  -e 's/(^\\s*use Gedcom(?:::\\w+)*\\s+)\\d+\\.\\d+;/\$\${1}$Version;/;'
-
 tags : @files
 \t ptags @files
 
-grammar :
+grammar : pure_all gedcom-5.5.grammar
 \t \$(PERL) -Mblib parse_grammar gedcom-5.5.grammar
-\t \$(SET_VERSION) -e 's/^ +//' lib/Gedcom/Grammar_5_5.pm
+\t \$(PERL) utils/makeh set_version $Version "$Date" lib/Gedcom/Grammar_5_5.pm
+\t \$(PERL) -pi -e 's/^ +//' lib/Gedcom/Grammar_5_5.pm
 
 @versions : Makefile.PL
-\t \$(SET_VERSION) @versions
+\t \$(PERL) utils/makeh set_version $Version "$Date" @versions
 
 README : lib/Gedcom.pm
 \t TERMCAP= COLUMNS=80 pod2text -s lib/Gedcom.pm | \\
