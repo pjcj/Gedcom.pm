@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 122;
+use Test::More tests => 126;
 
 use Gedcom;
 
@@ -51,6 +51,9 @@ use Gedcom;
   ok $n1->add("conc", "k, that's it.");
 
   ok my $n2 = $ged->add_note({ xref => "N100" }, "Note 2");
+
+  ok $i4->add("note", "This is a note on one line");
+  ok $i4->add("note", $n2);
 
   ok $i2->delete;
 
@@ -152,6 +155,8 @@ __DATA__
 2     DATE 3 Feb 1802
 1   SEX M
 1   FAMC F1
+1   NOTE This is a note on one line
+1   NOTE @N2@
 
 0 @I5@ INDI
 1   NAME Susan /Bloggs/

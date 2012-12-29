@@ -134,7 +134,7 @@ sub add_record
   (
     gedcom   => $self->{gedcom},
     callback => $self->{callback},
-    %args
+    tag      => $args{tag},
   );
 
   if (!defined $self->{grammar})
@@ -147,14 +147,27 @@ sub add_record
     my $grammar = $g[0];
     for my $g (@g)
     {
-      # print "testing ", $args{val}  // "undef", " against ",
-                        # $g->{value} // "undef", "\n";
-      if (( defined $args{val} &&  $g->{value}) ||
-          (!defined $args{val} && !$g->{value}))
+      # print "testing $args{tag} ", $args{val}  // "undef", " against ",
+                                   # $g->{value} // "undef", "\n";
+      if ($args{tag} eq "NOTE")
       {
-        # print "match\n";
-        $grammar = $g;
-        last;
+        if (( defined $args{xref} && $g->{value} =~ /xref/i) ||
+            (!defined $args{xref} && $g->{value} !~ /xref/i))
+        {
+          # print "note match\n";
+          $grammar = $g;
+          last;
+        }
+      }
+      else
+      {
+        if (( defined $args{val} &&  $g->{value}) ||
+            (!defined $args{val} && !$g->{value}))
+        {
+          # print "match\n";
+          $grammar = $g;
+          last;
+        }
       }
     }
     $self->parse($record, $grammar);
@@ -172,28 +185,34 @@ sub add_record
 sub add
 {
   my $self = shift;
-  my $val;
-  $val = pop if @_ > 1 && ref $_[-1] ne "ARRAY";
-
-  my @funcs = map { ref() ? $_ : split } @_;
-  $funcs[-1] = [$funcs[-1], 0] unless ref $funcs[-1];
-  push @{$funcs[-1]}, $val;
-  my $r = $self->get_and_create(@funcs);
-
-  if (defined $val)
+  my ($xref, $val);
+  if (@_ > 1 && ref $_[-1] ne "ARRAY")
   {
+    $val = pop;
     if (UNIVERSAL::isa($val, "Gedcom::Record"))
     {
-      $r->{value} = $val->{xref};
-      $self->{gedcom}{xrefs}{$val->{xref}} = $val;
-    }
-    else
-    {
-      $r->{value} = $val;
+      $xref = $val;
+      $val  = undef;
     }
   }
 
-  $r
+  my @funcs = map { ref() ? $_ : split } @_;
+  $funcs[-1] = [$funcs[-1], 0] unless ref $funcs[-1];
+  push @{$funcs[-1]}, { xref => $xref, val => $val };
+  my $record = $self->get_and_create(@funcs);
+
+  if (defined $xref)
+  {
+    $record->{value} = $xref->{xref};
+    $self->{gedcom}{xrefs}{$xref->{xref}} = $xref;
+  }
+
+  if (defined $val)
+  {
+    $record->{value} = $val;
+  }
+
+  $record
 }
 
 sub set
@@ -227,8 +246,9 @@ sub get_and_create
   my $rec = $self;
   for my $f (0 .. $#funcs)
   {
-    my ($func, $count, $val) = ($funcs[$f], 1);
-    ($func, $count, $val) = @$func if ref $func eq "ARRAY";
+    my ($func, $count, $args) = ($funcs[$f], 1);
+    $args = {} unless defined $args;
+    ($func, $count, $args) = @$func if ref $func eq "ARRAY";
     $count--;
 
     if (ref $func)
@@ -252,12 +272,12 @@ sub get_and_create
 
     if ($count < 0)
     {
-      $rec = $rec->add_record(tag => $record, val => $val);
+      $rec = $rec->add_record(tag => $record, %$args);
     }
     elsif ($#records < $count)
     {
       my $new;
-      $new = $rec->add_record(tag => $record, val => $val)
+      $new = $rec->add_record(tag => $record, %$args)
         for (0 .. @records - $count);
       $rec = $new;
     }
