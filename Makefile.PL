@@ -26,8 +26,8 @@ if (0)  # For automating webservices testing
 
 $| = 1;
 
-my $Version  = "1.17";
-my $Date     = "29th December 2012";
+my $Version  = "1.18";
+my $Date     = "24th January 2013";
 my $Author   = 'paul@pjcj.net';
 
 my @perlbug  = ("perlbug", "-a", $Author,
@@ -228,6 +228,7 @@ grammar : pure_all gedcom-5.5.grammar gedcom-5.5.1.grammar
 
 @versions : Makefile.PL
 \t \$(PERL) utils/makeh set_version $Version "$Date" @versions
+\t \$(MAKE) grammar
 
 README : lib/Gedcom.pm
 \t TERMCAP= COLUMNS=80 pod2text -s lib/Gedcom.pm | \\
