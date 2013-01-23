@@ -1,5 +1,8 @@
 Gedcom.pm history
 
+Release 1.18 - 24th January 2013
+ - Get dmake on Windows running again.
+
 Release 1.17 - 29th December 2012
  - Lots of clean-ups (Brian Cassidy).
  - POD fixes (Brian Cassidy) (rt 31321).

@@ -36,7 +36,7 @@ my @perlbug  = ("perlbug", "-a", $Author,
 my $Perlbug  = join " ", map { / / ? "'$_'" : $_ } @perlbug;
 
 my @files    = sort keys %{maniread()};
-my @versions = grep { $_ ne "README" && $_ ne "Makefile.PL" } @files;
+my @versions = grep { !/README|travis|Makefile\.PL/ } @files;
 
 $ExtUtils::MakeMaker::Verbose = 0;
 
