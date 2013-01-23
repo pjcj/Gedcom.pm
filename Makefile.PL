@@ -228,7 +228,7 @@ grammar : pure_all gedcom-5.5.grammar gedcom-5.5.1.grammar
 
 @versions : Makefile.PL
 \t \$(PERL) utils/makeh set_version $Version "$Date" @versions
-\t \$(MAKE) grammar
+\t \$(MAKE) grammar README
 
 README : lib/Gedcom.pm
 \t TERMCAP= COLUMNS=80 pod2text -s lib/Gedcom.pm | \\
