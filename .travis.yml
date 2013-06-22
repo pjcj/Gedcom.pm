@@ -4,8 +4,11 @@ perl:
   - "5.12"
   - "5.14"
   - "5.16"
+  - "5.18"
 before_install:
-    - perl -MYAML=LoadFile -le 'print for keys LoadFile("MYMETA.yml")->{recommends}' | xargs cpanm
+      cpanm -n Devel::Cover::Report::Coveralls
+script:
+      perl Makefile.PL && make && cover -test -report coveralls
 notifications:
   email:
     on_success: always
