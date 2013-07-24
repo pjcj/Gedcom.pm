@@ -51,8 +51,6 @@
    n <<SOURCE_RECORD>> {1:1}
    |
    n <<SUBMITTER_RECORD>> {1:1}
-   |
-   n <<EVENT_DEFINITION>> {1:1}
    ]
 
    FAM_RECORD: =
@@ -89,7 +87,6 @@ n @<XREF:INDI>@   INDI {1:1}
     +1 <<LDS_INDIVIDUAL_ORDINANCE>>  {0:M}
     +1 <<CHILD_TO_FAMILY_LINK>>  {0:M}
     +1 <<SPOUSE_TO_FAMILY_LINK>>  {0:M}
-    +1 <<ADDRESS_STRUCTURE>>  {0:1}
     +1 SUBM @<XREF:SUBM>@  {0:M}
     +1 <<ASSOCIATION_STRUCTURE>>  {0:M}
     +1 ALIA @<XREF:INDI>@  {0:M}
@@ -155,7 +152,6 @@ n @<XREF:INDI>@   INDI {1:1}
       +2 AGNC <RESPONSIBLE_AGENCY>  {0:1}
       +2 <<NOTE_STRUCTURE>>  {0:M}
     +1 AUTH <SOURCE_ORIGINATOR>  {0:1}
-      +2 ABBR <SOURCE_ORIGINATOR_ABBR>  {0:1}
       +2 CONT <SOURCE_ORIGINATOR>  {0:M}
       +2 CONC <SOURCE_ORIGINATOR>  {0:M}
     +1 TITL <SOURCE_DESCRIPTIVE_TITLE>  {0:1}
@@ -168,7 +164,6 @@ n @<XREF:INDI>@   INDI {1:1}
     +1 TEXT <TEXT_FROM_SOURCE>  {0:1}
       +2 CONT <TEXT_FROM_SOURCE>  {0:M}
       +2 CONC <TEXT_FROM_SOURCE>  {0:M}
-    +1 QUAY <CERTAINTY_ASSESSMENT>  {0:1}
     +1 <<SOURCE_REPOSITORY_CITATION>>  {0:1}
     +1 <<MULTIMEDIA_LINK>>  {0:M}
     +1 <<NOTE_STRUCTURE>>  {0:M}
@@ -511,20 +506,11 @@ n @<XREF:INDI>@   INDI {1:1}
     +1 <<NOTE_STRUCTURE>>  {0:M}
 
 
-   EVENT_DEFINITION: =
-
-   n _EVENT_DEFN <EVENT_NAME> {1:1}
-     +1 TYPE <EVENT_TYPE> {0:1}
-     +1 TITL <EVENT_TITLE> {0:1}
-        +2 ABBR <EVENT_TITLE_ABBR> {0:1}
-     +1 ABBR <EVENT_ABBR> {0:1}
-
    SOURCE_CITATION: =
 
   [
     n SOUR @<XREF:SOUR>@      {1:1}
       +1 PAGE <WHERE_WITHIN_SOURCE>  {0:1}
-      +1 REFN <REFERENCE_NUMBER> {0:1}
       +1 EVEN <EVENT_TYPE_CITED_FROM>  {0:1}
         +2 ROLE <ROLE_IN_EVENT>  {0:1}
       +1 DATA        {0:1}

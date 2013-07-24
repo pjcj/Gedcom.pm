@@ -2,8 +2,8 @@
 cgi-bin/gedcom.cgi
 CHANGES
 ged
+gedcom-5.5-strict.grammar
 gedcom-5.5.1.grammar
-gedcom-5.5.aft.grammar
 gedcom-5.5.grammar
 gedcom.vim
 gedcom_compare
