@@ -1,5 +1,8 @@
 Gedcom.pm history
 
+Release 1.19 -
+ - Allow CONC and CONT on PAGE (Ken Williams) (github 2).
+
 Release 1.18 - 24th January 2013
  - Get dmake on Windows running again.
 

@@ -524,6 +524,8 @@ n @<XREF:INDI>@   INDI {1:1}
   [
     n SOUR @<XREF:SOUR>@      {1:1}
       +1 PAGE <WHERE_WITHIN_SOURCE>  {0:1}
+        +2 CONC <WHERE_WITHIN_SOURCE>  {0:M}
+        +2 CONT <WHERE_WITHIN_SOURCE>  {0:M}
       +1 REFN <REFERENCE_NUMBER> {0:1}
       +1 EVEN <EVENT_TYPE_CITED_FROM>  {0:1}
         +2 ROLE <ROLE_IN_EVENT>  {0:1}
