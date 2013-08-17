@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.18 - 24th January 2013
+# Version 1.19 - 18th August 2013
 
 # This is really just a test of the lifelines testing mechanism, but it
 # also serves as a very basic lifelines test.
