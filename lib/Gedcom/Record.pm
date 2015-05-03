@@ -565,6 +565,10 @@ sub normalise_dates
       my @dates = split / or /, $self->{value};
       for my $dt (@dates)
       {
+        #don't change the date if it looks like 'AFT 1989'
+        #AFT means AFTER and ParseDate returns the current date and the tests are failing
+        #current date can symbolize such an "after" date, but can also symbolize a very specific point in time and that could also confuse the user
+        next if $dt =~ m/^AFT/;
         # don't change the date if it is just < 7 digits
         if ($dt !~ /^\s*(\d+)\s*$/ || length $1 > 6)
         {
