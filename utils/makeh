@@ -16,7 +16,7 @@ my $Command = {
         local ($^I, @ARGV) = (".bak", @files);
         while (<>)
         {
-            s/(^\s*\$VERSION = ")\d+\.\d+(";)/$1$version$2/;
+            s/(^\s*(?:our\s+)?\$VERSION = ")\d+\.\d+(";)/$1$version$2/;
             s/(Version )\d+\.\d+( - ).*/$1$version$2$date/;
             s/(^\s*use Gedcom(?:::\w+)*\s+)\d+\.\d+;/$1$version;/;
             print;
