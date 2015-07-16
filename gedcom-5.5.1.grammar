@@ -356,7 +356,7 @@ n @<XREF:INDI>@   INDI                        {1:1}
 
    INDIVIDUAL_EVENT_DETAIL: =
   n  <<EVENT_DETAIL>>                         {1:1}
-  n  AGE <<AGE_AT_EVENT>>                     {0:1}
+  n  AGE <AGE_AT_EVENT>                       {0:1}
 
 
    INDIVIDUAL_EVENT_STRUCTURE: =
