@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 our $AUTOLOAD;
-our $VERSION = "1.15";
+our $VERSION = "1.19";
 
 package Gedcom::WebServices;
 
