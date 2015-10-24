@@ -1002,6 +1002,13 @@
 1   NAME a4b4c4d4
 1   RIN 92
 
+0 @I92@ INDI
+1   NAME resi test
+1   RIN 93
+1   RESI abc
+2     DATE 02 Apr 1921
+2     PLAC The Wardrobe, Narnia
+
 0 @F1@ FAM
 1   CHIL @I1@
 1   DIV N

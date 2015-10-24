@@ -28,7 +28,7 @@ Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
 
 $SIG{__WARN__} = sub { print STDERR "\n@_" };
 
-sub main()
+sub main
 {
   my $gedcom_file = shift @ARGV;
   $| = 1;
@@ -237,6 +237,15 @@ sub main()
     $ged->validate;
     print "\nwriting...";
     $ged->write("$gedcom_file.new");
+  }
+  if (1)
+  {
+    for my $i ($ged->individuals) {
+      my @residence = $i->residence;
+      for my $r (@residence) {
+        print $i->name, ": ", $r->place, "\n";
+      }
+    }
   }
 }
 

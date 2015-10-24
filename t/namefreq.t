@@ -22,7 +22,7 @@ use File::Spec;
 
 my $report = File::Spec->catfile((-d "t" ? ("t/") : ()), "lines", "namefreq");
 
-Lines->test(tests          => 82,
+Lines->test(tests          => 83,
             report         => $report,
             lines_report   => "$report.l",
             report_command => $ENV{lines} ? "$report.l\n" : undef,
