@@ -88,7 +88,7 @@ WriteMakefile
 );
 
 print "\n";
-print "checking for Date::Manip.pm........ ";
+print "checking for Date::Manip .......... ";
 
 eval "use Date::Manip";
 if (my $m = $INC{"Date/Manip.pm"})
@@ -107,7 +107,7 @@ In the meantime, you may continue to use the rest of Gedcom.pm.
 EOM
 }
 
-print "checking for Parse::RecDescent.pm.. ";
+print "checking for Parse::RecDescent .... ";
 
 eval "use Parse::RecDescent";
 if (my $m = $INC{"Parse/RecDescent.pm"})
@@ -126,7 +126,7 @@ In the meantime, you may continue to use the rest of Gedcom.pm.
 EOM
 }
 
-print "checking for Roman.pm.............. ";
+print "checking for Roman ................ ";
 
 eval "use Roman";
 if (my $m = $INC{"Roman.pm"})
@@ -146,7 +146,7 @@ meantime, you may continue to use the rest of Gedcom.pm.
 EOM
 }
 
-print "checking for working IO::Handle.... ";
+print "checking for working IO::Handle ... ";
 
 eval <<'EOE';
     use FileHandle;
