@@ -14,7 +14,11 @@ require 5.005;
 use ExtUtils::MakeMaker;
 use ExtUtils::Manifest "maniread";
 
-if (0)  # For automating webservices testing
+our $WEBSERVICES_TESTING = 0;
+
+
+
+if ($WEBSERVICES_TESTING)  # For automating webservices testing
 {
     eval
     q{
@@ -171,20 +175,6 @@ else
 {
     print "working\n";
 }
-
-print <<EOM if 0;
-
---------------------------------------------------------------------------------
-
-I like to have some idea of the distribution of this software.  To that end I
-would be very grateful for mail from you.  This will be used only to satisfy my
-curiosity and to help me make decisions which may involve changes to the
-module.
-
-If you can run perlbug you can send me a success report with "make ok".
-Failure reports with "make nok" are also appreciated.
-
-EOM
 
 print <<EOM;
 
