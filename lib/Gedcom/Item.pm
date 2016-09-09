@@ -889,7 +889,8 @@ Print the item.  Used for debugging.  (What?  There are bugs?)
 
 Get specific sub-items from the item.
 
-The arguments are the name of the tag, and optionally the count.
+The arguments are the name of the tag, and optionally the count, starting from
+one.
 
 In scalar context, returns the sub-item, or undef if it doesn't exist.
 In array context, returns all sub-items matching the specified tag.
@@ -902,8 +903,8 @@ NOTE - This function is deprecated - use get_item instead
 
 Get a specific child item from the item.
 
-The argument contains the name of the tag, and optionally the count.
-The regular expression to generate the tag and the count is:
+The argument contains the name of the tag, and optionally the count, starting
+from one.  The regular expression to generate the tag and the count is:
 
   my ($tag, $count) = $t =~ /^_?(\w+?)(\d*)$/
 

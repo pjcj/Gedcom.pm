@@ -708,7 +708,8 @@ Used by renumber().
 Get specific sub-records from the record.  This function is identical to
 Gedcom::Item::get_item().
 
-The arguments are the name of the tag, and optionally the count.
+The arguments are the name of the tag, and optionally the count, starting from
+one.
 
 In scalar context, returns the sub-record, or undef if it doesn't exist.
 In array context, returns all sub-records matching the specified tag.
