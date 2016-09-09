@@ -15,10 +15,10 @@ use lib -d "t" ? "t" : "..";
 
 BEGIN
 {
-    unless ($ENV{DEVEL_COVER_WS_TESTS})
+    unless ($ENV{WEBSERVICES_TESTING})
     {
         eval "use Test::More skip_all => " .
-             "q[\$DEVEL_COVER_WS_TESTS is not set]";
+             "q[\$WEBSERVICES_TESTING is not set]";
 
     }
 
