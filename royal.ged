@@ -1004,10 +1004,15 @@
 
 0 @I92@ INDI
 1   NAME resi test
-1   RIN 93
+1   RIN 140
 1   RESI abc
 2     DATE Saturday, 2nd April 1921
 2     PLAC The Wardrobe, Narnia
+
+0 @I93@ INDI
+1   NAME _PRIM test
+1   RIN 141
+1   _PRIM Y
 
 0 @F1@ FAM
 1   CHIL @I1@

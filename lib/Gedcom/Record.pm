@@ -80,7 +80,8 @@ sub record
     {
       warn $func
       ? "Non standard record of type $func requested"
-      : "Record type not specified";
+      : "Record type not specified"
+        unless $func =~ /^_/;
       $record = $func;
     }
 
@@ -262,7 +263,8 @@ sub get_and_create
     {
       warn $func
       ? "Non standard record of type $func requested"
-      : "Record type not specified";
+      : "Record type not specified"
+        unless $func =~ /^_/;
       $record = $func;
     }
 

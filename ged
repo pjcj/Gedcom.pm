@@ -238,7 +238,7 @@ sub main
     print "\nwriting...";
     $ged->write("$gedcom_file.new");
   }
-  if (1)
+  if (0)
   {
     for my $i ($ged->individuals) {
       my @residence = $i->residence;
@@ -246,6 +246,12 @@ sub main
         print $i->name, ": ", $r->place, "\n";
       }
     }
+  }
+  if (1)
+  {
+    my $i = $ged->get_individual("I93");
+    my $prim = $i->get_value("_PRIM");
+    print "_PRIM: $prim\n";
   }
 }
 

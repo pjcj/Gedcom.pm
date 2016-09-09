@@ -67,13 +67,13 @@ sub import
     ok $ged->validate;
 
     my $fams = 47;
-    my $inds = 92;
+    my $inds = 93;
     my %xrefs;
 
     ok xrefs($ged->individuals), i(1 .. $inds);
-    ok rins ($ged->individuals), i(2 .. $inds + 1);
+    ok rins ($ged->individuals), i(2 .. $inds - 1, 140, 141);
     ok xrefs($ged->families   ), i(1 .. $fams);
-    ok rins ($ged->families   ), i($inds + 1 .. $fams + $inds);
+    ok rins ($ged->families   ), i($inds .. $fams + $inds - 1);
 
     %xrefs = $ged->renumber;
     ok $ged->validate;
@@ -81,7 +81,7 @@ sub import
     $ged->$resolve();
     ok $ged->validate;
 
-    ok $xrefs{INDI}, 92;
+    ok $xrefs{INDI}, 93;
     ok $xrefs{FAM},  47;
     ok $xrefs{SUBM}, 1;
 
@@ -94,7 +94,8 @@ sub import
                           15 17 18 19 21 22 23 26 27 28 30 31 49 32 47 33 39 43
                           48 34 35 36 37 38 40 41 42 44 45 46 50 53 51 54 52 56
                           57 58 59 60 61 62 64 65 71 78 66 67 69 70 68 72 73 75
-                          74 76 77 79 80 81 83 84 85 86 87 88 89 90 91 92 93));
+                          74 76 77 79 80 81 83 84 85 86 87 88 89 90 91 92 140
+                          141));
     ok xrefs($ged->families   ), i(1 .. $fams);
     ok rins ($ged->families   ),
              join(" ", qw(94 93 116 95 111 104 106 107 115 96 112 98 108 100 118
@@ -165,7 +166,7 @@ sub import
     $ged->$resolve();
     ok $ged->validate;
 
-    ok $xrefs{INDI}, 92;
+    ok $xrefs{INDI}, 93;
     ok $xrefs{FAM},  47;
     ok $xrefs{SUBM}, 1;
     ok rins($ged->resolve_xref($ind_xref)), "17";
@@ -175,13 +176,15 @@ sub import
                           12 13 14 15 16 17 18 26 27 28 32 33 34 35 36 37 38 39
                           40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57
                           58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75
-                          76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92));
+                          76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92
+                          93));
     ok rins ($ged->individuals),
              join(" ", qw(2 3 4 5 6 8 29 55 63 82 7 9 10 25 11 12 16 20 24 13 14
                           15 17 18 19 21 22 23 26 27 28 30 31 49 32 47 33 39 43
                           48 34 35 36 37 38 40 41 42 44 45 46 50 53 51 54 52 56
                           57 58 59 60 61 62 64 65 71 78 66 67 69 70 68 72 73 75
-                          74 76 77 79 80 81 83 84 85 86 87 88 89 90 91 92 93));
+                          74 76 77 79 80 81 83 84 85 86 87 88 89 90 91 92 140
+                          141));
     ok xrefs($ged->families),
              join(" ", qw(14 46 47 10 15 16 17 18 19 2 11 1 3 4 5 6 7 8 9 12 13
                           20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37
@@ -255,7 +258,7 @@ sub import
     ok unlink $f1;
   };
 
-  my $tests = 1508;
+  my $tests = 1513;
   my $grammar;
   if ($grammar = delete $args{create_grammar})
   {
@@ -1298,10 +1301,15 @@ __DATA__
 
 0 @I92@ INDI
 1   NAME resi test
-1   RIN 93
+1   RIN 140
 1   RESI abc
 2     DATE Saturday, 2nd April 1921
 2     PLAC The Wardrobe, Narnia
+
+0 @I93@ INDI
+1   NAME _PRIM test
+1   RIN 141
+1   _PRIM Y
 
 0 @F14@ FAM
 1   HUSB @I29@
