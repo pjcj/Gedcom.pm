@@ -16,8 +16,6 @@ use ExtUtils::Manifest "maniread";
 
 our $WEBSERVICES_TESTING = 0;
 
-
-
 if ($WEBSERVICES_TESTING)  # For automating webservices testing
 {
     eval
@@ -182,6 +180,9 @@ print <<EOM;
 
 If you have any questions or comments please send a message to the perl-gedcom
 mailing list, details of which are available in the README file.
+
+If you can run perlbug you can send me a success report with "make ok".
+Failure reports with "make nok" are also appreciated.
 
 EOM
 
