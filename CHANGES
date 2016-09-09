@@ -1,6 +1,8 @@
 Gedcom.pm history
 
-Release 1.19 -
+Release 1.20 -
+
+Release 1.19 - 18th August 2013
  - Allow CONC and CONT on PAGE (Ken Williams) (github 2).
  - Make default grammar more lax but also include strict grammar file.
  - Make Text::Soundex a prerequisite.
