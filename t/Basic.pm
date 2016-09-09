@@ -1300,7 +1300,7 @@ __DATA__
 1   NAME resi test
 1   RIN 93
 1   RESI abc
-2     DATE 02 Apr 1921
+2     DATE Saturday, 2nd April 1921
 2     PLAC The Wardrobe, Narnia
 
 0 @F14@ FAM
