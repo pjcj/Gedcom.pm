@@ -14,7 +14,11 @@ require 5.005;
 use ExtUtils::MakeMaker;
 use ExtUtils::Manifest "maniread";
 
-if (0)  # For automating webservices testing
+our $WEBSERVICES_TESTING = 0;
+
+
+
+if ($WEBSERVICES_TESTING)  # For automating webservices testing
 {
     eval
     q{
@@ -84,7 +88,7 @@ WriteMakefile
 );
 
 print "\n";
-print "checking for Date::Manip.pm........ ";
+print "checking for Date::Manip .......... ";
 
 eval "use Date::Manip";
 if (my $m = $INC{"Date/Manip.pm"})
@@ -103,7 +107,7 @@ In the meantime, you may continue to use the rest of Gedcom.pm.
 EOM
 }
 
-print "checking for Parse::RecDescent.pm.. ";
+print "checking for Parse::RecDescent .... ";
 
 eval "use Parse::RecDescent";
 if (my $m = $INC{"Parse/RecDescent.pm"})
@@ -122,7 +126,7 @@ In the meantime, you may continue to use the rest of Gedcom.pm.
 EOM
 }
 
-print "checking for Roman.pm.............. ";
+print "checking for Roman ................ ";
 
 eval "use Roman";
 if (my $m = $INC{"Roman.pm"})
@@ -142,7 +146,7 @@ meantime, you may continue to use the rest of Gedcom.pm.
 EOM
 }
 
-print "checking for working IO::Handle.... ";
+print "checking for working IO::Handle ... ";
 
 eval <<'EOE';
     use FileHandle;
@@ -171,20 +175,6 @@ else
 {
     print "working\n";
 }
-
-print <<EOM if 0;
-
---------------------------------------------------------------------------------
-
-I like to have some idea of the distribution of this software.  To that end I
-would be very grateful for mail from you.  This will be used only to satisfy my
-curiosity and to help me make decisions which may involve changes to the
-module.
-
-If you can run perlbug you can send me a success report with "make ok".
-Failure reports with "make nok" are also appreciated.
-
-EOM
 
 print <<EOM;
 
