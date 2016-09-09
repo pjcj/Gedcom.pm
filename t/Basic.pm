@@ -258,7 +258,7 @@ sub import
     ok unlink $f1;
   };
 
-  my $tests = 1513;
+  my $tests = 1521;
   my $grammar;
   if ($grammar = delete $args{create_grammar})
   {
@@ -1689,6 +1689,14 @@ __DATA__
 
 0 @N1@ NOTE Line 1
 1   CONT Line 2
+
+0 @N2@ NOTE Line 1
+1   CONT * Line 2 *
+1   CONT * Line 3 *
+1   CONT * 
+1   CONT **
+1   CONT ***
+1   CONT *
 
 0 @S1@ SOUR
 1   TEXT Source text

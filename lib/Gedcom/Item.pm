@@ -321,7 +321,7 @@ sub next_item
                         line      => $line_number);
 #     print "found structure $structure\n";
     }
-    elsif (my ($level, $xref, $tag, $value, $min, $max) =
+    elsif (my ($level, $xref, $tag, $value, $space, $min, $max, $star) =
       $line =~ /^\s*                       # optional whitespace at start
                 ((?:\+?\d+)|n)             # start level
                 \s*                        # optional whitespace
@@ -347,7 +347,7 @@ sub next_item
                       \]                   # end list
                     )                      #
                   )                        #
-                  \s+                      # whitespace
+                  (\s+)                    # whitespace
                 )??                        # optional - non greedy
                 (?:                        # value
                   \{                       # open brace
@@ -357,8 +357,8 @@ sub next_item
                     \*?                    # optional *
                   [\}\]]                   # close brace or bracket
                 )?                         # optional
-                \*?                        # optional *
-                \s*$/x)                    # optional whitespace at end
+                (\*?\s*)                   # optional * and whitespace at end
+                $/x)
 #     $line =~ /^\s*                       # optional whitespace at start
 #               (\d+)                      # start level
 #               \s*                        # optional whitespace
@@ -386,6 +386,10 @@ sub next_item
         $rec->{xref}  = $xref  =~ /^\@(.+)\@$/ ? $1 : $xref
           if defined $xref;
         $rec->{tag}   = $tag                         if defined $tag;
+        $value .= $space if defined $space && $self->{grammar};
+        $value .= $star  if defined $star  && $self->{grammar};
+        $value =~ s/[\r\n]+$// if defined $value;
+        # print STDERR "value: [$value]\n";
         $rec->{value} = ($rec->{pointer} = $value =~ /^\@(.+)\@$/) ? $1 : $value
           if defined $value;
         $rec->{min}   = $min                         if defined $min;
