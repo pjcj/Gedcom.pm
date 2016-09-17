@@ -15,10 +15,10 @@ package Gedcom::Grammar;
 
 use Data::Dumper;
 
-use Gedcom::Item 1.19;
+use Gedcom::Item 1.20;
 
 use vars qw($VERSION @ISA);
-$VERSION = "1.19";
+$VERSION = "1.20";
 @ISA     = qw( Gedcom::Item );
 
 sub structure {
@@ -121,7 +121,7 @@ __END__
 
 Gedcom::Grammar - a module to manipulate Gedcom grammars
 
-Version 1.19 - 18th August 2013
+Version 1.20 - 17th September 2017
 
 =head1 SYNOPSIS
 

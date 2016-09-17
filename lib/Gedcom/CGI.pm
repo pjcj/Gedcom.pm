@@ -15,10 +15,10 @@ package Gedcom::CGI;
 
 use CGI qw(:cgi :html);
 
-use Gedcom 1.19;
+use Gedcom 1.20;
 
 use vars qw($VERSION);
-$VERSION = "1.19";
+$VERSION = "1.20";
 
 sub gedcom {
     my ($gedcom_file) = @_;
@@ -130,7 +130,7 @@ __END__
 
 Gedcom::CGI - Basic CGI routines for Gedcom.pm
 
-Version 1.19 - 18th August 2013
+Version 1.20 - 17th September 2017
 
 =head1 SYNOPSIS
 

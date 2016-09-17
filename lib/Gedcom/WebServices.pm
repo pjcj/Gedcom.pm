@@ -6,11 +6,11 @@ use strict;
 use warnings;
 
 our $AUTOLOAD;
-our $VERSION = "1.19";
+our $VERSION = "1.20";
 
 package Gedcom::WebServices;
 
-use Gedcom 1.19;
+use Gedcom 1.20;
 
 use Apache::Constants qw( OK DECLINED );
 use Apache::Request;
@@ -205,7 +205,7 @@ __END__
 
 Gedcom::WebServices - Basic web service routines for Gedcom.pm
 
-Version 1.19 - 18th August 2013
+Version 1.20 - 17th September 2017
 
 =head1 SYNOPSIS
 
@@ -372,7 +372,7 @@ See the BUGS file.  And the TODO file.
 
 =head1 VERSION
 
-Version 1.19 - 18th August 2013
+Version 1.20 - 17th September 2017
 
 =head1 LICENCE
 

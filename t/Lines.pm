@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.19 - 18th August 2013
+# Version 1.20 - 17th September 2017
 
 use strict;
 
@@ -19,9 +19,9 @@ use File::Basename;
 use Test;
 
 use vars qw($VERSION);
-$VERSION = "1.19";
+$VERSION = "1.20";
 
-use Gedcom 1.19;
+use Gedcom 1.20;
 
 sub test {
     my $class = shift;

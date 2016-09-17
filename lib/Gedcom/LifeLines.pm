@@ -19,10 +19,10 @@ BEGIN {  # We'll use these if they are available
   eval "use Roman ()";
 }
 
-use Gedcom 1.19;
+use Gedcom 1.20;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = "1.19";
+$VERSION = "1.20";
 @ISA     = qw( Exporter );
 @EXPORT  = qw (
     set_ged display flush
@@ -1027,7 +1027,7 @@ __END__
 
 Gedcom::LifeLines - functions for lines2perl
 
-Version 1.19 - 18th August 2013
+Version 1.20 - 17th September 2017
 
 =head1 SYNOPSIS
 

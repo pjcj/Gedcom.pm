@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.19 - 18th August 2013
+# Version 1.20 - 17th September 2017
 
 use strict;
 
@@ -17,7 +17,7 @@ use lib "/var/www/Gedcom/lib";
 
 use CGI qw(:cgi :html);
 
-use Gedcom::CGI 1.19;
+use Gedcom::CGI 1.20;
 
 my $op = param("op");
 
@@ -38,7 +38,7 @@ __END__
 
 main.cgi
 
-Version 1.19 - 18th August 2013
+Version 1.20 - 17th September 2017
 
 =head1 SYNOPSIS
 
