@@ -32,6 +32,49 @@ sub ok
     &Test::ok(@a)
 }
 
+sub validate_ok {
+    my ($ged, $read_only) = @_;
+    my $warn = "";
+    my $ret;
+    {
+        local $SIG{__WARN__} = sub { $warn .= "@_" };
+        $ret = $ged->validate;
+    }
+    # warn "validate_ok", $ret, $warn;
+
+    if ($read_only) {
+        ok $ret;
+        ok 1;
+        return;
+    }
+
+    ok !$ret;
+    my $w = <<EOW;
+royal.ged:1008: RESI: RESI Can't contain a value (abc)
+royal.ged:1019: DIV: DIV Can't contain a value (N)
+royal.ged:1053: DIV: DIV Can't contain a value (N)
+royal.ged:1063: DIV: DIV Can't contain a value (Y)
+royal.ged:1076: DIV: DIV Can't contain a value (N)
+royal.ged:1087: DIV: DIV Can't contain a value (N)
+royal.ged:1098: DIV: DIV Can't contain a value (N)
+royal.ged:1138: DIV: DIV Can't contain a value (N)
+royal.ged:1156: DIV: DIV Can't contain a value (Y)
+royal.ged:1163: DIV: DIV Can't contain a value (Y)
+royal.ged:1214: DIV: DIV Can't contain a value (Y)
+royal.ged:1238: DIV: DIV Can't contain a value (Y)
+royal.ged:1250: DIV: DIV Can't contain a value (Y)
+royal.ged:1259: DIV: DIV Can't contain a value (Y)
+royal.ged:1292: DIV: DIV Can't contain a value (Y)
+royal.ged:1362: DIV: DIV Can't contain a value (Y)
+royal.ged:1367: DIV: DIV Can't contain a value (Y)
+EOW
+    # my @s = sort split /\n/, $warn;
+    # warn "-- [$_]\n" for @s;
+    $warn = join "", map "$_\n", sort split /\n/, $warn;
+    # warn "validate_XX", $ret, $warn;
+    ok $warn, $w;
+}
+
 my @Ged_data = <DATA>;
 
 sub xrefs (@)
@@ -56,15 +99,16 @@ sub import
     my %args = @_;
     my $resolve     = $args{resolve};
     my $gedcom_file = $args{gedcom_file};
+    my $read_only   = $args{read_only};
 
     ok $ged;
-    ok $ged->validate;
+    validate_ok($ged, $read_only);
 
     $ged->$resolve();
-    ok $ged->validate;
+    validate_ok($ged, $read_only);
 
     $ged->normalise_dates if $INC{"Date/Manip.pm"};
-    ok $ged->validate;
+    validate_ok($ged, $read_only);
 
     my $fams = 47;
     my $inds = 93;
@@ -76,17 +120,17 @@ sub import
     ok rins ($ged->families   ), i($inds .. $fams + $inds - 1);
 
     %xrefs = $ged->renumber;
-    ok $ged->validate;
+    validate_ok($ged, $read_only);
 
     $ged->$resolve();
-    ok $ged->validate;
+    validate_ok($ged, $read_only);
 
     ok $xrefs{INDI}, 93;
     ok $xrefs{FAM},  47;
     ok $xrefs{SUBM}, 1;
 
     $ged->order;
-    ok $ged->validate;
+    validate_ok($ged, $read_only);
 
     ok xrefs($ged->individuals), i(1 .. $inds);
     ok rins ($ged->individuals),
@@ -161,10 +205,10 @@ sub import
     ok rins($ged->resolve_xref($ind_xref)), "10";
 
     %xrefs = $ged->renumber(xrefs => [$ind_xref]);
-    ok $ged->validate;
+    validate_ok($ged, $read_only);
 
     $ged->$resolve();
-    ok $ged->validate;
+    validate_ok($ged, $read_only);
 
     ok $xrefs{INDI}, 93;
     ok $xrefs{FAM},  47;
@@ -243,11 +287,11 @@ sub import
        $i = $ged->get_individual("I83");
     my $n = $i->resolve($i->note)->full_value;
     ok $n, "Line 1\nLine 2";
-    ok $ged->validate;
+    validate_ok($ged, $read_only);
 
     my $f1 = $gedcom_file . $$;
     $ged->write($f1);
-    ok $ged->validate;
+    validate_ok($ged, $read_only);
     ok -e $f1;
 
     # check the gedcom file is correct
@@ -258,7 +302,7 @@ sub import
     ok unlink $f1;
   };
 
-  my $tests = 1521;
+  my $tests = 1531;
   my $grammar;
   if ($grammar = delete $args{create_grammar})
   {
