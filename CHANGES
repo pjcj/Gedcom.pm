@@ -1,6 +1,13 @@
 Gedcom.pm history
 
-Release 1.20 -
+Release 1.20 - 17th September 2017
+ - Tidy up Makefile (Alberto Simões) (github 17)
+ - Correct WebServices version (pauloscustodio) (github 9)
+ - Fix AGE_AT_EVENT in 5.5.1 grammar (pauloscustodio) (github 8)
+ - Work around Date::Manip API change (Tudor Constantin) (github 7)
+ - Don't warn on using user-defined tags (Nigel Horne) (github 16)
+ - Handle a star at the end of a value (Erin Spiceland) (github 6)
+ - Validation error when there should be no value (Nigel Horne) (github 13)
 
 Release 1.19 - 18th August 2013
  - Allow CONC and CONT on PAGE (Ken Williams) (github 2).
