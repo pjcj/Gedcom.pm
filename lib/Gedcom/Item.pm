@@ -105,6 +105,7 @@ sub read
   seek($fh, 0, 2);
   my $size = tell $fh;
   seek($fh, $bom ? 3 : 0, 0);  # skip BOM
+  $. = 0;
 
   # initial callback
   my $callback = $self->{callback};;
@@ -394,6 +395,7 @@ sub next_item
           if defined $value;
         $rec->{min}   = $min                         if defined $min;
         $rec->{max}   = $max                         if defined $max;
+        # { use Data::Dumper; local $rec->{gedcom} = "xxx"; print Dumper $rec; }
       }
       else
       {
