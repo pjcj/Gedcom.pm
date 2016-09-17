@@ -18,32 +18,32 @@ isa_ok( $ged, 'Gedcom' );
 my @birthdates = <DATA>;
 
 {
-  my @dates = @birthdates;
+    my @dates = @birthdates;
 
-  # Look at each individual.
-  for my $i ($ged->individuals) {
-    # Look at each birth record.
-    # There will generally be one birth record, but there may be none,
-    # or more than one.
-    for my $b ($i->birth) {
-      # Look at each date in the birth record.
-      # Again, there will generally be only one date, but there may be
-      # none, or more than one.
-      for my $d ($b->date) {
-        date_eq( $i->name . " was born on $d\n", shift @dates );
-      }
+    # Look at each individual.
+    for my $i ($ged->individuals) {
+        # Look at each birth record.
+        # There will generally be one birth record, but there may be none,
+        # or more than one.
+        for my $b ($i->birth) {
+            # Look at each date in the birth record.
+            # Again, there will generally be only one date, but there may be
+            # none, or more than one.
+            for my $d ($b->date) {
+                date_eq( $i->name . " was born on $d\n", shift @dates );
+            }
+        }
     }
-  }
 }
 
 {
-  # Here's a newer, better way of doing the same thing.
-  my @dates = @birthdates;
-  for my $i ($ged->individuals) {
-    for my $d ($i->get_value(qw(birth date))) {
-      date_eq($i->name . " was born on $d\n", shift @dates);
+    # Here's a newer, better way of doing the same thing.
+    my @dates = @birthdates;
+    for my $i ($ged->individuals) {
+        for my $d ($i->get_value(qw(birth date))) {
+            date_eq($i->name . " was born on $d\n", shift @dates);
+        }
     }
-  }
 }
 
 date_eq($ged->get_individual("Edward_VIII")->get_value(qw(birth date)),

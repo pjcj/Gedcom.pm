@@ -29,28 +29,25 @@ use Gedcom::LifeLines 1.19;
 use vars qw( $VERSION $Prefix $Suffix );
 $VERSION = "1.19";
 
-sub _indent
-{
-  join "", map { ref $_ ? _indent(@$_) : $_ } @_
+sub _indent {
+    join "", map { ref $_ ? _indent(@$_) : $_ } @_
 }
 
-sub indent
-{
-# print STDERR "indenting @_\n";
-  my $i = _indent(@_);
-  $i =~ s/^/  /gm;
-  $i
+sub indent {
+    # print STDERR "indenting @_\n";
+    my $i = _indent(@_);
+    $i =~ s/^/  /gm;
+    $i
 }
 
 my %Opts;
 GetOptions(\%Opts, "quiet!") or die "bad options";
 
-sub msg
-{
-  return if $Opts{quiet};
-  printf STDERR "%4d,%3d: ", shift, shift;
-  print  STDERR @_, "\n";
-  return
+sub msg {
+    return if $Opts{quiet};
+    printf STDERR "%4d,%3d: ", shift, shift;
+    print  STDERR @_, "\n";
+    return
 }
 
 # TODO - use correct perl
@@ -84,40 +81,35 @@ my $_Traverse_sub;                                     # subroutine for traverse
 sub out  { print  STDERR @_ unless $Opts{quiet} }
 sub outf { printf STDERR @_ unless $Opts{quiet} }
 
-sub initialise ()
-{
-  die "usage: $0 -gedcom_file file.ged\n"
+sub initialise () {
+    die "usage: $0 -gedcom_file file.ged\n"
     unless GetOptions(\%Opts,
-                      "gedcom_file=s",
-                      "quiet!",
-                      "validate!",
-                     ) and defined $Opts{gedcom_file};
-  local $SIG{__WARN__} = sub { out "\n@_" };
-  out "reading...";
-  $Ged = Gedcom->new
-  (
-    gedcom_file  => $Opts{gedcom_file},
-    callback     => sub { out "." }
-  );
-  if ($Opts{validate})
-  {
-    out "\nvalidating...";
-    my %x;
-    my $vcb = sub
-    {
-     my ($r) = @_;
-     my $t = $r->{xref};
-     out "." if $t && !$x{$t}++;
-    };
-    $Ged->validate($vcb);
-  }
-  out "\n";
-  set_ged($Ged);
+        "gedcom_file=s",
+        "quiet!",
+        "validate!",
+    ) and defined $Opts{gedcom_file};
+    local $SIG{__WARN__} = sub { out "\n@_" };
+    out "reading...";
+    $Ged = Gedcom->new(
+        gedcom_file  => $Opts{gedcom_file},
+        callback     => sub { out "." }
+    );
+    if ($Opts{validate}) {
+        out "\nvalidating...";
+        my %x;
+        my $vcb = sub {
+            my ($r) = @_;
+            my $t = $r->{xref};
+            out "." if $t && !$x{$t}++;
+        };
+        $Ged->validate($vcb);
+    }
+    out "\n";
+    set_ged($Ged);
 }
 
-$SIG{__WARN__} = sub
-{
-  out $_[0] unless $_[0] =~ /^Use of uninitialized value/
+$SIG{__WARN__} = sub {
+    out $_[0] unless $_[0] =~ /^Use of uninitialized value/
 };
 
 EOH
@@ -674,67 +666,64 @@ constant             : /([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?/
 
 EOG
 
-my @keywords =
-(
-  @Gedcom::LifeLines::EXPORT,
-  qw
-  (
-    proc
-    func
-    if
-    elsif
-    else
-    while
-    forlist
-    spouses
-    families
-    forindi
-    children
-    forfam
-    fornodes
-    traverse
-    include
-    global
-    set
-    getintmsg
-    getstrmsg
-    getindimsg
-    continue
-    break
-    return
-    list
-    table
-    call
-    add
-    sub
-    mul
-    div
-    mod
-    exp
-    neg
-    and
-    or
-    not
-    eq
-    ne
-    lt
-    le
-    gt
-    ge
-    empty
-    length
-    dequeue
-    pop
-    getel
-    lookup
-    incr
-    decr
-    enqueue
-    requeue
-    push
-    setel
-    insert
-  )
+my @keywords = (
+    @Gedcom::LifeLines::EXPORT, qw (
+        proc
+        func
+        if
+        elsif
+        else
+        while
+        forlist
+        spouses
+        families
+        forindi
+        children
+        forfam
+        fornodes
+        traverse
+        include
+        global
+        set
+        getintmsg
+        getstrmsg
+        getindimsg
+        continue
+        break
+        return
+        list
+        table
+        call
+        add
+        sub
+        mul
+        div
+        mod
+        exp
+        neg
+        and
+        or
+        not
+        eq
+        ne
+        lt
+        le
+        gt
+        ge
+        empty
+        length
+        dequeue
+        pop
+        getel
+        lookup
+        incr
+        decr
+        enqueue
+        requeue
+        push
+        setel
+        insert
+    )
 );
 my $x = "emulated_name : /\\b(" . join("|", @Gedcom::LifeLines::EXPORT) .
                          ")\\b/\n" .

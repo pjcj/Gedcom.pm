@@ -16,14 +16,12 @@ use ExtUtils::Manifest "maniread";
 
 our $WEBSERVICES_TESTING = 0;
 
-if ($WEBSERVICES_TESTING)  # For automating webservices testing
-{
-    eval
-    q{
+if ($WEBSERVICES_TESTING) {  # For automating webservices testing
+    eval '
         use Apache::TestMM qw(test clean);
         Apache::TestMM::filter_args();
         Apache::TestMM::generate_script("t/TEST");
-    };
+    ';
 }
 
 $| = 1;
@@ -42,8 +40,7 @@ my @versions = grep { !/README|travis|Makefile\.PL/ } @files;
 
 $ExtUtils::MakeMaker::Verbose = 0;
 
-WriteMakefile
-(
+WriteMakefile(
     NAME       => "Gedcom",
     VERSION    => $Version,
     AUTHOR     => 'Paul Johnson (paul@pjcj.net)',
@@ -89,12 +86,9 @@ print "\n";
 print "checking for Date::Manip .......... ";
 
 eval "use Date::Manip";
-if (my $m = $INC{"Date/Manip.pm"})
-{
+if (my $m = $INC{"Date/Manip.pm"}) {
     print "$m\n";
-}
-else
-{
+} else {
     print <<EOM;
 not found
 
@@ -108,12 +102,9 @@ EOM
 print "checking for Parse::RecDescent .... ";
 
 eval "use Parse::RecDescent";
-if (my $m = $INC{"Parse/RecDescent.pm"})
-{
+if (my $m = $INC{"Parse/RecDescent.pm"}) {
     print "$m\n";
-}
-else
-{
+} else {
     print <<EOM;
 not found
 
@@ -127,12 +118,9 @@ EOM
 print "checking for Roman ................ ";
 
 eval "use Roman";
-if (my $m = $INC{"Roman.pm"})
-{
+if (my $m = $INC{"Roman.pm"}) {
     print "$m\n";
-}
-else
-{
+} else {
     print <<EOM;
 not found
 
@@ -152,8 +140,7 @@ eval <<'EOE';
     $fh->getline;
     $fh->input_line_number;
 EOE
-if ($@)
-{
+if ($@) {
     print <<'EOM';
 broken
 
@@ -168,9 +155,7 @@ to patch your Perl, my patch is available at
 http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1999-04/msg02366.html
 or send me mail.
 EOM
-}
-else
-{
+} else {
     print "working\n";
 }
 
@@ -186,8 +171,7 @@ Failure reports with "make nok" are also appreciated.
 
 EOM
 
-sub MY::postamble
-{
+sub MY::postamble {
     qq[
 tags : @files
 \t ptags @files

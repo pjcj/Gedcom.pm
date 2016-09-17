@@ -25,8 +25,7 @@ use Gedcom 1.19;
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
 
-sub ok
-{
+sub ok {
     my @a = @_;
     s/[\r\n]+$/\n/ for @a;
     &Test::ok(@a)
@@ -77,265 +76,249 @@ EOW
 
 my @Ged_data = <DATA>;
 
-sub xrefs (@)
-{
-  join " ", map { $_->xref =~ /(\d+)/; $1 } @_
-}
+sub xrefs (@) { join " ", map { $_->xref =~ /(\d+)/; $1 } @_ }
+sub rins  (@) { join " ", map { $_->rin } @_                 }
+sub i     (@) { "@_"                                         }
 
-sub rins (@)
-{
-  join " ", map { $_->rin } @_
-}
-
-sub i (@) { "@_" }
-
-sub import
-{
-  my $class = shift;
-  my %args = @_;
-  my $basic_test = sub
-  {
-    my $ged = shift;
+sub import {
+    my $class = shift;
     my %args = @_;
-    my $resolve     = $args{resolve};
-    my $gedcom_file = $args{gedcom_file};
-    my $read_only   = $args{read_only};
+    my $basic_test = sub {
+        my $ged = shift;
+        my %args = @_;
+        my $resolve     = $args{resolve};
+        my $gedcom_file = $args{gedcom_file};
+        my $read_only   = $args{read_only};
 
-    ok $ged;
-    validate_ok($ged, $read_only);
+        ok $ged;
+        validate_ok($ged, $read_only);
 
-    $ged->$resolve();
-    validate_ok($ged, $read_only);
+        $ged->$resolve();
+        validate_ok($ged, $read_only);
 
-    $ged->normalise_dates if $INC{"Date/Manip.pm"};
-    validate_ok($ged, $read_only);
+        $ged->normalise_dates if $INC{"Date/Manip.pm"};
+        validate_ok($ged, $read_only);
 
-    my $fams = 47;
-    my $inds = 93;
-    my %xrefs;
+        my $fams = 47;
+        my $inds = 93;
+        my %xrefs;
 
-    ok xrefs($ged->individuals), i(1 .. $inds);
-    ok rins ($ged->individuals), i(2 .. $inds - 1, 140, 141);
-    ok xrefs($ged->families   ), i(1 .. $fams);
-    ok rins ($ged->families   ), i($inds .. $fams + $inds - 1);
+        ok xrefs($ged->individuals), i(1 .. $inds);
+        ok rins ($ged->individuals), i(2 .. $inds - 1, 140, 141);
+        ok xrefs($ged->families   ), i(1 .. $fams);
+        ok rins ($ged->families   ), i($inds .. $fams + $inds - 1);
 
-    %xrefs = $ged->renumber;
-    validate_ok($ged, $read_only);
+        %xrefs = $ged->renumber;
+        validate_ok($ged, $read_only);
 
-    $ged->$resolve();
-    validate_ok($ged, $read_only);
+        $ged->$resolve();
+        validate_ok($ged, $read_only);
 
-    ok $xrefs{INDI}, 93;
-    ok $xrefs{FAM},  47;
-    ok $xrefs{SUBM}, 1;
+        ok $xrefs{INDI}, 93;
+        ok $xrefs{FAM},  47;
+        ok $xrefs{SUBM}, 1;
 
-    $ged->order;
-    validate_ok($ged, $read_only);
+        $ged->order;
+        validate_ok($ged, $read_only);
 
-    ok xrefs($ged->individuals), i(1 .. $inds);
-    ok rins ($ged->individuals),
-             join(" ", qw(2 3 4 5 6 8 29 55 63 82 7 9 10 25 11 12 16 20 24 13 14
-                          15 17 18 19 21 22 23 26 27 28 30 31 49 32 47 33 39 43
-                          48 34 35 36 37 38 40 41 42 44 45 46 50 53 51 54 52 56
-                          57 58 59 60 61 62 64 65 71 78 66 67 69 70 68 72 73 75
-                          74 76 77 79 80 81 83 84 85 86 87 88 89 90 91 92 140
-                          141));
-    ok xrefs($ged->families   ), i(1 .. $fams);
-    ok rins ($ged->families   ),
-             join(" ", qw(94 93 116 95 111 104 106 107 115 96 112 98 108 100 118
-                          99 132 113 114 97 136 102 119 121 139 126 127 128 138
-                          120 122 130 103 125 105 101 117 110 129 133 134 135
-                          109 137 131 123 124));
+        ok xrefs($ged->individuals), i(1 .. $inds);
+        ok rins ($ged->individuals),
+        join(" ", qw(2 3 4 5 6 8 29 55 63 82 7 9 10 25 11 12 16 20 24 13 14
+            15 17 18 19 21 22 23 26 27 28 30 31 49 32 47 33 39 43
+            48 34 35 36 37 38 40 41 42 44 45 46 50 53 51 54 52 56
+            57 58 59 60 61 62 64 65 71 78 66 67 69 70 68 72 73 75
+            74 76 77 79 80 81 83 84 85 86 87 88 89 90 91 92 140
+            141));
+        ok xrefs($ged->families   ), i(1 .. $fams);
+        ok rins ($ged->families   ),
+        join(" ", qw(94 93 116 95 111 104 106 107 115 96 112 98 108 100 118
+            99 132 113 114 97 136 102 119 121 139 126 127 128 138
+            120 122 130 103 125 105 101 117 110 129 133 134 135
+            109 137 131 123 124));
 
-    ok $ged->next_xref("I"), "I" . ($inds + 1);
-    ok $ged->next_xref("F"), "F" . ($fams + 1);
-    ok $ged->next_xref("S"), "S2";
+        ok $ged->next_xref("I"), "I" . ($inds + 1);
+        ok $ged->next_xref("F"), "F" . ($fams + 1);
+        ok $ged->next_xref("S"), "S2";
 
-    ok my $i31  = $ged->get_individual("Marion Stein");
-    ok my $famc = $i31->famc;
-    ok my $src  = $famc->source;
-    $src = $ged->get_source($src) unless ref $src;
-    ok $src->text, "Source text";
+        ok my $i31  = $ged->get_individual("Marion Stein");
+        ok my $famc = $i31->famc;
+        ok my $src  = $famc->source;
+        $src = $ged->get_source($src) unless ref $src;
+        ok $src->text, "Source text";
 
-    my ($ind) = $ged->get_individual("Elizabeth II");
-    ok $ind;
+        my ($ind) = $ged->get_individual("Elizabeth II");
+        ok $ind;
 
-    my %rin_relations =
-    (
-      ancestors   => "8 9 4 5 2 3",
-      brothers    => "",
-      children    => "12 16 20 24",
-      daughters   => "16",
-      descendents => "12 16 20 24 14 15 18 19 22 23",
-      father      => "8",
-      husband     => "11",
-      mother      => "9",
-      parents     => "8 9",
-      siblings    => "25",
-      sisters     => "25",
-      sons        => "12 20 24",
-      spouse      => "11",
-      wife        => "",
-    );
+        my %rin_relations = (
+            ancestors   => "8 9 4 5 2 3",
+            brothers    => "",
+            children    => "12 16 20 24",
+            daughters   => "16",
+            descendents => "12 16 20 24 14 15 18 19 22 23",
+            father      => "8",
+            husband     => "11",
+            mother      => "9",
+            parents     => "8 9",
+            siblings    => "25",
+            sisters     => "25",
+            sons        => "12 20 24",
+            spouse      => "11",
+            wife        => "",
+        );
 
-    ok rins($ind->$_()), $rin_relations{$_} for sort keys %rin_relations;
+        ok rins($ind->$_()), $rin_relations{$_} for sort keys %rin_relations;
 
-    my %xref1_relations =
-    (
-      ancestors   => "6 12 3 4 1 2",
-      brothers    => "",
-      children    => "16 17 18 19",
-      daughters   => "17",
-      descendents => "16 17 18 19 21 22 24 25 27 28",
-      father      => "6",
-      husband     => "15",
-      mother      => "12",
-      parents     => "6 12",
-      siblings    => "14",
-      sisters     => "14",
-      sons        => "16 18 19",
-      spouse      => "15",
-      wife        => "",
-    );
+        my %xref1_relations = (
+            ancestors   => "6 12 3 4 1 2",
+            brothers    => "",
+            children    => "16 17 18 19",
+            daughters   => "17",
+            descendents => "16 17 18 19 21 22 24 25 27 28",
+            father      => "6",
+            husband     => "15",
+            mother      => "12",
+            parents     => "6 12",
+            siblings    => "14",
+            sisters     => "14",
+            sons        => "16 18 19",
+            spouse      => "15",
+            wife        => "",
+        );
 
-    ok xrefs($ind->$_()), $xref1_relations{$_} for sort keys %xref1_relations;
+        ok xrefs($ind->$_()), $xref1_relations{$_}
+            for sort keys %xref1_relations;
 
-    my $ind_xref = $ind->{xref};
-    ok $ind_xref, "I13";
-    ok rins($ged->resolve_xref($ind_xref)), "10";
+        my $ind_xref = $ind->{xref};
+        ok $ind_xref, "I13";
+        ok rins($ged->resolve_xref($ind_xref)), "10";
 
-    %xrefs = $ged->renumber(xrefs => [$ind_xref]);
-    validate_ok($ged, $read_only);
+        %xrefs = $ged->renumber(xrefs => [$ind_xref]);
+        validate_ok($ged, $read_only);
 
-    $ged->$resolve();
-    validate_ok($ged, $read_only);
+        $ged->$resolve();
+        validate_ok($ged, $read_only);
 
-    ok $xrefs{INDI}, 93;
-    ok $xrefs{FAM},  47;
-    ok $xrefs{SUBM}, 1;
-    ok rins($ged->resolve_xref($ind_xref)), "17";
+        ok $xrefs{INDI}, 93;
+        ok $xrefs{FAM},  47;
+        ok $xrefs{SUBM}, 1;
+        ok rins($ged->resolve_xref($ind_xref)), "17";
 
-    ok xrefs($ged->individuals),
-             join(" ", qw(29 30 19 20 21 7 22 23 24 25 31 8 1 9 2 3 4 5 6 10 11
-                          12 13 14 15 16 17 18 26 27 28 32 33 34 35 36 37 38 39
-                          40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57
-                          58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75
-                          76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92
-                          93));
-    ok rins ($ged->individuals),
-             join(" ", qw(2 3 4 5 6 8 29 55 63 82 7 9 10 25 11 12 16 20 24 13 14
-                          15 17 18 19 21 22 23 26 27 28 30 31 49 32 47 33 39 43
-                          48 34 35 36 37 38 40 41 42 44 45 46 50 53 51 54 52 56
-                          57 58 59 60 61 62 64 65 71 78 66 67 69 70 68 72 73 75
-                          74 76 77 79 80 81 83 84 85 86 87 88 89 90 91 92 140
-                          141));
-    ok xrefs($ged->families),
-             join(" ", qw(14 46 47 10 15 16 17 18 19 2 11 1 3 4 5 6 7 8 9 12 13
-                          20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37
-                          38 39 40 41 42 43 44 45));
-    ok rins ($ged->families),
-             join(" ", qw(94 93 116 95 111 104 106 107 115 96 112 98 108 100 118
-                          99 132 113 114 97 136 102 119 121 139 126 127 128 138
-                          120 122 130 103 125 105 101 117 110 129 133 134 135
-                          109 137 131 123 124));
+        ok xrefs($ged->individuals),
+        join(" ", qw(29 30 19 20 21 7 22 23 24 25 31 8 1 9 2 3 4 5 6 10 11
+            12 13 14 15 16 17 18 26 27 28 32 33 34 35 36 37 38 39
+            40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57
+            58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75
+            76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92
+            93));
+        ok rins ($ged->individuals),
+        join(" ", qw(2 3 4 5 6 8 29 55 63 82 7 9 10 25 11 12 16 20 24 13 14
+            15 17 18 19 21 22 23 26 27 28 30 31 49 32 47 33 39 43
+            48 34 35 36 37 38 40 41 42 44 45 46 50 53 51 54 52 56
+            57 58 59 60 61 62 64 65 71 78 66 67 69 70 68 72 73 75
+            74 76 77 79 80 81 83 84 85 86 87 88 89 90 91 92 140
+            141));
+        ok xrefs($ged->families),
+        join(" ", qw(14 46 47 10 15 16 17 18 19 2 11 1 3 4 5 6 7 8 9 12 13
+            20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37
+            38 39 40 41 42 43 44 45));
+        ok rins ($ged->families),
+        join(" ", qw(94 93 116 95 111 104 106 107 115 96 112 98 108 100 118
+            99 132 113 114 97 136 102 119 121 139 126 127 128 138
+            120 122 130 103 125 105 101 117 110 129 133 134 135
+            109 137 131 123 124));
 
-    ok $ged->next_xref("I"), "I" . ($inds + 1);
-    ok $ged->next_xref("F"), "F" . ($fams + 1);
-    ok $ged->next_xref("S"), "S2";
+        ok $ged->next_xref("I"), "I" . ($inds + 1);
+        ok $ged->next_xref("F"), "F" . ($fams + 1);
+        ok $ged->next_xref("S"), "S2";
 
-    ok rins($ind->$_()), $rin_relations{$_} for sort keys %rin_relations;
+        ok rins($ind->$_()), $rin_relations{$_} for sort keys %rin_relations;
 
-    my %xref2_relations =
-    (
-      ancestors   => "7 8 19 20 29 30",
-      brothers    => "",
-      children    => "3 4 5 6",
-      daughters   => "4",
-      descendents => "3 4 5 6 11 12 14 15 17 18",
-      father      => "7",
-      husband     => "2",
-      mother      => "8",
-      parents     => "7 8",
-      siblings    => "9",
-      sisters     => "9",
-      sons        => "3 5 6",
-      spouse      => "2",
-      wife        => "",
-    );
+        my %xref2_relations = (
+            ancestors   => "7 8 19 20 29 30",
+            brothers    => "",
+            children    => "3 4 5 6",
+            daughters   => "4",
+            descendents => "3 4 5 6 11 12 14 15 17 18",
+            father      => "7",
+            husband     => "2",
+            mother      => "8",
+            parents     => "7 8",
+            siblings    => "9",
+            sisters     => "9",
+            sons        => "3 5 6",
+            spouse      => "2",
+            wife        => "",
+        );
 
-    ok xrefs($ind->$_()), $xref2_relations{$_} for sort keys %xref2_relations;
+        ok xrefs($ind->$_()), $xref2_relations{$_}
+        for sort keys %xref2_relations;
 
-    my %individuals =
-    (
-      "B1 C1" => [ 82 ],                                           # exact match
-      "B2 C2" => [ 83, 84, 85 ],                           # use word boundaries
-      "B3 C3" => [ 86, 87, 88, 89 ],                            # match anywhere
-      "B3 c3" => [ 86, 87, 88, 89 ],                  # match anywhere, any case
-      "B4 C4" => [ 90, 91 ],                                # match in any order
-      "B4 c4" => [ 90, 91 ],      # match in any order, any case (order correct)
-      "c4 B4" => [ 90, 91 ],     # match in any order, any case (order reversed)
-    );
+        my %individuals = (
+            "B1 C1" => [82],                                       # exact match
+            "B2 C2" => [83, 84, 85],                       # use word boundaries
+            "B3 C3" => [86, 87, 88, 89],                        # match anywhere
+            "B3 c3" => [86, 87, 88, 89],              # match anywhere, any case
+            "B4 C4" => [90, 91],                            # match in any order
+            "B4 c4" => [90, 91],  # match in any order, any case (order correct)
+            "c4 B4" => [90, 91], # match in any order, any case (order reversed)
+        );
 
-    ok xrefs($ged->get_individual($_)), i(@{$individuals{$_}})
-      for sort keys %individuals;
+        ok xrefs($ged->get_individual($_)), i(@{$individuals{$_}})
+        for sort keys %individuals;
 
-    my $i = $ged->get_individual("I82");
-    ok $i->note, "Line 1\nLine 2\nLine 3\nLine 4";
-    ok scalar $i->get_value("birth age"), 0;
+        my $i = $ged->get_individual("I82");
+        ok $i->note, "Line 1\nLine 2\nLine 3\nLine 4";
+        ok scalar $i->get_value("birth age"), 0;
 
 
-       $i = $ged->get_individual("I83");
-    my $n = $i->resolve($i->note)->full_value;
-    ok $n, "Line 1\nLine 2";
-    validate_ok($ged, $read_only);
+        $i = $ged->get_individual("I83");
+        my $n = $i->resolve($i->note)->full_value;
+        ok $n, "Line 1\nLine 2";
+        validate_ok($ged, $read_only);
 
-    my $f1 = $gedcom_file . $$;
-    $ged->write($f1);
-    validate_ok($ged, $read_only);
-    ok -e $f1;
+        my $f1 = $gedcom_file . $$;
+        $ged->write($f1);
+        validate_ok($ged, $read_only);
+        ok -e $f1;
 
-    # check the gedcom file is correct
-    ok open F1, $f1;
-    ok scalar <F1>, $_ for @Ged_data;
-    ok eof;
-    ok close F1;
-    ok unlink $f1;
-  };
+        # check the gedcom file is correct
+        ok open F1, $f1;
+        ok scalar <F1>, $_ for @Ged_data;
+        ok eof;
+        ok close F1;
+        ok unlink $f1;
+    };
 
-  my $tests = 1531;
-  my $grammar;
-  if ($grammar = delete $args{create_grammar})
-  {
-    Test::plan tests => $tests + 3;
-    system ($^X, ((-d "t") ? "." : "..") . "/parse_grammar", $grammar, 0.1);
-    ok $?, 0;
-    ok -e "lib/Gedcom/Grammar_0_1.pm";
-    $args{grammar_version} = 0.1;
-  }
-  else
-  {
-    Test::plan tests => $tests;
-  }
+    my $tests = 1531;
+    my $grammar;
+    if ($grammar = delete $args{create_grammar}) {
+        Test::plan tests => $tests + 3;
+        system ($^X, ((-d "t") ? "." : "..") . "/parse_grammar", $grammar, 0.1);
+        ok $?, 0;
+        ok -e "lib/Gedcom/Grammar_0_1.pm";
+        $args{grammar_version} = 0.1;
+    } else {
+        Test::plan tests => $tests;
+    }
 
-  my $g = _new_gedcom( \%args );
-  $basic_test->( $g, %args );
+    my $g = _new_gedcom(\%args);
+    $basic_test->($g, %args);
 
-  if ($grammar)
-  {
-    ok unlink ((-d "t") ? "." : "..") . "/lib/Gedcom/Grammar_0_1.pm";
-  }
+    if ($grammar) {
+        ok unlink ((-d "t") ? "." : "..") . "/lib/Gedcom/Grammar_0_1.pm";
+    }
 }
 
 sub _new_gedcom {
-  my $args = shift;
-  $args->{gedcom_file} = (-d "t" ? "" : "../") . "royal.ged"
+    my $args = shift;
+    $args->{gedcom_file} = (-d "t" ? "" : "../") . "royal.ged"
     unless defined $args->{gedcom_file};
-  $args->{read_only} = 1
+    $args->{read_only} = 1
     unless defined $args->{read_only};
 
-  my $ged = Gedcom->new(%$args);
+    my $ged = Gedcom->new(%$args);
 
-  return $ged;
+    $ged
 }
 
 __DATA__

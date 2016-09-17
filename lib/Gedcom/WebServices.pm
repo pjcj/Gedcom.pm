@@ -16,27 +16,23 @@ use Apache::Constants qw( OK DECLINED );
 use Apache::Request;
 use Apache::URI;
 
-sub _new
-{
+sub _new {
     my $class = shift;
     my $r     = shift;
 
-    my $self =
-    {
+    my $self = {
         r => $r ? Apache::Request->instance($r) : $r,
         @_
     };
     bless $self, $class
 }
 
-sub _set_handlers
-{
+sub _set_handlers {
     my ($handlers) = @_;
 
     my $handler_text;
 
-    for my $h (@{$handlers})
-    {
+    for my $h (@{$handlers}) {
         # print STDERR "creating $type handler for $h\n";
         $handler_text .= _create_handler($h);
     }
@@ -45,20 +41,16 @@ sub _set_handlers
     $handler_text
 }
 
-sub _create_handler
-{
+sub _create_handler {
     my ($h) = @_;
     my $handler = "___$h";
-    unless (defined &$handler)
-    {
+    unless (defined &$handler) {
         no strict "refs";
-        *$handler = sub ($$)
-        {
+        *$handler = sub ($$) {
             my ($class, $r) = @_;
             my $self;
             my $vars;
-            eval
-            {
+            eval {
                 my $hn = "__$h";
                 $self = $class->_new($r, handler => $hn);
                 $self->$hn;
@@ -70,8 +62,7 @@ sub _create_handler
         };
     }
     my $l = <<"EOE";
-    \$Location{"/$h"} =
-    {
+    \$Location{"/$h"} = {
         SetHandler  => "perl-script",
         PerlHandler => "Gedcom::WebServices->___$h",
     };
@@ -79,14 +70,12 @@ EOE
     $l
 }
 
-sub _parse_uri
-{
+sub _parse_uri {
     my $r      = shift;
     my $uri    = $r->parsed_uri;
     my $path   = $uri->path;
     # print STDERR "parse path $path\n";
-    if ($path =~ s!^/ws/(plain|json|xml)/!!)
-    {
+    if ($path =~ s!^/ws/(plain|json|xml)/!!) {
         $r->notes(PATH => $path);
         # print STDERR "parse new path [$1]\n";
         $r->uri("/$1");
@@ -94,15 +83,13 @@ sub _parse_uri
     DECLINED
 }
 
-sub _error
-{
+sub _error {
     my $self = shift;
     my ($msg) = @_;
     print $msg;
 }
 
-sub _process
-{
+sub _process {
     my $self = shift;
     my ($type) = @_;
 
@@ -122,110 +109,71 @@ sub _process
     # print STDERR "params @params\n";
 
     my @ret;
-    if (@params)
-    {
+    if (@params) {
         my $xref = shift @params;
         my $rec = $ged->resolve_xref($xref) || $ged->resolve_xref(uc $xref) ||
                   die "Can't get record [$xref]\n";
 
-        if (@params)
-        {
+        if (@params) {
             my ($action, @parms) = @params;
             die "Invalid action [$action]\n" unless $rec->can($action);
 
-            if ($Gedcom::Funcs{lc $action} && @parms)
-            {
+            if ($Gedcom::Funcs{lc $action} && @parms) {
                 # print STDERR "Calling get_value(@params)\n";
                 @ret = $rec->get_value(@params);
-            }
-            else
-            {
+            } else {
                 # print STDERR "Calling $action(@params)\n";
                 @ret = $rec->$action(@parms);
             }
-        }
-        else
-        {
-            if ($type eq "plain")
-            {
+        } else {
+            if ($type eq "plain") {
                 $rec->write(\*STDOUT);
-            }
-            elsif ($type eq "xml")
-            {
+            } elsif ($type eq "xml") {
                 my $r = $rec->hash;
                 $rec->write_xml(\*STDOUT);
-            }
-            elsif ($type eq "json")
-            {
+            } elsif ($type eq "json") {
                 my $r = $rec->hash;
                 # use DDS; print STDERR Dump $r;
                 print JSON->new->objToJson({ rec => $r });
-            }
-            else
-            {
+            } else {
                 die "unrecognised type: $type";
             }
         }
-    }
-    elsif (my $search = $self->{r}->param("search"))
-    {
+    } elsif (my $search = $self->{r}->param("search")) {
         @ret = $ged->get_individual($search);
-    }
-    else
-    {
+    } else {
         die "No xref or parameters specified\n";
     }
 
     # print @ret . "\n";
     # use Data::Dumper; print Dumper \@ret;
-    for (@ret)
-    {
-        if (ref)
-        {
-            if (defined $_->{xref})
-            {
+    for (@ret) {
+        if (ref) {
+            if (defined $_->{xref}) {
                 print "/ws/$type/$file/", $_->xref, "\n";
-            }
-            else
-            {
-                if ($type eq "plain")
-                {
+            } else {
+                if ($type eq "plain") {
                     $_->write(\*STDOUT, scalar @params);
-                }
-                elsif ($type eq "xml")
-                {
+                } elsif ($type eq "xml") {
                     $_->write_xml(\*STDOUT);
-                }
-                elsif ($type eq "json")
-                {
+                } elsif ($type eq "json") {
                     my $r = $_->hash;
                     # use DDS; print STDERR Dump $r;
                     print JSON->new->objToJson($r);
-                }
-                else
-                {
+                } else {
                     die "unrecognised type: $type";
                 }
             }
-        }
-        else
-        {
+        } else {
             my $result = @params ? $params[-1] : "result";
-            if ($type eq "plain")
-            {
+            if ($type eq "plain") {
                 print "$_\n";
-            }
-            elsif ($type eq "xml")
-            {
+            } elsif ($type eq "xml") {
                 $result = uc $result;
                 print "<$result>$_</$result>\n";
-            }
-            elsif ($type eq "json")
-            {
+            } elsif ($type eq "json") {
                 print JSON->new->objToJson({ $result => $_ });
-            }
-            else
-            {
+            } else {
                 die "unrecognised type: $type";
             }
         }
@@ -233,20 +181,17 @@ sub _process
     print "\n" unless @ret;
 }
 
-sub __plain
-{
+sub __plain {
     my $self = shift;
     $self->_process("plain");
 }
 
-sub __xml
-{
+sub __xml {
     my $self = shift;
     $self->_process("xml");
 }
 
-sub __json
-{
+sub __json {
     my $self = shift;
     require JSON;
     $self->_process("json");

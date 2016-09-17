@@ -6,98 +6,98 @@ use Test::More tests => 126;
 use Gedcom;
 
 {
-  my $gedcom_file = "gedcompm.ged";
+    my $gedcom_file = "gedcompm.ged";
 
-  my $ged = Gedcom->new;
-  isa_ok( $ged, 'Gedcom' );
+    my $ged = Gedcom->new;
+    isa_ok( $ged, 'Gedcom' );
 
-  ok my $i1 = $ged->add_individual("O5");
-  ok $i1->add("name", "Fred /Bloggs/");
-  ok $i1->add("birth date", "20 Dec 1775");
-  ok $i1->add("birth", ["date", 2], "21 Dec 1775");
-  ok $i1->add(["birth", 2], "date", "22 Dec 1775");
-  ok $i1->add("sex", "M");
+    ok my $i1 = $ged->add_individual("O5");
+    ok $i1->add("name", "Fred /Bloggs/");
+    ok $i1->add("birth date", "20 Dec 1775");
+    ok $i1->add("birth", ["date", 2], "21 Dec 1775");
+    ok $i1->add(["birth", 2], "date", "22 Dec 1775");
+    ok $i1->add("sex", "M");
 
-  ok my $ix = $ged->add_individual("O");
-  ok $ix->add("name", "John /Smith/");
-  ok $ix->add("christening date", "15 July 1954");
-  ok $ix->add("christening date", "25 July 1954");
-  ok $ix->add("sex", "F");
+    ok my $ix = $ged->add_individual("O");
+    ok $ix->add("name", "John /Smith/");
+    ok $ix->add("christening date", "15 July 1954");
+    ok $ix->add("christening date", "25 July 1954");
+    ok $ix->add("sex", "F");
 
-  ok my $i2 = $ged->add_individual;
-  ok $i2->add("name", "Betty /Bloggs/");
-  ok $i2->add("christening date", "11 May 1777");
-  ok $i2->add("sex", "F");
+    ok my $i2 = $ged->add_individual;
+    ok $i2->add("name", "Betty /Bloggs/");
+    ok $i2->add("christening date", "11 May 1777");
+    ok $i2->add("sex", "F");
 
-  ok my $i3 = $ged->add_individual;
-  ok $i3->add("name", "Jane /Bloggs/");
+    ok my $i3 = $ged->add_individual;
+    ok $i3->add("name", "Jane /Bloggs/");
 
-  ok my $i4 = $ged->add_individual;
-  ok $i4->add("name", "Joe /Bloggs/");
-  ok $i4->add("birth date", "2 Feb 1802");
-  ok $i4->set("birth date", "3 Feb 1802");
-  ok $i4->add("sex", "M");
+    ok my $i4 = $ged->add_individual;
+    ok $i4->add("name", "Joe /Bloggs/");
+    ok $i4->add("birth date", "2 Feb 1802");
+    ok $i4->set("birth date", "3 Feb 1802");
+    ok $i4->add("sex", "M");
 
-  ok my $f1 = $ged->add_family;
-  ok $f1->add_husband($i1);
-  ok $f1->add_wife($i2);
-  ok $f1->add_child($i3);
-  ok $f1->add_child($i4);
+    ok my $f1 = $ged->add_family;
+    ok $f1->add_husband($i1);
+    ok $f1->add_wife($i2);
+    ok $f1->add_child($i3);
+    ok $f1->add_child($i4);
 
-  ok my $n1 = $ged->add_note("First line");
-  ok $n1->add("cont", "This is a note.");
-  ok $n1->add("cont", "Please take notice.");
-  ok $n1->add("conc", "There's more.  O");
-  ok $n1->add("conc", "k, that's it.");
+    ok my $n1 = $ged->add_note("First line");
+    ok $n1->add("cont", "This is a note.");
+    ok $n1->add("cont", "Please take notice.");
+    ok $n1->add("conc", "There's more.  O");
+    ok $n1->add("conc", "k, that's it.");
 
-  ok my $n2 = $ged->add_note({ xref => "N100" }, "Note 2");
+    ok my $n2 = $ged->add_note({ xref => "N100" }, "Note 2");
 
-  ok $i4->add("note", "This is a note on one line");
-  ok $i4->add("note", $n2);
+    ok $i4->add("note", "This is a note on one line");
+    ok $i4->add("note", $n2);
 
-  ok $i2->delete;
+    ok $i2->delete;
 
-  ok my $i5 = $ged->add_individual;
-  ok $i5->add("name", "Susan /Bloggs/");
-  ok $i5->add("christening date", "11 May 1778");
-  ok $i5->add("sex", "F");
+    ok my $i5 = $ged->add_individual;
+    ok $i5->add("name", "Susan /Bloggs/");
+    ok $i5->add("christening date", "11 May 1778");
+    ok $i5->add("sex", "F");
 
-  my $obj1 = $i5->add("OBJE", 12);
-  my $obj2 = $i5->add("OBJE");
-  $obj2->add("FORM", "qqq");
-  $obj2->add("FILE", "rrr");
+    my $obj1 = $i5->add("OBJE", 12);
+    my $obj2 = $i5->add("OBJE");
+    $obj2->add("FORM", "qqq");
+    $obj2->add("FILE", "rrr");
 
-  ok $f1->add_wife($i5);
+    ok $f1->add_wife($i5);
 
-  ok $f1->delete;
+    ok $f1->delete;
 
-  ok $ged->renumber;
-  ok $ged->order;
+    ok $ged->renumber;
+    ok $ged->order;
 
-  $ged->write($gedcom_file);
+    $ged->write($gedcom_file);
 
-  {
-    my $w = 0;
-    local $SIG{ __WARN__ } = sub { $w++ };
+    {
+        my $w = 0;
+        local $SIG{ __WARN__ } = sub { $w++ };
 
-    ok !$ged->validate, 'Gedcom file is not valid';
-    is $w, 2, '2 warnings thrown';
-  }
+        ok !$ged->validate, 'Gedcom file is not valid';
+        is $w, 2, '2 warnings thrown';
+    }
 
-  ok -e $gedcom_file, "$gedcom_file exists";
+    ok -e $gedcom_file, "$gedcom_file exists";
 
-  # check the gedcom file is correct
-  ok open F1, $gedcom_file;
-  my @ged_data = <DATA>;
-  for (@ged_data)
-  {
-    my $f = <F1>;
-    is $f, $_, "line $. matches" unless m{Ignore};
-  }
+    # check the gedcom file is correct
+    ok open F1, $gedcom_file;
+    my @ged_data = <DATA>;
+    for (@ged_data)
+    {
+        my $f = <F1>;
+        is $f, $_, "line $. matches" unless m{Ignore};
+    }
 
-  ok eof, 'No more lines to compare';
-  ok close F1;
-  ok unlink $gedcom_file;
+    ok eof, 'No more lines to compare';
+    ok close F1;
+    ok unlink $gedcom_file;
 }
 
 __DATA__

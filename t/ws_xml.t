@@ -13,25 +13,21 @@ use strict;
 
 use lib -d "t" ? "t" : "..";
 
-BEGIN
-{
-    unless ($ENV{WEBSERVICES_TESTING})
-    {
+BEGIN {
+    unless ($ENV{WEBSERVICES_TESTING}) {
         eval "use Test::More skip_all => " .
              "q[\$WEBSERVICES_TESTING is not set]";
 
     }
 
-    eval
-    q{
+    eval q[
         use 5.006;
         use Apache::Test ":withtestmore";
         use Apache::TestUtil;
         use LWP::Simple;
-    };
+    ];
 
-    if (my $e = $@)
-    {
+    if (my $e = $@) {
         eval "use Test::More skip_all => q[mod_perl not fully installed]";
         #eval "use Test::More skip_all => q[mod_perl not fully installed [$e]]";
     }
@@ -50,8 +46,7 @@ my $root = "http://$hostport$ws";
 sub ws { join "", map "$ws/$_\n",                  @_ }
 sub rs { join "", map {chomp(my $t = $_); "$t\n" } @_ }
 
-my @tests =
-(
+my @tests = (
     [ "?search=Elizabeth_II", ws "I9"                                    ],
     [ "/i9/name",             rs <<'EOR'                                 ],
 <NAME>Elizabeth_II Alexandra Mary /Windsor/</NAME>
@@ -88,8 +83,7 @@ EOR
 
 plan tests => scalar @tests + 2;
 
-for (@tests)
-{
+for (@tests) {
     my $q = $root . $_->[0];
     # t_debug("-- $q");
     # t_debug("++ ", get($q));

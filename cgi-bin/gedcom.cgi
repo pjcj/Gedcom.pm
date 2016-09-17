@@ -23,14 +23,13 @@ my $op = param("op");
 
 eval { Gedcom::CGI->$op() };
 
-if (my $error = $@)
-{
-  print header,
-        start_html,
-        h1("Gedcom error"),
-        "Unable to run $op.",
-        pre($error),
-        end_html;
+if (my $error = $@) {
+    print header,
+          start_html,
+          h1("Gedcom error"),
+          "Unable to run $op.",
+          pre($error),
+          end_html;
 }
 
 __END__

@@ -23,34 +23,32 @@ $VERSION = "1.19";
 
 $SIG{__WARN__} = sub { print STDERR "\n@_" };
 
-sub main
-{
-  my ($g1, $g2) = @ARGV;
+sub main {
+    my ($g1, $g2) = @ARGV;
 
-  $| = 1;
+    $| = 1;
 
-  print "reading $g1 ...";
-  my $ged1 = Gedcom->new
-  (
-    gedcom_file     => $g1,
-    callback        => sub { print "." },
-    read_only       => 0,
-  );
+    print "reading $g1 ...";
+    my $ged1 = Gedcom->new(
+        gedcom_file => $g1,
+        callback    => sub { print "." },
+        read_only   => 0,
+    );
 
-  print "\nreading $g2 ...";
-  my $ged2 = Gedcom->new
-  (
-    gedcom_file     => $g2,
-    callback        => sub { print "." },
-    read_only       => 0,
-  );
-  print "\n";
+    print "\nreading $g2 ...";
+    my $ged2 = Gedcom->new(
+        gedcom_file => $g2,
+        callback    => sub { print "." },
+        read_only   => 0,
+    );
+    print "\n";
 
-  # my $comparison = $ged1->{record}->compare($ged2->{record});
-  my $comparison = $ged1->get_individual("I1")->compare($ged2->get_individual("I0003"));
+    # my $comparison = $ged1->{record}->compare($ged2->{record});
+    my $comparison = $ged1->get_individual("I1")
+                          ->compare($ged2->get_individual("I0003"));
 
-  $comparison->print;
-  # print Dumper $comparison;
+    $comparison->print;
+    # print Dumper $comparison;
 }
 
 main

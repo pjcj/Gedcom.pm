@@ -22,38 +22,38 @@ $VERSION = "1.19";
 
 $SIG{__WARN__} = sub { print "\n@_" };
 
-sub main()
-{
-  die "usage: $0 grammar_file [version]\n" unless @ARGV == 1 || @ARGV == 2;
-  my ($grammar_file, $version) = @ARGV;
-  ($version) = $grammar_file =~ /(\d+(\.\d+)*)/ unless defined $version;
-  die "version must be a gedcom version number\n" unless $version;
-  $| = 1;
-  print "reading $grammar_file ...";
-  my $grammar = Gedcom::Grammar->new(file     => $grammar_file,
-                                     version  => $version,
-                                     callback => sub { print "." });
+sub main {
+    die "usage: $0 grammar_file [version]\n" unless @ARGV == 1 || @ARGV == 2;
+    my ($grammar_file, $version) = @ARGV;
+    ($version) = $grammar_file =~ /(\d+(\.\d+)*)/ unless defined $version;
+    die "version must be a gedcom version number\n" unless $version;
+    $| = 1;
+    print "reading $grammar_file ...";
+    my $grammar = Gedcom::Grammar->new(
+        file     => $grammar_file,
+        version  => $version,
+        callback => sub { print "." }
+    );
 
-  delete $grammar->{callback};
-  delete $grammar->{stored_record};
+    delete $grammar->{callback};
+    delete $grammar->{stored_record};
 
-  my $me = "Unknown user";
-  my $login = $me;
-  if ($login = getlogin || (getpwuid($<))[0] || $ENV{USER} || $ENV{LOGIN})
-  {
-    my $name;
-    eval { $name = (getpwnam($login))[6] };
-    $me = $name || $login;
-  }
-  my $date = localtime;
+    my $me = "Unknown user";
+    my $login = $me;
+    if ($login = getlogin || (getpwuid($<))[0] || $ENV{USER} || $ENV{LOGIN}) {
+        my $name;
+        eval { $name = (getpwnam($login))[6] };
+        $me = $name || $login;
+    }
+    my $date = localtime;
 
-  (my $v = $version) =~ tr/./_/;
-  my $g   = "Grammar_$v";
-  my $gpm = "lib/Gedcom/$g.pm";
-  print "\nwriting $gpm ...\n";
-  open(G, ">$gpm") or die "Can't open $gpm: $!";
+    (my $v = $version) =~ tr/./_/;
+    my $g   = "Grammar_$v";
+    my $gpm = "lib/Gedcom/$g.pm";
+    print "\nwriting $gpm ...\n";
+    open(G, ">$gpm") or die "Can't open $gpm: $!";
 
-  print G <<EOT;
+    print G <<EOT;
 # Copyright 1998-2013, Paul Johnson (paul\@pjcj.net)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
@@ -83,13 +83,13 @@ use vars qw(\$VERSION \$grammar);
 
 EOT
 
-  my $d = Data::Dumper->new([$grammar], ["grammar"]);
-  $d->Indent(1)->Purity(1)->Quotekeys(0);
-  my $dv = eval $Data::Dumper::VERSION;
-  $d->Sortkeys(1) if $dv >= 2.12;
-  $d->Useperl(1)  if $dv >= 2.12;         # Because of a bug.
-  print G $d->Dump;
-  close G or die "Can't open $gpm: $!";
+    my $d = Data::Dumper->new([$grammar], ["grammar"]);
+    $d->Indent(1)->Purity(1)->Quotekeys(0);
+    my $dv = eval $Data::Dumper::VERSION;
+    $d->Sortkeys(1) if $dv >= 2.12;
+    $d->Useperl(1)  if $dv >= 2.12;         # Because of a bug.
+    print G $d->Dump;
+    close G or die "Can't open $gpm: $!";
 }
 
-main;
+main

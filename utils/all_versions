@@ -12,15 +12,13 @@ use warnings;
 
 use Getopt::Long;
 
-my $Options =
-{
+my $Options = {
     dry_run        => 0,
     ignore_failure => 0,
     version        => [],
 };
 
-sub get_options
-{
+sub get_options {
     die "Bad option" unless
     GetOptions($Options,  # Store the options in the Options hash.
                qw(
@@ -28,8 +26,7 @@ sub get_options
                    ignore_failure!
                    version=s
                  ));
-    $Options->{version} =
-        [ "5.6.1",
+    $Options->{version} = [ "5.6.1",
           map { ($_, "$_-thr") }
               qw( 5.6.2
                   5.8.0 5.8.1 5.8.2 5.8.3 5.8.4 5.8.5 5.8.6 5.8.7 5.8.8 5.8.9
@@ -39,8 +36,7 @@ sub get_options
         [ grep eval { !system "perl$_ -v" }, @{$Options->{version}} ];
 }
 
-sub sys
-{
+sub sys {
     my ($command) = @_;
     print "$command\n";
     return if $Options->{dry_run};
@@ -51,8 +47,7 @@ sub sys
 get_options;
 my $command = "@ARGV" or die "Usage: $0 [-v version] command\n";
 
-for my $v (@{$Options->{version}})
-{
+for my $v (@{$Options->{version}}) {
     my $perl = "perl$v";
     sys "rm -rf cover_db";
     sys "$perl Makefile.PL";

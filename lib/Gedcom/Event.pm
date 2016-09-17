@@ -19,24 +19,6 @@ use vars qw($VERSION @ISA);
 $VERSION = "1.19";
 @ISA     = qw( Gedcom::Record );
 
-# sub type
-# {
-#   my $self = shift;
-#   $self->tag_value("TYPE")
-# }
-
-# sub date
-# {
-#   my $self = shift;
-#   $self->tag_value("DATE")
-# }
-
-# sub place
-# {
-#   my $self = shift;
-#   $self->tag_value("PLAC")
-# }
-
 1;
 
 __END__

@@ -13,26 +13,22 @@ use strict;
 
 use lib -d "t" ? "t" : "..";
 
-BEGIN
-{
-    unless ($ENV{WEBSERVICES_TESTING})
-    {
+BEGIN {
+    unless ($ENV{WEBSERVICES_TESTING}) {
         eval "use Test::More skip_all => " .
              "q[\$WEBSERVICES_TESTING is not set]";
 
     }
 
-    eval
-    q{
+    eval q[
         use 5.006;
         use Apache::Test ":withtestmore";
         use Apache::TestUtil;
         use LWP::Simple;
         use Test::JSON;
-    };
+    ];
 
-    if (my $e = $@)
-    {
+    if (my $e = $@) {
         eval "use Test::More skip_all => " .
              "q[mod_perl or Test::JSON not fully installed]";
              # "q[mod_perl or Test::JSON not fully installed [$e]]";
@@ -42,7 +38,7 @@ BEGIN
 
 use Test::More;
 
-Apache::TestRequest::module('default');
+Apache::TestRequest::module("default");
 
 my $config   = Apache::Test::config();
 my $hostport = Apache::TestRequest::hostport($config) || "";
@@ -53,8 +49,7 @@ my $root = "http://$hostport$ws";
 sub ws { join "", map "$ws/$_\n",                  @_ }
 sub rs { my $r = join "", map {chomp(my $t = $_); "$t\n" } @_; chomp $r; $r }
 
-my @tests =
-(
+my @tests = (
     [ "?search=Elizabeth_II", ws "I9"                                    ],
     [ "/i9/name",             rs <<'EOR'                                 ],
 {"name":"Elizabeth_II Alexandra Mary /Windsor/"}
@@ -77,8 +72,7 @@ EOR
 
 plan tests => scalar @tests + 2 + grep substr($_->[1], 0, 1) eq "{", @tests;
 
-for (@tests)
-{
+for (@tests) {
     my $q = $root . $_->[0];
     # t_debug("-- $q");
     # t_debug("++ ", get($q));
