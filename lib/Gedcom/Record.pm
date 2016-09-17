@@ -445,6 +445,10 @@ sub validate_syntax
   my $file = $self->{gedcom}{record}{file};
   my $here = "$file:$self->{line}: $self->{tag}" .
              (defined $self->{xref} ? " $self->{xref}" : "");
+  # print "$self->{line}: "; $self->print;
+  $ok = 0, warn "$here: $self->{tag} Can't contain a value ($self->{value})\n"
+    if defined $self->{value} && length $self->{value} &&
+       !defined $grammar->{value};
   my %counts;
   for my $record (@{$self->_items})
   {
