@@ -76,7 +76,7 @@ sub _compare
       {
           my $err;
           my $d = DateCalc($v1, $v2, \$err, 1);
-          print "**** [$v1] [$v2] $d\n";
+          # print "**** [$v1] [$v2] $d\n";
           my @d = split ":", $d;
           $self->{value_match} = grep (!($_ + 0), @d) / @d;
       }
