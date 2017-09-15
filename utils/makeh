@@ -13,7 +13,7 @@ use warnings;
 my $Command = {
     set_version => sub {
         my ($command, $version, $date, @files) = @_;
-        local ($^I, @ARGV) = (".bak", @files);
+        local ($^I, @ARGV) = ("", @files);
         while (<>) {
             s/(^\s*(?:our\s+)?\$VERSION = ")\d+\.\d+(";)/$1$version$2/;
             s/(Version )\d+\.\d+( - ).*/$1$version$2$date/;
