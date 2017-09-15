@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# . ./utils/setup
+
+tidy () { echo -n "$1" | perl -naF: -e 'print join ":", grep !$s{$_}++ && -e, @F'; }
+gedcom_home=$PWD
+PATH=$(tidy "$gedcom_home/utils:$PATH")
+export PATH
+
+if [ ! -z "$ZSH_VERSION" ]; then
+    _dev() {
+        # shellcheck disable=SC2034
+        # shellcheck disable=SC2207
+        reply=($(utils/dev options))
+    }
+    compctl -K _dev dev
+fi
