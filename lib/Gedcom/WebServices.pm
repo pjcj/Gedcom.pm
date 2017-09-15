@@ -1,4 +1,4 @@
-# Copyright 2005-2013, Paul Johnson (paul@pjcj.net)
+# Copyright 2005-2017, Paul Johnson (paul@pjcj.net)
 
 require 5.006;
 
@@ -376,7 +376,7 @@ Version 1.20 - 17th September 2016
 
 =head1 LICENCE
 
-Copyright 2005-2013, Paul Johnson (paul@pjcj.net)
+Copyright 2005-2017, Paul Johnson (paul@pjcj.net)
 
 This software is free.  It is licensed under the same terms as Perl itself.
 
