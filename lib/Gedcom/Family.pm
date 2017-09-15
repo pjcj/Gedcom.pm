@@ -101,7 +101,7 @@ __END__
 
 Gedcom::Family - a module to manipulate Gedcom families
 
-Version 1.20 - 17th September 2017
+Version 1.20 - 17th September 2016
 
 =head1 SYNOPSIS
 

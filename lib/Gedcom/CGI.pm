@@ -130,7 +130,7 @@ __END__
 
 Gedcom::CGI - Basic CGI routines for Gedcom.pm
 
-Version 1.20 - 17th September 2017
+Version 1.20 - 17th September 2016
 
 =head1 SYNOPSIS
 

@@ -205,7 +205,7 @@ __END__
 
 Gedcom::WebServices - Basic web service routines for Gedcom.pm
 
-Version 1.20 - 17th September 2017
+Version 1.20 - 17th September 2016
 
 =head1 SYNOPSIS
 
@@ -372,7 +372,7 @@ See the BUGS file.  And the TODO file.
 
 =head1 VERSION
 
-Version 1.20 - 17th September 2017
+Version 1.20 - 17th September 2016
 
 =head1 LICENCE
 
