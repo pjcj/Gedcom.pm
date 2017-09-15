@@ -169,7 +169,7 @@ sub main {
         print "\nwriting xml...";
         $ged->write_xml("$gedcom_file.xml");
     }
-    if (1) {
+    if (0) {
         print "\nvalidating...";
         my %x;
         my $vcb = sub {
@@ -193,7 +193,7 @@ sub main {
     if (0) {
         print "\nnormalising dates...";
         $ged->normalise_dates("%E %b %Y");
-#   $ged->normalise_dates;
+        # $ged->normalise_dates;
         print "\nrenumbering...";
         $ged->renumber;
         print "\nordering...";
@@ -220,10 +220,19 @@ sub main {
             }
         }
     }
-    if (1) {
+    if (0) {
         my $i = $ged->get_individual("I93");
         my $prim = $i->get_value("_PRIM");
         print "_PRIM: $prim\n";
+    }
+    if (1) {
+        my $from = $ged->get_individual("I14");
+        my $to   = $ged->get_individual("I1");
+        my $rel  = $from->relationship($to);
+        print "\n", $to->name, " is the $rel of ", $from->name, "\n";
+
+        my $i1 = $ged->get_individual("I82");
+        my $r1 = $i1->relationship($to);
     }
 }
 

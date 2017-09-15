@@ -293,7 +293,141 @@ sub fams {
     wantarray ? @a : $a[0]
 }
 
-1;
+# FIXME: currently only finds ancestors
+# TODO: find in-laws
+# See http://www.myrelative.com/html/relationship.html for inspiration
+
+sub relationship {
+    my $self = shift;
+    my ($other) = @_;
+
+    my @ancestors = $self->ancestors() or return;
+
+    my $sex = $self->sex;
+    die $self->name, ": unknown sex\n" if $sex eq "U";
+
+    for my $person1 (@ancestors) {
+        if ($person1 eq $other) {
+            # Direct ancestor
+            my $steps = $self->_stepsabove($other, 0);
+            my $title = $sex eq "M" ? "father" : "mother";
+            if ($steps >= 5) {
+                $steps -= 2;
+                return "$steps times great-grand$title";
+            } elsif ($steps == 1) {
+                return $title;
+            } elsif ($steps == 2) {
+                return "grand$title";
+            } elsif ($steps == 3) {
+                return "great-grand$title";
+            } elsif ($steps == 4) {
+                return "great-great-grand$title";
+            } elsif ($steps <= 0) {
+                if (my $spouse = $other->spouse) {
+                    if ($self->_stepsabove($spouse, 0)) {
+                        # The caller should now check
+                        # the spouse's relationship
+                        return;
+                    }
+                }
+                die $other->name,
+                    ": BUG - not a direct ancestor, steps = $steps";
+            }
+        }
+    }
+
+    my @ancestors2 = $other->ancestors or return;
+
+    for my $person1 (@ancestors) {
+        for my $person2 (@ancestors2) {
+            # print $person1->name, '->', $person2->name, "\n";
+            # G::C is noisy
+            # TODO - apparently fixed in Github, awaiting new version on CPAN
+            # my $c = Gedcom::Comparison->new($person1, $person2);
+            # if($c->identical($person2)) {
+                # die 'match found';
+            # }
+            if ($person1 eq $person2) {
+                # Common ancestor is $person2
+                my $steps1 = $self->_stepsabove($person1, 0);
+                return if $steps1 > 7;
+                my $steps2 = $other->_stepsabove($person2, 0);
+                return if $steps2 > 7;
+
+                # It would be nice to do this as an algorithm, but this will do
+                # e.g. 2, 1 is uncle
+                my $rel = {
+                    2 << 8 | 2 => "cousin",
+                    2 << 8 | 3 => "first cousin once-removed",
+                    3 << 8 | 2 => "first cousin once-removed",
+                    2 << 8 | 4 => "first cousin twice-removed",
+                    3 << 8 | 3 => "second cousin",
+                    3 << 8 | 4 => "second cousin once-removed",
+                    4 << 8 | 2 => "first cousin twice-removed",
+                    5 << 8 | 2 => "first cousin three-times-removed",
+                    5 << 8 | 3 => "second cousin twice-removed",
+                    6 << 8 | 3 => "second cousin three-times-removed",
+                    6 << 8 | 4 => "third cousin twice-removed",
+                    6 << 8 | 5 => "fourth cousin once-removed",
+                    7 << 8 | 5 => "fourth cousin twice-removed",
+                };
+                my $m_rel = {
+                    1 << 8 | 1 => "brother",
+                    1 << 8 | 2 => "nephew",
+                    2 << 8 | 1 => "uncle",
+                    3 << 8 | 1 => "great-uncle",
+                    4 << 8 | 1 => "great-great-uncle",
+                };
+                my $f_rel = {
+                    1 << 8 | 1 => "sister",
+                    1 << 8 | 2 => "niece",
+                    2 << 8 | 1 => "aunt",
+                    3 << 8 | 1 => "great-aunt",
+                    4 << 8 | 1 => "great-great-aunt",
+                };
+
+                my $n = ($steps1 << 8) | $steps2;
+                my $rc = $rel->{$n} || ($sex eq "M" ? $m_rel : $f_rel)->{$n};
+                if ($rc && $rc =~ /cousin/) {
+                    my $father = $self->father;
+                    my $mother = $self->mother;
+                    if ($father && ($father->_stepsabove($person2, 0) > 0)) {
+                        $rc .= " on your father's side";
+                    } elsif ($mother && ($mother->_stepsabove($person2, 0) > 0)) {
+                        $rc .= " on your mother's side";
+                    }
+                }
+                # print "$steps1, $steps2\n" if(!defined($rc));
+
+                return $rc;
+            }
+        }
+    }
+}
+
+sub _stepsabove {
+    my $self = shift;
+    my ($target, $count) = @_;
+
+    return -1 if $count == -1;
+
+    return $count if $self eq $target;
+
+    my $father = $self->father;
+    if ($father) {
+        my $rc = $father->_stepsabove($target, $count + 1);
+        return $rc unless $rc == -1;
+    }
+
+    my $mother = $self->mother;
+    if ($mother) {
+        return $mother->_stepsabove($target, $count + 1);
+    }
+
+    -1
+}
+
+1
 
 __END__
 
