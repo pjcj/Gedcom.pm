@@ -12,10 +12,19 @@ perl:
     - "5.26"
     - "dev"
     - "blead"
+sudo: false
 before_install:
-    cpanm -n Devel::Cover::Report::Coveralls
+    - cpanm -n Devel::Cover::Report::Coveralls
+    - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
+    - source ~/travis-perl-helpers/init
+    - build-perl
+    - perl -V
+    - build-dist
+    - cd $BUILD_DIR
+install:
+    - cpan-install --deps
 script:
-    perl Makefile.PL && make && cover -test -report coveralls
+    - perl Makefile.PL && make && cover -test -report coveralls
 notifications:
     email:
         on_success: always
