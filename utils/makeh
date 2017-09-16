@@ -36,9 +36,13 @@ my $Command = {
             next if $. < 3;
             s/^/# / if $. == 3;
             if ($. == 5) {
-                my $badge = "https://coveralls.io/repos/github/" .
-                            "pjcj/Gedcom.pm/badge.svg?branch=master";
-                s/.*/[![Coverage Status]($badge)]($badge)/;
+                my $coveralls = "https://coveralls.io/repos/github/" .
+                                "pjcj/Gedcom.pm/badge.svg?branch=master";
+                my $travis    = "https://travis-ci.org/" .
+                                "pjcj/Gedcom.pm.svg?branch=master";
+                my $badges    = "[![Build Status]($travis)]($travis)" .
+                                "[![Coverage Status]($coveralls)]($coveralls)";
+                s/.*/$badges/;
             };
             print;
         }
