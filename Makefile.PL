@@ -184,11 +184,10 @@ grammar : pure_all gedcom-5.5.grammar gedcom-5.5.1.grammar
 
 @versions : Makefile.PL
 \t \$(PERL) utils/makeh set_version $Version "$Date" @versions
-\t \$(MAKE) grammar README
+\t \$(MAKE) grammar README.md
 
-README : lib/Gedcom.pm
-\t TERMCAP= COLUMNS=80 pod2text -s lib/Gedcom.pm | \\
-  \$(PERL) utils/makeh make_readme > README
+README.md : lib/Gedcom.pm
+\t pod2markdown < lib/Gedcom.pm > README.md
 
 # Webservies section
 
