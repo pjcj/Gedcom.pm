@@ -270,11 +270,20 @@ sub import {
         ok $i->note, "Line 1\nLine 2\nLine 3\nLine 4";
         ok scalar $i->get_value("birth age"), 0;
 
-
         $i = $ged->get_individual("I83");
         my $n = $i->resolve($i->note)->full_value;
         ok $n, "Line 1\nLine 2";
         validate_ok($ged, $read_only);
+
+        my $from1 = $ged->get_individual("I14");
+        my $to1   = $ged->get_individual("I1");
+        my $rel1  = $from1->relationship($to1);
+        ok $rel1, "grandfather";
+
+        my $from2 = $ged->get_individual("I82");
+        my $rel2 = $from2->relationship($to1);
+        ok !defined $rel2;
+
 
         my $f1 = $gedcom_file . $$;
         $ged->write($f1);
@@ -289,7 +298,7 @@ sub import {
         ok unlink $f1;
     };
 
-    my $tests = 1531;
+    my $tests = 1533;
     my $grammar;
     if ($grammar = delete $args{create_grammar}) {
         Test::plan tests => $tests + 3;
