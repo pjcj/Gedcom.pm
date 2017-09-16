@@ -41,14 +41,16 @@ my @versions = grep { !/README|travis|Makefile\.PL/ } @files;
 $ExtUtils::MakeMaker::Verbose = 0;
 
 WriteMakefile(
-    NAME       => "Gedcom",
-    VERSION    => $Version,
-    AUTHOR     => 'Paul Johnson (paul@pjcj.net)',
-    ABSTRACT   => "Interface to genealogy GEDCOM files",
-    DIR        => [],
-    EXE_FILES  => [ "cgi-bin/gedcom.cgi" ],
-    PREREQ_PM  => { "Text::Soundex" => 0 },
-    META_MERGE => {
+    NAME           => "Gedcom",
+    VERSION        => $Version,
+    AUTHOR         => 'Paul Johnson (paul@pjcj.net)',
+    ABSTRACT       => "Interface to genealogy GEDCOM files",
+    DIR            => [],
+    EXE_FILES      => [ "cgi-bin/gedcom.cgi" ],
+    BUILD_REQUIRES => { "Pod::Markdown" => 0 },
+    TEST_REQUIRES  => { "Test::Pod"     => 0 },
+    PREREQ_PM      => { "Text::Soundex" => 0 },
+    META_MERGE     => {
         license => [ "perl_5" ],
         release_status => "stable",
         # https://metacpan.org/pod/CPAN::Meta::Spec#PREREQUISITES
@@ -88,9 +90,9 @@ WriteMakefile(
             url     => "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
         },
     },
-    dist       => { COMPRESS => "gzip --best --force" },
-    clean      => { FILES => join " ",  map { "$_.version" } @versions },
-    depend     => { distdir => "@files" },
+    dist   => { COMPRESS => "gzip --best --force"                     },
+    clean  => { FILES    => join " ",  map { "$_.version" } @versions },
+    depend => { distdir  => "@files"                                  },
 );
 
 print "\n";
