@@ -765,8 +765,7 @@ To access information about the individual, use a function of the same name as
 the GEDCOM tag, or its description.  Tags and descriptions are listed at the
 head of Gedcom.pm.  For example
 
-  for my $b ($i->birth)
-  {
+  for my $b ($i->birth) {
   }
 
 will loop through all the birth records in the individual.  Usually there will
@@ -843,10 +842,8 @@ line.
 
   my $ged = Gedcom->new(shift);
 
-  for my $i ($ged->individuals)
-  {
-      for my $bd ($i->get_value("birth date"))
-      {
+  for my $i ($ged->individuals) {
+      for my $bd ($i->get_value("birth date")) {
           print $i->name, " was born on $bd\n";
       }
   }
