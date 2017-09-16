@@ -99,7 +99,7 @@ __END__
 
 =head1 NAME
 
-Gedcom::Family - a module to manipulate Gedcom families
+Gedcom::Family - a module to manipulate GEDCOM families
 
 Version 1.20 - 17th September 2016
 
@@ -120,7 +120,7 @@ Version 1.20 - 17th September 2016
 
 =head1 DESCRIPTION
 
-A selection of subroutines to handle families in a gedcom file.
+A selection of subroutines to handle families in a GEDCOM file.
 
 Derived from Gedcom::Record.
 

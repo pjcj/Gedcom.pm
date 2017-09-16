@@ -74,7 +74,7 @@ sub _valid_items {
         } else {
             die "What's a " . Data::Dumper->new([$item], ["grammar"])
             unless my ($value) = $item->{value} =~ /<<(.*)>>/;
-            die "Can't find $value in gedcom structures"
+            die "Can't find $value in Gedcom structures"
             unless my $structure = $self->structure($value);
             $item->{structure} = $structure;
             while (my($tag, $g) = each %{$structure->valid_items}) {
@@ -119,7 +119,7 @@ __END__
 
 =head1 NAME
 
-Gedcom::Grammar - a module to manipulate Gedcom grammars
+Gedcom::Grammar - a module to manipulate GEDCOM grammars
 
 Version 1.20 - 17th September 2016
 
@@ -136,7 +136,7 @@ Version 1.20 - 17th September 2016
 
 =head1 DESCRIPTION
 
-A selection of subroutines to handle the grammar of a gedcom file.
+A selection of subroutines to handle the grammar of a GEDCOM file.
 
 Derived from Gedcom::Item.
 

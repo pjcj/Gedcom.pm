@@ -612,7 +612,7 @@ Version 1.20 - 17th September 2016
 
 =head1 DESCRIPTION
 
-A selection of subroutines to handle records in a gedcom file.
+A selection of subroutines to handle records in a GEDCOM file.
 
 Derived from Gedcom::Item.
 
@@ -661,7 +661,7 @@ there is none.  In list context, record() returns all the specified
 records.
 
 Records may be specified by a list of strings.  Each string is either a
-Gedcom tag or a description.  Starting from the first string in the
+GEDCOM tag or a description.  Starting from the first string in the
 list, specified records are retrieved.  Then from those records, records
 specified by the next string in the list are retrieved.  This continues
 until all strings from the list have been used.
@@ -805,7 +805,7 @@ Delete the specified sub-record from the record.
 
 =head2 Access functions
 
-All the Gedcom tag names can be used as function names.  Depending on
+All the GEDCOM tag names can be used as function names.  Depending on
 the context in which they are called, the functions return either an
 array of the specified sub-items, or the first specified sub-item.
 

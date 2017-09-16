@@ -433,7 +433,7 @@ __END__
 
 =head1 NAME
 
-Gedcom::Individual - a module to manipulate Gedcom individuals
+Gedcom::Individual - a module to manipulate GEDCOM individuals
 
 Version 1.20 - 17th September 2016
 
@@ -471,7 +471,7 @@ Version 1.20 - 17th September 2016
 
 =head1 DESCRIPTION
 
-A selection of subroutines to handle individuals in a gedcom file.
+A selection of subroutines to handle individuals in a GEDCOM file.
 
 Derived from Gedcom::Record.
 

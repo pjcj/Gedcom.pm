@@ -137,7 +137,7 @@ sub read {
     unless (@{$self->{items}}) {
         # $#{$self->{items}} = 20000;
         # $#{$self->{items}} = -1;
-        # If we have a grammar, then we are reading a gedcom file and must use
+        # If we have a grammar, then we are reading a GEDCOM file and must use
         # the grammar to verify what is being read.
         # If we do not have a grammar, then that is what we are reading.
         while (my $item = $self->next_item($self)) {
@@ -651,7 +651,7 @@ Version 1.20 - 17th September 2016
 
 =head1 DESCRIPTION
 
-A selection of subroutines to handle items in a gedcom file.
+A selection of subroutines to handle items in a GEDCOM file.
 
 =head1 HASH MEMBERS
 
@@ -687,7 +687,7 @@ The maximum number of items allowed.
 
 =head2 $item->{gedcom}
 
-The top level gedcom object.
+The top level Gedcom object.
 
 =head2 $item->{file}
 
@@ -773,7 +773,7 @@ Write the item to a FileHandle.
 The subroutine takes three parameters:
   $fh:        The FileHandle to which to write
   $level:     The level of the item
-  $flush:     Whether or not to indent the gedcom output according to the level
+  $flush:     Whether or not to indent the GEDCOM output according to the level
 
 =head2 write_xml
 
@@ -891,7 +891,7 @@ the value() function and probably the items() function.
   my $sub_items = $item->_items;
 
 Return a reference to a list of all the sub-items, reading them from the
-Gedcom file if they have not already been read.
+GEDCOM file if they have not already been read.
 
 It should not be necessary to use this function.  See items().
 
@@ -899,7 +899,7 @@ It should not be necessary to use this function.  See items().
 
   my @sub_items = $item->items;
 
-Return a list of all the sub-items, reading them from the Gedcom file if
+Return a list of all the sub-items, reading them from the GEDCOM file if
 they have not already been read.
 
 In general it should not be necessary to use this function.  The
