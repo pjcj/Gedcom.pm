@@ -669,14 +669,14 @@ Version 1.20 - 17th September 2016
 
 =head1 DESCRIPTION
 
-This module provides for manipulation of Gedcom files.  Gedcom is a
-format for storing genealogical information designed by The Church of
-Jesus Christ of Latter-Day Saints (http://www.lds.org).  Information
-about Gedcom is available as a zip file at
-ftp://gedcom.org/pub/genealogy/gedcom/gedcom55.zip.  Unfortunately, this
-is only usable if you can access a PC running Windows of some
-description.  Part of the reason I wrote this module is because I don't
-do that.  Well, I didn't.  I can now although I prefer not to...
+This module provides for manipulation of Gedcom files.  Gedcom is a format for
+storing genealogical information designed by The Church of Jesus Christ of
+Latter-Day Saints (http://www.lds.org).  Information about Gedcom used to be
+available as a zip file at ftp://gedcom.org/pub/genealogy/gedcom/gedcom55.zip.
+That may still be the case, but it seems to be password protected now.
+However, the document in that archive seems to be available in a somewhat more
+accessible format at
+https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf.
 
 Requirements:
 
