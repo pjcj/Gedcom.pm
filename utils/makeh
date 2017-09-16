@@ -40,7 +40,7 @@ my $Command = {
                                 "Gedcom.pm";
                 my $travis    = "https://travis-ci.org/pjcj/Gedcom.pm";
                 my $badges    = "[![Build Status]($travis.svg?branch=master)]" .
-                                "($travis)" .
+                                "($travis) " .
                                 "[![Coverage Status]($coveralls/badge.svg" .
                                 "?branch=master)]($coveralls?branch=master)";
                 s/.*/$badges/;
