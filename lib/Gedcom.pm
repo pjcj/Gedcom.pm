@@ -269,7 +269,7 @@ sub new {
         } else {
             ($version) = $self->{grammar_file} =~ /(\d+(\.\d+)*)/;
         }
-        die "version must be a gedcom version number\n" unless $version;
+        die "version must be a GEDCOM version number\n" unless $version;
         return undef unless
         $grammar = Gedcom::Grammar->new(
             file     => $self->{grammar_file},
@@ -290,7 +290,7 @@ sub new {
         @c = map { $_->{top} = $grammar; @{$_->{items}} } @c;
     }
 
-    # now read in or create the gedcom file
+    # now read in or create the GEDCOM file
     return undef unless
     my $r = $self->{record} = Gedcom::Record->new(
         defined $self->{gedcom_file} ? (file => $self->{gedcom_file}) : (),
@@ -626,7 +626,7 @@ __END__
 
 =head1 NAME
 
-Gedcom - a module to manipulate Gedcom genealogy files
+Gedcom - a module to manipulate GEDCOM genealogy files
 
 Version 1.20 - 17th September 2016
 
@@ -669,9 +669,9 @@ Version 1.20 - 17th September 2016
 
 =head1 DESCRIPTION
 
-This module provides for manipulation of Gedcom files.  Gedcom is a format for
+This module provides for manipulation of GEDCOM files.  GEDCOM is a format for
 storing genealogical information designed by The Church of Jesus Christ of
-Latter-Day Saints (http://www.lds.org).  Information about Gedcom used to be
+Latter-Day Saints (http://www.lds.org).  Information about GEDCOM used to be
 available as a zip file at ftp://gedcom.org/pub/genealogy/gedcom/gedcom55.zip.
 That may still be the case, but it seems to be password protected now.
 However, the document in that archive seems to be available in a somewhat more
@@ -690,12 +690,12 @@ Optional Modules:
   Parse::RecDescent.pm to use lines2perl
   Roman.pm             to use the LifeLines function roman from lines2perl
 
-The Gedcom format is specified in a grammar file (gedcom-5.5.grammar).
+The GEDCOM format is specified in a grammar file (gedcom-5.5.grammar).
 Gedcom.pm parses the grammar which is then used to validate and allow
-manipulation of the Gedcom file.  I have only used Gedcom.pm with
-version 5.5 of the Gedcom grammar, which I had to modify slightly to
+manipulation of the GEDCOM file.  I have only used Gedcom.pm with
+version 5.5 of the GEDCOM grammar, which I had to modify slightly to
 correct a few errors.  The advantage of this approach is that Gedcom.pm
-should be useful if the Gedcom grammar is ever updated.  It also made
+should be useful if the GEDCOM grammar is ever updated.  It also made
 the software easier to write, and probably more dependable too.  I
 suppose this is the virtue of laziness shining through.
 
@@ -705,7 +705,7 @@ release has more documentation than the previous ones - but if you would
 like information feel free to send me mail or better still, ask on the
 mailing list.
 
-This module provides some functions which work over the entire Gedcom
+This module provides some functions which work over the entire GEDCOM
 file, such as reformatting dates, renumbering entries and ordering the
 entries.  It also allows access to individuals, and then to relations of
 individuals, for example sons, siblings, spouse, parents and so forth.
@@ -715,12 +715,12 @@ programs to Perl.  The program works, but it has a few rough edges, and
 some missing functionality.  I'll be working on it when it hits the top
 of my TODO list.
 
-There is now an option for read only access to the gedcom file.
+There is now an option for read only access to the GEDCOM file.
 Actually, this doesn't stop you changing or writing the file, but it
-does parse the gedcom file lazily, meaning that only those portions of
-the gedcom file which are needed will be read.  This can provide a
+does parse the GEDCOM file lazily, meaning that only those portions of
+the GEDCOM file which are needed will be read.  This can provide a
 substantial saving of time and memory providing that not too much of the
-gedcom file is read.  If you are going to read the whole gedcom file,
+GEDCOM file is read.  If you are going to read the whole GEDCOM file,
 this mode is less efficient unless you do some manual housekeeping.
 
 Should you find this software useful, or if you make changes to it, or
@@ -745,12 +745,12 @@ This space is reserved for something of a tutorial.  If you learn best
 by looking at examples, take a look at the test directory, I<t>.  The
 most simple test is I<birthdates.t>.
 
-The first thing to do is to read in the Gedcom file.  At its most
+The first thing to do is to read in the GEDCOM file.  At its most
 simple, this will involve a statement such as
 
   my $ged = Gedcom->new($gedcom_file);
 
-It is now possible to access the records within the gedcom file.  Each
+It is now possible to access the records within the GEDCOM file.  Each
 individual and family is a record.  Records can contain other records.
 For example, an individual is a record.  The birth information is a
 sub-record of the individual, and the date of birth is a sub-record of
@@ -758,14 +758,14 @@ the birth record.
 
 Some records, such as the birth record, are simply containers for other
 records.  Some records have a value, such as the date record, whose
-value is a date.  This is all defined in the Gedcom standard.
+value is a date.  This is all defined in the GEDCOM standard.
 
 To access an individual use a statement such as
 
   my $i = $ged->get_individual("Paul Johnson");
 
 To access information about the individual, use a function of the same
-name as the Gedcom tag, or its description.  Tags and descriptions are
+name as the GEDCOM tag, or its description.  Tags and descriptions are
 listed at the head of Gedcom.pm.  For example
 
   for my $b ($i->birth)
@@ -792,7 +792,7 @@ there is no value, as is the case for the birth record, then the record
 itself is returned.  If there is a value, but the record itself is
 required, then the get_record() function can be used.
 
-Information must be accessed through the Gedcom structure so, for
+Information must be accessed through the GEDCOM structure so, for
 example, the birthdate is accessed via the date record from the birth
 record within an individual.
 
@@ -805,7 +805,7 @@ records is a nice solution, all else being equal.
 
 Access to values can also be gained through the get_value() function.
 This is a preferable solution where it is necessary to work down the
-Gedcom structure.  For example
+GEDCOM structure.  For example
 
   my $bd = $i->get_value("birth date");
   my $bd = $i->get_value(qw(birth date));
@@ -835,7 +835,7 @@ and other information specific to individuals, for example
 
   my @sons = $i->sons;
 
-It is possible to get all the individuals in the gedcom file as
+It is possible to get all the individuals in the GEDCOM file as
 
   my @individuals = $ged->individuals;
 
@@ -875,7 +875,7 @@ Some of the more important hash members are:
 
 =head2 $ged->{grammar}
 
-This contains the gedcom grammar.
+This contains the GEDCOM grammar.
 
 See Gedcom::Grammar.pm for more details.
 
@@ -908,12 +908,12 @@ See Gedcom::Record.pm for more details.
 
 Create a new gedcom object.
 
-gedcom_file is the name of the gedcom file to parse.  If you do not
+gedcom_file is the name of the GEDCOM file to parse.  If you do not
 supply a gedcom_file parameter then you will get an empty Gedcom object,
 empty that is apart from a few mandatory records.
 
 You may optionally pass grammar_version as the version number of the
-gedcom grammar you want to use.  There are two versions available, 5.5
+GEDCOM grammar you want to use.  There are two versions available, 5.5
 and 5.5.1.  If you do not specify a grammar version, you may specify a
 grammar file as grammar_file.  Usually, you will do neither of these,
 and in this case the grammar version will default to the latest full
@@ -921,20 +921,20 @@ available version, currently 5.5.  5.5.1 is only a draft, but it is
 available if you specify it.
 
 The read_only parameter indicates that the Gedcom data structure will be
-used primarily for read_only operations.  In this mode the gedcom file
+used primarily for read_only operations.  In this mode the GEDCOM file
 is read lazily, such that whenever possible the Gedcom records are not
 read until they are needed.  This can save on both memory and CPU usage,
-provided that not too much of the gedcom file is needed.  If the whole
-of the gedcom file needs to be read, for example to validate it, or to
+provided that not too much of the GEDCOM file is needed.  If the whole
+of the GEDCOM file needs to be read, for example to validate it, or to
 write it out in a different format, then this option should not be used.
 
 When using the read_only option an index file is kept which can also
 speed up operations.  It's usage should be transparent, but will require
-write access to the directory containing the gedcom file.  If you access
+write access to the directory containing the GEDCOM file.  If you access
 individuals only by their xref (eg I20) then the index file will allow
-only the relevant parts of the gedcom file to be read.
+only the relevant parts of the GEDCOM file to be read.
 
-With or without the read_only option, the gedcom file is accessed in the
+With or without the read_only option, the GEDCOM file is accessed in the
 same fashion and the data structures can be changed.  In this respect,
 the name read_only is not very accurate, but since changing the Gedcom
 data will generally mean that the data will be written which means that
@@ -945,7 +945,7 @@ the amount of CPU time and memory that your application uses.  You may
 also need to read this paragraph a few times to understand it.  Sorry.
 
 callback is an optional reference to a subroutine which will be called
-at various times while the gedcom file (and the grammar file, if
+at various times while the GEDCOM file (and the grammar file, if
 applicable) is being read.  Its purpose is to provide feedback during
 potentially long operations.  The subroutine is called with five
 arguments:
@@ -964,19 +964,19 @@ If the subroutine returns false, the operation is aborted.
   $ged->set_encoding("utf-8");
 
 Valid arguments are "ansel" and "utf-8".  Defaults to "ansel" but is set to
-"utf-8" if the gedcom data was read from a file which was deemed to contain
+"utf-8" if the GEDCOM data was read from a file which was deemed to contain
 UTF-8, either due to the presence of a BOM or as specified by a CHAR item.
 
-Set the encoding for the gedcom file.  Calling this directly doesn't alter the
+Set the encoding for the GEDCOM file.  Calling this directly doesn't alter the
 CHAR item, but does affect the way in which files are written.
 
 =head2 write
 
   $ged->write($new_gedcom_file, $flush);
 
-Write out the gedcom file.
+Write out the GEDCOM file.
 
-Takes the name of the new gedcom file, and whether or not to indent the
+Takes the name of the new GEDCOM file, and whether or not to indent the
 output according to the level of the record.  $flush defaults to false,
 but the new file name must be specified.
 
@@ -984,9 +984,9 @@ but the new file name must be specified.
 
   $ged->write_xml($new_xml_file);
 
-Write the gedcom file as XML.
+Write the GEDCOM file as XML.
 
-Takes the name of the new gedcom file.
+Takes the name of the new GEDCOM file.
 
 Note that this function is experimental.  The XML output doesn't conform
 to any standard that I know of, because I don't know of any standard.
@@ -1030,13 +1030,13 @@ yet.
 
   return unless $ged->validate($callback);
 
-Validate the gedcom object.  This performs a number of consistency
+Validate the Gedcom object.  This performs a number of consistency
 checks, but could do even more.  $callback is not properly used yet.
 
 Any errors found are given out as warnings.  If this is unwanted, use
 $SIG{__WARN__} to catch the warnings.
 
-Returns true iff the gedcom object is valid.
+Returns true iff the Gedcom object is valid.
 
 =head2 normalise_dates
 
@@ -1086,7 +1086,7 @@ FAM, NOTE, TRLR, and then by xref within the type.
 
 Order all the records.  Optionally provide a sort subroutine.
 
-This orders the entries within the gedcom object, which will affect the
+This orders the entries within the Gedcom object, which will affect the
 order in which they are written out.  The default sort function is
 Gedcom::sort_sub.  You will need to ensure that the HEAD record is first
 and that the TRLR record is last.
