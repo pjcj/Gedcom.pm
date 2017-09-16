@@ -39,8 +39,8 @@ my $Command = {
                 my $coveralls = "https://coveralls.io/repos/github/pjcj/" .
                                 "Gedcom.pm";
                 my $travis    = "https://travis-ci.org/pjcj/Gedcom.pm";
-                my $badges    = "[![Build Status]($travis.pm.svg?branch=master" .
-                                ")]($travis)" .
+                my $badges    = "[![Build Status]($travis.svg?branch=master)]" .
+                                "($travis)" .
                                 "[![Coverage Status]($coveralls/badge.svg" .
                                 "?branch=master)]($coveralls?branch=master)";
                 s/.*/$badges/;
