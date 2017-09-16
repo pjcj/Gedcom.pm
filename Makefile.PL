@@ -51,7 +51,13 @@ WriteMakefile(
     META_MERGE => {
         license => [ "perl_5" ],
         release_status => "stable",
+        # https://metacpan.org/pod/CPAN::Meta::Spec#PREREQUISITES
         prereqs => {
+            build => {
+                requires => {
+                    "Pod::Markdown"     => 0,
+                },
+            },
             runtime => {
                 recommends => {
                     "Date::Manip"       => 0,
