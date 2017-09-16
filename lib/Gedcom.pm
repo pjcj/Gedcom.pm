@@ -669,13 +669,6 @@ Version 1.20 - 17th September 2016
 
 =head1 DESCRIPTION
 
-Copyright 1998-2017, Paul Johnson (paul@pjcj.net)
-
-This software is free.  It is licensed under the same terms as Perl itself.
-
-The latest version of this software should be available from my homepage:
-http://www.pjcj.net
-
 This module provides for manipulation of Gedcom files.  Gedcom is a
 format for storing genealogical information designed by The Church of
 Jesus Christ of Latter-Day Saints (http://www.lds.org).  Information
@@ -1178,5 +1171,14 @@ on the first line of the note.
 
 Return all records of the specified type.  In scalar context just return the
 first record.  If a parameter is passed in, just return records of that xref.
+
+=head1 LICENCE
+
+Copyright 1998-2017, Paul Johnson (paul@pjcj.net)
+
+This software is free.  It is licensed under the same terms as Perl itself.
+
+The latest version of this software should be available from my homepage:
+http://www.pjcj.net
 
 =cut
