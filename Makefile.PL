@@ -200,7 +200,7 @@ grammar : pure_all gedcom-5.5.grammar gedcom-5.5.1.grammar
 \t \$(MAKE) grammar README.md
 
 README.md : lib/Gedcom.pm
-\t pod2markdown < lib/Gedcom.pm > README.md || echo pod2markdown unavailable
+\t pod2markdown < lib/Gedcom.pm | \$(PERL) utils/makeh munge_readme > README.md
 
 # Webservies section
 
