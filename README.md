@@ -1,6 +1,6 @@
 # Gedcom - a module to manipulate GEDCOM genealogy files
 
-[![Build Status](https://travis-ci.org/pjcj/Gedcom.pm.svg?branch=master)](https://travis-ci.org/pjcj/Gedcom.pm.svg?branch=master)[![Coverage Status](https://coveralls.io/repos/github/pjcj/Gedcom.pm/badge.svg?branch=master)](https://coveralls.io/repos/github/pjcj/Gedcom.pm/badge.svg?branch=master)
+[![Build Status](https://travis-ci.org/pjcj/Gedcom.pm.pm.svg?branch=master)](https://travis-ci.org/pjcj/Gedcom.pm)[![Coverage Status](https://coveralls.io/repos/github/pjcj/Gedcom.pm/badge.svg?branch=master)](https://coveralls.io/repos/github/pjcj/Gedcom.pm?branch=master)
 
 # SYNOPSIS
 
