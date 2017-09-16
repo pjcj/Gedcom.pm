@@ -723,8 +723,6 @@ substantial saving of time and memory providing that not too much of the
 gedcom file is read.  If you are going to read the whole gedcom file,
 this mode is less efficient unless you do some manual housekeeping.
 
-Note that this is still considered beta software - caveat emptor.
-
 Should you find this software useful, or if you make changes to it, or
 if you would like me to make changes to it, please send me mail.  I
 would like to have some sort of an idea of the use this software is
