@@ -36,13 +36,14 @@ my $Command = {
             next if $. < 3;
             s/^/# / if $. == 3;
             if ($. == 5) {
-                my $coveralls = "https://coveralls.io/repos/github/pjcj/" .
-                                "Gedcom.pm";
+                my $coveralls = "https://coveralls.io";
+                my $gedcom    = "github/pjcj/Gedcom.pm";
                 my $travis    = "https://travis-ci.org/pjcj/Gedcom.pm";
                 my $badges    = "[![Build Status]($travis.svg?branch=master)]" .
                                 "($travis) " .
-                                "[![Coverage Status]($coveralls/badge.svg" .
-                                "?branch=master)]($coveralls?branch=master)";
+                                "[![Coverage Status]($coveralls/repos/" .
+                                "$gedcom/badge.svg?branch=master)]" .
+                                "($coveralls/$gedcom?branch=master)";
                 s/.*/$badges/;
             };
             print;
