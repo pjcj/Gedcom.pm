@@ -1,8 +1,6 @@
-# NAME
+# Gedcom - a module to manipulate GEDCOM genealogy files
 
-Gedcom - a module to manipulate GEDCOM genealogy files
-
-Version 1.20 - 17th September 2016
+[![Coverage Status](https://coveralls.io/repos/github/pjcj/Gedcom.pm/badge.svg?branch=master)](https://coveralls.io/repos/github/pjcj/Gedcom.pm/badge.svg?branch=master)
 
 # SYNOPSIS
 
