@@ -199,7 +199,7 @@ grammar : pure_all gedcom-5.5.grammar gedcom-5.5.1.grammar
 \t \$(PERL) utils/makeh set_version $Version "$Date" @versions
 \t \$(MAKE) grammar README.md
 
-README.md : lib/Gedcom.pm
+README.md : lib/Gedcom.pm utils/makeh
 \t pod2markdown < lib/Gedcom.pm | \$(PERL) utils/makeh munge_readme > README.md
 
 # Webservies section
