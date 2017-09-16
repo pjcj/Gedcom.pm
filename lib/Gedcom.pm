@@ -927,7 +927,7 @@ the GEDCOM file to be read.
 
 With or without the read_only option, the GEDCOM file is accessed in the same
 fashion and the data structures can be changed.  In this respect, the name
-read_only is not very accurate, but since changing the Gedcom data will
+read_only is not particularly accurate, but since changing the Gedcom data will
 generally mean that the data will be written which means that the data will
 first be read, the read_only option is generally useful when the data will not
 be written and when not all the data will be read.  You may find it useful to
