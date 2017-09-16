@@ -979,11 +979,7 @@ Write the GEDCOM file as XML.
 Takes the name of the new GEDCOM file.
 
 Note that this function is experimental.  The XML output doesn't conform to any
-standard that I know of, because I don't know of any standard.  If and when
-such a standard surfaces, and probably even if it doesn't, I'll change the
-output from this function.  If you make use of this function, beware.  I'd also
-be very interested in hearing from you to determine the requirements for the
-XML.
+standard; it's just me trying to turn the GEDCOM format into sensible XML.
 
 =head2 collect_xrefs
 
