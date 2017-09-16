@@ -58,6 +58,11 @@ WriteMakefile(
                     "Pod::Markdown"     => 0,
                 },
             },
+            test => {
+                recommends => {
+                    "Test::Pod"         => 0,
+                },
+            },
             runtime => {
                 recommends => {
                     "Date::Manip"       => 0,
