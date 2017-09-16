@@ -692,12 +692,12 @@ Optional Modules:
 
 The GEDCOM format is specified in a grammar file (gedcom-5.5.grammar).
 Gedcom.pm parses the grammar which is then used to validate and allow
-manipulation of the GEDCOM file.  I have only used Gedcom.pm with
-version 5.5 of the GEDCOM grammar, which I had to modify slightly to
-correct a few errors.  The advantage of this approach is that Gedcom.pm
-should be useful if the GEDCOM grammar is ever updated.  It also made
-the software easier to write, and probably more dependable too.  I
-suppose this is the virtue of laziness shining through.
+manipulation of the GEDCOM file.  I have only used Gedcom.pm with versions 5.5
+and 5.5.1 of the GEDCOM grammar, which I had to modify slightly to correct a
+few errors.  The advantage of this approach is that Gedcom.pm should be useful
+if the GEDCOM grammar is ever updated.  It also made the software easier to
+write, and probably more dependable too.  I suppose this is the virtue of
+laziness shining through.
 
 The vice of laziness is also shining brightly - I need to document how
 to use this module in much greater detail.  This is happening - this
