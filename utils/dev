@@ -81,9 +81,9 @@ main() {
             perl -pi -e "s/Copyright $from\\K(, $me)/-$to\$1/i"    $files
             ;;
         install_dependencies)
-            cpanm --notest App::cpm
-            cpm install --workers="$($0 nice_cpus)" --global                \
-                Date::Manip Parse::RecDescent Roman Text::Soundex
+            cpanm --notest                                        \
+                Date::Manip Parse::RecDescent Roman Text::Soundex \
+                Pod::Markdown Test::Pod
             ;;
         all_versions)
             shift
