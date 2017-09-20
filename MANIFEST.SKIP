@@ -1,9 +1,7 @@
 # From the original MANIFEST.SKIP
 \.org$
 \.version$
-^cover_db/
 core$
-^install/build/
 ^t/TEST$
 ^t/conf/apache_test_config.pm$
 ^t/conf/extra.conf$
@@ -34,6 +32,8 @@ Gedcom/Grammar_0_1.pm$
 \bblibdirs$
 ^MANIFEST\.SKIP$
 MYMETA.*
+.perl-version
+tags
 
 # Avoid temp and backup files.
 ~$

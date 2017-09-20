@@ -7,9 +7,6 @@ gedcom-5.5.1.grammar
 gedcom-5.5.grammar
 gedcom.vim
 gedcom_compare
-install/buildperl
-install/SETUP
-install/System.pm
 lib/Gedcom.pm
 lib/Gedcom/CGI.pm
 lib/Gedcom/Comparison.pm
@@ -29,7 +26,6 @@ MANIFEST			This list of files
 parse_grammar
 README.md
 royal.ged
-setup
 t/Basic.pm
 t/basic.t
 t/bias.t
@@ -62,4 +58,6 @@ t/ws_xml.t
 tkged
 TODO
 utils/all_versions
+utils/dev
 utils/makeh
+utils/setup
