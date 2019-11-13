@@ -389,7 +389,7 @@ sub write {
     my ($fh, $level, $flush) = @_;
     $level ||= 0;
     my @p;
-    push @p, $level . "  " x $level         unless $flush || $level < 0;
+    push @p, $level . "  " x ($flush ? 0 : $level) unless $level < 0;
     push @p, "\@$self->{xref}\@"            if     defined $self->{xref} &&
                                                    length $self->{xref};
     push @p, $self->{tag}                   if     $level >= 0;
