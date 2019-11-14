@@ -620,7 +620,12 @@ sub top_tag {
     $Top_tag_order{$tag}
 }
 
-1;
+"
+But take your time, think a lot
+Think of everything you've got
+For you will still be here tomorrow
+But your dreams may not
+"
 
 __END__
 
