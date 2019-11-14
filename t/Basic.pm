@@ -89,6 +89,7 @@ sub import {
         my $resolve     = $args{resolve};
         my $gedcom_file = $args{gedcom_file};
         my $read_only   = $args{read_only};
+        my $flush       = $args{flush} || 0;
 
         ok $ged;
         validate_ok($ged, $read_only);
@@ -286,11 +287,13 @@ sub import {
 
 
         my $f1 = $gedcom_file . $$;
-        $ged->write($f1);
+        $ged->write($f1, $flush);
         validate_ok($ged, $read_only);
         ok -e $f1;
 
         # check the gedcom file is correct
+        map { s/^(\d+)\s+/$1 / } @Ged_data if $flush;
+
         ok open F1, $f1;
         ok scalar <F1>, $_ for @Ged_data;
         ok eof;
