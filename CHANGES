@@ -2,6 +2,7 @@ Gedcom.pm history
 
 Release 1.21 -
  - Add relationship method between two individuals (Nigel Horne) (github 12)
+ - Fix "flush" output (Dabrien 'Dabe' Murphy) (github 24)
 
 Release 1.20 - 17th September 2016
  - Tidy up Makefile (Alberto Simões) (github 17)
