@@ -14,12 +14,12 @@ require 5.005;
 package Gedcom::Comparison;
 
 use vars qw($VERSION $Indent);
-$VERSION = "1.20";
+$VERSION = "1.21";
 $Indent  = 0;
 
 BEGIN { eval "use Date::Manip" }             # We'll use this if it is available
 
-use Gedcom::Item 1.20;
+use Gedcom::Item 1.21;
 
 my %cache;
 
@@ -159,7 +159,7 @@ __END__
 
 Gedcom::Comparison - a module to compare Gedcom records
 
-Version 1.20 - 17th September 2016
+Version 1.21 - 14th November 2019
 
 =head1 SYNOPSIS
 
