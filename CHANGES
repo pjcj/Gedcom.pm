@@ -1,5 +1,8 @@
 Gedcom.pm history
 
+Release 1.22 - 15th November 2019
+ - Clarify licence in MYMETA files (Tina Müller) (github 25)
+
 Release 1.21 - 14th November 2019
  - Add relationship method between two individuals (Nigel Horne) (github 12)
  - Fix "flush" output (Dabrien 'Dabe' Murphy) (github 24)

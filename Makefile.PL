@@ -44,6 +44,7 @@ WriteMakefile(
     NAME           => "Gedcom",
     VERSION        => $Version,
     AUTHOR         => 'Paul Johnson (paul@pjcj.net)',
+    LICENSE        => "perl_5",
     ABSTRACT       => "Interface to genealogy GEDCOM files",
     DIR            => [],
     EXE_FILES      => [ "cgi-bin/gedcom.cgi" ],
