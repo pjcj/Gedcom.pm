@@ -16,7 +16,7 @@ package Gedcom::Item;
 use Symbol;
 
 use vars qw($VERSION);
-$VERSION = "1.21";
+$VERSION = "1.22";
 
 sub new {
     my $proto = shift;
@@ -611,7 +611,7 @@ __END__
 
 Gedcom::Item - a base class for Gedcom::Grammar and Gedcom::Record
 
-Version 1.21 - 14th November 2019
+Version 1.22 - 15th November 2019
 
 =head1 SYNOPSIS
 

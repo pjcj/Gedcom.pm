@@ -7,7 +7,7 @@
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-# Version 1.21 - 14th November 2019
+# Version 1.22 - 15th November 2019
 
 use strict;
 
@@ -24,10 +24,10 @@ use Tk;
 use Carp;
 use Data::Dumper;
 
-use Gedcom 1.21;
+use Gedcom 1.22;
 
 use vars qw( $VERSION );
-$VERSION = "1.21";
+$VERSION = "1.22";
 
 eval "use Date::Manip";
 Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
@@ -1236,7 +1236,7 @@ __END__
 
 tkged - an interactive program to manipulate Gedcom genealogy files
 
-Version 1.21 - 14th November 2019
+Version 1.22 - 15th November 2019
 
 =head1 SYNOPSIS
 
