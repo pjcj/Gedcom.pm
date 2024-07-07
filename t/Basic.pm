@@ -304,7 +304,7 @@ sub import {
         ok unlink $f1;
     };
 
-    my $tests = 1533;
+    my $tests = 1536;
     my $grammar;
     if ($grammar = delete $args{create_grammar}) {
         Test::plan tests => $tests + 3;
@@ -1739,6 +1739,9 @@ __DATA__
 1   CONT **
 1   CONT ***
 1   CONT *
+
+0 @N3@ NOTE Line <1>
+1   CONT Line &2
 
 0 @S1@ SOUR
 1   TEXT Source text
