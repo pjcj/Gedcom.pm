@@ -51,7 +51,7 @@ sub main {
     my $g   = "Grammar_$v";
     my $gpm = "lib/Gedcom/$g.pm";
     print "\nwriting $gpm ...\n";
-    open(G, ">$gpm") or die "Can't open $gpm: $!";
+    open G, ">$gpm" or die "Can't open $gpm: $!";
 
     print G <<EOT;
 # Copyright 1998-2024, Paul Johnson (paul\@pjcj.net)
@@ -85,7 +85,7 @@ EOT
 
     my $d = Data::Dumper->new([$grammar], ["grammar"]);
     $d->Indent(1)->Purity(1)->Quotekeys(0);
-    my $dv = eval $Data::Dumper::VERSION;
+    my $dv = eval $Data::Dumper::VERSION;  ## no critic (ProhibitStringyEval)
     $d->Sortkeys(1) if $dv >= 2.12;
     $d->Useperl(1)  if $dv >= 2.12;         # Because of a bug.
     print G $d->Dump;
