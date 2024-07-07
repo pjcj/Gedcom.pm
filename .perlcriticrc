@@ -1595,7 +1595,7 @@ add_packages = Devel::Cover::DB
 
 # Global variables to exclude from this policy.
 # Values that are always included: $ARG, $_, @_.
-allow = %ENV %SIG $> $0
+allow = %ENV %SIG $> $0 $.
 
 
 # Negative array index should be used.

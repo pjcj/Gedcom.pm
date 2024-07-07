@@ -7,11 +7,10 @@
 
 # documentation at __END__
 
-use strict;
-
-require 5.005;
-
 package Gedcom::Item;
+
+use strict;
+require 5.005;
 
 use Symbol;
 
@@ -87,9 +86,9 @@ sub read {
     }
 
     # find out how big the file is
-    seek($fh, 0, 2);
+    seek $fh, 0, 2;
     my $size = tell $fh;
-    seek($fh, $bom ? 3 : 0, 0);  # skip BOM
+    seek $fh, $bom ? 3 : 0, 0;  # skip BOM
     $. = 0;
 
     # initial callback
@@ -179,8 +178,8 @@ sub read {
             warn "Can't open $if";
         } else {
             for my $item (@{$self->{items}}) {
-                print I join("|", map { $item->{$_} || "" }
-                    qw(tag xref value line cpos));
+                print I join "|", map { $item->{$_} || "" }
+                    qw(tag xref value line cpos);
                 print I "\n";
             }
             close I or warn "Can't close $if";
@@ -204,7 +203,7 @@ sub add_items {
         if ($parse && $self->{gedcom}{read_only} && $self->{gedcom}{grammar}) {
 #     print "reading items\n";
             if (defined $item->{cpos}) {
-                seek($self->{fh}, $item->{cpos}, 0);
+                seek $self->{fh}, $item->{cpos}, 0;
                 $. = $item->{line};
             }
         }
@@ -245,7 +244,7 @@ sub skip_items {
         if (my ($lev) = $l =~ /^\s*(\d+)/) {
             if ($lev <= $level) {
                 # print "pushing <$l>\n";
-                seek($self->{fh}, $cpos, 0);
+                seek $self->{fh}, $cpos, 0;
                 $.--;
                 last;
             }
@@ -343,15 +342,16 @@ sub next_item {
                 $value .= $star  if defined $star  && $self->{grammar};
                 $value =~ s/[\r\n]+$// if defined $value;
                 # print STDERR "value: [$value]\n";
-                $rec->{value} = ($rec->{pointer} = $value =~ /^\@(.+)\@$/)
-                    ? $1
-                    : $value
-                    if defined $value;
+                if (defined $value) {
+                    $rec->{value} = ($rec->{pointer} = $value =~ /^\@(.+)\@$/)
+                        ? $1
+                        : $value;
+                }
                 $rec->{min}   = $min                         if defined $min;
                 $rec->{max}   = $max                         if defined $max;
             } else {
                 # print " -- pushing back\n";
-                seek($fh, $bpos, 0);
+                seek $fh, $bpos, 0;
                 $. = $bline;
             }
         } elsif ($line =~ /^\s*[\[\|\]]\s*(?:\/\*.*\*\/\s*)?$/) {
@@ -495,7 +495,7 @@ sub write_xml {
 sub print {
     my $self = shift;
     for my $v (qw( level xref tag value min max )) {
-        print($v, ": ", $self->{$v}, " ") if defined $self->{$v};
+        print $v, ": ", $self->{$v}, " " if defined $self->{$v};
     }
     print "\n";
 }
