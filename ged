@@ -165,7 +165,7 @@ sub main {
 # print "\nnormalising dates...";
 # $ged->normalise_dates("%E %b %Y");
 # sleep 6000;
-    if (0) {
+    if (1) {
         print "\nwriting xml...";
         $ged->write_xml("$gedcom_file.xml");
     }
@@ -225,7 +225,7 @@ sub main {
         my $prim = $i->get_value("_PRIM");
         print "_PRIM: $prim\n";
     }
-    if (1) {
+    if (0) {
         my $from = $ged->get_individual("I14");
         my $to   = $ged->get_individual("I1");
         my $rel  = $from->relationship($to);
