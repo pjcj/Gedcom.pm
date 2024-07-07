@@ -17,6 +17,9 @@ jobs:
         os: [ macos-latest, windows-latest ]
         perl: [ "5" ]
         include:
+          # nothing below 5.8 is supported
+          - { os: "ubuntu-latest", perl: "5.8" }
+          - { os: "ubuntu-latest", perl: "5.10" }
           - { os: "ubuntu-latest", perl: "5.12" }
           - { os: "ubuntu-latest", perl: "5.14" }
           - { os: "ubuntu-latest", perl: "5.16" }
