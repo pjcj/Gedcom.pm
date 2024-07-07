@@ -579,7 +579,10 @@ sub full_value {
         my $v = defined $item->{value} ? $item->{value} : "";
         $v =~ s/[\r\n]+$//;
         $value .= "\n$v" if $item->{tag} eq "CONT";
-        $value .=    $v  if $item->{tag} eq "CONC";
+        if ($item->{tag} eq "CONC") {
+            $value .= " " if $item->{gedcom}{add_conc_space} && $value =~ /\S$/;
+            $value .= $v;
+        }
     }
     $value
 }
