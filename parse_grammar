@@ -38,8 +38,9 @@ sub main {
     delete $grammar->{callback};
     delete $grammar->{stored_record};
 
-    my $me = [getpwuid $<]->[6] || do {
-        my $login = [getpwuid $<]->[0] || $ENV{USER} || $ENV{LOGIN};
+    my $u = eval { [ getpwuid $< ] } || [];
+    my $me = $u->[6] || do {
+        my $login = $u->[0] || $ENV{USER} || $ENV{LOGIN};
         my $name;
         eval { $name = (getpwnam $login)[6] };
         $name || $login

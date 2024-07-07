@@ -306,8 +306,9 @@ sub new {
     # Add the required elements, unless they are already there.
 
         unless ($r->get_record("head")) {
-            my $me = [getpwuid $<]->[6] || do {
-                my $login = [getpwuid $<]->[0] || $ENV{USER} || $ENV{LOGIN};
+            my $u = eval { [ getpwuid $< ] } || [];
+            my $me = $u->[6] || do {
+                my $login = $u->[0] || $ENV{USER} || $ENV{LOGIN};
                 my $name;
                 eval { $name = (getpwnam $login)[6] };
                 $name || $login
