@@ -295,7 +295,9 @@ sub import {
         ok -e $f1;
 
         # check the gedcom file is correct
-        map { s/^(\d+)\s+/$1 / } @Ged_data if $flush;
+        if ($flush) {
+            s/^(\d+)\s+/$1 / for @Ged_data
+        }
 
         ok open F1, $f1;
         ok scalar <F1>, $_ for @Ged_data;
