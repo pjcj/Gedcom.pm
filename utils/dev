@@ -107,6 +107,15 @@ recipe-install-dependencies() {
   install_dependencies
 }
 
+install_development_dependencies() {
+  cpanm --notest \
+    Dist::Zilla Perl::Critic Perl::Tidy
+}
+
+recipe_install-development-dependencies() {
+  install_development_dependencies
+}
+
 install_perl() {
   local name="${1:?No name specified}"
   local version="${2:?No version specified}"
@@ -115,6 +124,7 @@ install_perl() {
   export PLENV_VERSION="$name"
   plenv install-cpanm
   install_dependencies
+  install_development_dependencies
 }
 
 recipe_install-perl() {
