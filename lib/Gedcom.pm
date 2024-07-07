@@ -7,11 +7,10 @@
 
 # documentation at __END__
 
-use strict;
-
-require 5.005;
-
 package Gedcom;
+
+use strict;
+require 5.005;
 
 use Carp;
 use Data::Dumper;
@@ -170,7 +169,7 @@ BEGIN {
         TRLR => 8,
     );
 
-    while (my ($tag, $name) = each (%$Tags)) {
+    while (my ($tag, $name) = each %$Tags) {
         $Funcs{$tag} = $Funcs{lc $tag} = $tag;
         if ($name) {
             $name =~ s/ /_/g;
@@ -307,14 +306,12 @@ sub new {
     # Add the required elements, unless they are already there.
 
         unless ($r->get_record("head")) {
-            my $me = "Unknown user";
-            my $login = $me;
-            if ($login = getlogin || (getpwuid($<))[0] ||
-                         $ENV{USER} || $ENV{LOGIN}) {
+            my $me = [getpwuid $<]->[6] || do {
+                my $login = [getpwuid $<]->[0] || $ENV{USER} || $ENV{LOGIN};
                 my $name;
-                eval { $name = (getpwnam($login))[6] };
-                $me = $name || $login;
-            }
+                eval { $name = (getpwnam $login)[6] };
+                $name || $login
+            } || "Unknown user";
             my $date = localtime;
 
             my ($l0, $l1, $l2, $l3);
@@ -492,8 +489,7 @@ sub sort_sub {
     my $x = sub {
         my ($r) = @_;
         return -2 unless defined $r->{xref};
-        $r->{xref} =~ /(\d+)/;
-        defined $1 ? $1 : -1
+        $r->{xref} =~ /(\d+)/ ? $1 : -1
     };
 
     sub {
@@ -545,12 +541,12 @@ sub get_individual {
     my $unordered = sub {
         my ($names, $t, @ind) = @_;
         map { $_->[1] } grep {
-            my $i = $_->[0];
+            my $ind = $_->[0];
             my $r = 1;
             for my $n (@$names) {
                 # remove matches as they are found
                 # we don't want to match the same name twice
-                last unless $r = $i =~ s/$n->[$t]//;
+                last unless $r = $ind =~ s/$n->[$t]//;
             }
             $r
         }
