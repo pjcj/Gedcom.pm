@@ -28,9 +28,9 @@ Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
 
 $SIG{__WARN__} = sub { print STDERR "\n@_" };
 
-sub main {
+sub main {  ## no critic (Subroutines::ProhibitExcessComplexity)
     my $gedcom_file = shift @ARGV;
-    $| = 1;
+    local $| = 1;
     print "reading...";
     my $ged = Gedcom->new(
         $gedcom_file,
@@ -183,7 +183,7 @@ sub main {
         print "\n";
     }
     if (@ARGV) {
-        print "\n---" . localtime();
+        print "\n---" . localtime;
         my $i = $ged->get_individual(shift @ARGV);
         print "\n", $i->xref, " => ", $i->name, "\n---" . localtime() . "\n";
         # my $n = $i->get_record("note");

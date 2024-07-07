@@ -869,7 +869,7 @@ global_variable_exemptions = VERSION ISA EXPORT(?:_OK)? EXPORT_TAGS AUTOLOAD ENV
 # maximum_violations_per_document    = no_limit
 
 # The variable names that are not to be allowed.
-forbid = abstract bases contract left no record right second
+forbid = abstract bases contract left no right second
 
 
 # Prohibit indirect object call syntax.
