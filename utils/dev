@@ -116,6 +116,15 @@ recipe_install-development-dependencies() {
   install_development_dependencies
 }
 
+install_test_dependencies() {
+  cpanm --notest \
+    Algorithm::Diff
+}
+
+recipe_install-test-dependencies() {
+  install_test_dependencies
+}
+
 install_perl() {
   local name="${1:?No name specified}"
   local version="${2:?No version specified}"
@@ -125,6 +134,7 @@ install_perl() {
   plenv install-cpanm
   install_dependencies
   install_development_dependencies
+  install_test_dependencies
 }
 
 recipe_install-perl() {
