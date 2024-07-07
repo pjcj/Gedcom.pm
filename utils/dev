@@ -100,7 +100,7 @@ recipe_update-copyright() {
 install_dependencies() {
   pi "Installing dependencies with cpanm"
   cpanm --notest \
-    Date::Manip Parse::RecDescent Roman Text::Soundex Pod::Markdown Test::Pod
+    Date::Manip Parse::RecDescent Roman Text::Soundex
 }
 
 recipe-install-dependencies() {
@@ -109,7 +109,7 @@ recipe-install-dependencies() {
 
 install_development_dependencies() {
   cpanm --notest \
-    Dist::Zilla Perl::Critic Perl::Tidy
+    Dist::Zilla Perl::Critic Perl::Tidy Pod::Markdown
 }
 
 recipe_install-development-dependencies() {
@@ -118,7 +118,7 @@ recipe_install-development-dependencies() {
 
 install_test_dependencies() {
   cpanm --notest \
-    Algorithm::Diff
+    Algorithm::Diff Test::Pod
 }
 
 recipe_install-test-dependencies() {
