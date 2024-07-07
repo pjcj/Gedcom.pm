@@ -11,6 +11,7 @@
     my $ged = Gedcom->new(grammar_version => "5.5.1",
                           gedcom_file     => $gedcom_file,
                           read_only       => 1,
+                          add_conc_space  => 1,
                           callback        => $cb);
     my $ged = Gedcom->new(grammar_file => "gedcom-5.5.grammar",
                           gedcom_file  => $gedcom_file);
@@ -262,6 +263,7 @@ See Gedcom::Record.pm for more details.
     my $ged = Gedcom->new(grammar_version => "5.5.1",
                           gedcom_file     => $gedcom_file,
                           read_only       => 1,
+                          add_conc_space  => 1,
                           callback        => $cb);
 
     my $ged = Gedcom->new(grammar_file => "gedcom-5.5.grammar",
@@ -303,6 +305,12 @@ be written and when not all the data will be read.  You may find it useful to
 experiment with this option and check the amount of CPU time and memory that
 your application uses.  You may also need to read this paragraph a few times to
 understand it.  Sorry.
+
+Some GEDCOM tools strip out whitespace at the end of lines before CONC
+lines. Setting the `add_conc_space` option to true will add a space before the
+CONC line if there is not already one there.  This is non-standard (incorrect)
+behaviour, but is useful if you have a GEDCOM file which has been created with
+such a tool. By default this option is not set.
 
 callback is an optional reference to a subroutine which will be called at
 various times while the GEDCOM file (and the grammar file, if applicable) is
