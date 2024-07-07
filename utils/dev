@@ -1,110 +1,133 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Copyright 2017-2019, Paul Johnson (paul@pjcj.net)
+# Copyright 2017-2024, Paul Johnson (paul@pjcj.net)
 
 # This software is free.  It is licensed under the same terms as Perl itself.
 
 # The latest version of this software should be available from my homepage:
 # http://www.pjcj.net
 
-set -euo pipefail
+if ((BASH_VERSINFO[0] < 5)); then
+  echo "❌ bash version $BASH_VERSION is too old. Please install v5 or higher."
+  exit 1
+fi
 
-script=$(basename "$0")
-srcdir=$(readlink -f "$(dirname "$0")")
-readonly LOG_FILE="/tmp/$script.log"
-_p() { l=$1; shift; echo "$l $script: $*" | tee -a "$LOG_FILE" >&2; }
-pt() { _p "[TRACE]  " "$*";                                         }
-pd() { _p "[DEBUG]  " "$*";                                         }
-pi() { _p "[INFO]   " "$*";                                         }
-pw() { _p "[WARNING]" "$*";                                         }
-pe() { _p "[ERROR]  " "$*";                                         }
-pf() { _p "[FATAL]  " "$*"; exit 1;                                 }
+set -eEuo pipefail
+shopt -s inherit_errexit
+
+_p() {
+  __l=$1
+  shift
+  echo "$__l $script: $*" | tee -a "$LOG_FILE" >&2
+}
+pt() { _p "[TRACE]  " "$*"; }
+pd() { _p "[DEBUG]  " "$*"; }
+pi() { _p "[INFO]   " "$*"; }
+pw() { _p "[WARNING]" "$*"; }
+pe() { _p "[ERROR]  " "$*"; }
+pf() {
+  _p "[FATAL]  " "$*"
+  exit 1
+}
 
 usage() {
-    cat <<EOT
+  cat <<EOT
 $script --help
 $script --trace --verbose
 $script update-copyright
 EOT
-    exit 0
+  exit 0
 }
 
 cleanup() {
-    declare -r res=$?
-    ((verbose)) && pi "Cleaning up"
-    exit $res
+  declare -r res=$?
+  # ((verbose)) && pi "Cleaning up"
+  exit "$res"
 }
 
-PATH="$srcdir:$PATH"
-verbose=0
-force=0
-
-while [ $# -gt 0 ]; do
+parse_options() {
+  while [[ $# -gt 0 ]]; do
     case "$1" in
-        -h|--help)
-            usage
-            shift
-            ;;
-        -t|--trace)
-            set -x
-            shift
-            ;;
-        -v|--verbose)
-            verbose=1
-            shift
-            ;;
-        -f|--force)
-            force=1
-            shift
-            ;;
-        *)
-            break
-            ;;
+    -h | --help)
+      usage
+      ;;
+    -t | --trace)
+      set -x
+      shift
+      ;;
+    -v | --verbose)
+      verbose=1
+      shift
+      ;;
+    *)
+      recipe="$1"
+      shift
+      args=("$@")
+      break
+      ;;
     esac
-done
+  done
+}
 
-gcdir=$(readlink -f "$srcdir/..")
+recipe_options() {
+  echo "-h --help"
+  echo "-t --trace"
+  echo "-v --verbose"
+  declare -F | perl -nE 'say $1 if /recipe_(.+)/'
+}
+
+setup() {
+  script=$(basename "$0")
+  verbose=0
+  readonly LOG_FILE="/tmp/$script.log"
+  parse_options "$@"
+}
+
+recipe_update-copyright() {
+  local from="${1:-$(date +'%Y' --date='last year')}"
+  local to="${2:-$(date +'%Y')}"
+  pi "Updating copyright from $from to $to"
+  local me="Paul Johnson"
+  local files
+  files=$(git ls-files)
+  # shellcheck disable=SC2086
+  perl -pi -e "s/Copyright \\d+-\\K$from(, $me)/$to\$1/i" $files
+  # shellcheck disable=SC2086
+  perl -pi -e "s/Copyright $from\\K(, $me)/-$to\$1/i" $files
+}
+
+install_dependencies() {
+  pi "Installing dependencies with cpanm"
+  cpanm --notest \
+    Date::Manip Parse::RecDescent Roman Text::Soundex Pod::Markdown Test::Pod
+}
+
+recipe-install-dependencies() {
+  install_dependencies
+}
+
+recipe_all-versions() {
+  ./utils/all_versions "$@"
+}
+
+run_recipe() {
+  recipe="recipe_$recipe"
+  shift
+  if declare -F "$recipe" >/dev/null 2>&1; then
+    "$recipe" "${args[@]:-}"
+  else
+    pf "Unknown recipe: $recipe"
+  fi
+}
 
 main() {
-    ((verbose)) && pi "Running $*"
-    [ -z "${1:-}" ] && pf "Missing argument"
-    case "$1" in
-        update-copyright)
-            from="${2:-$(date +'%Y' --date='last year')}"
-            to="${3:-$(date +'%Y')}"
-            pi "Updating copyright from $from to $to"
-            me="Paul Johnson"
-            files=$(git ls-files)
-            # shellcheck disable=SC2086
-            perl -pi -e "s/Copyright \\d+-\\K$from(, $me)/$to\$1/i" $files
-            # shellcheck disable=SC2086
-            perl -pi -e "s/Copyright $from\\K(, $me)/-$to\$1/i"    $files
-            ;;
-        install_dependencies)
-            cpanm --notest                                        \
-                Date::Manip Parse::RecDescent Roman Text::Soundex \
-                Pod::Markdown Test::Pod
-            ;;
-        all_versions)
-            shift
-            ./utils/all_versions "$@"
-            ;;
-        __xx__)
-            shift
-            echo $force "$gcdir"
-            ;;
-        options)
-            perl -nE 'say $1 =~ s/"//gr =~ s/\s*\|\s*/\n/gr' \
-                -E 'if /^ {8}"?([a-zA-Z0-9_ "|\\-]+)"?(?:\)|\s*\|\s*\\)$/' \
-                -E '&& $1 !~ /^_/' < "$0"
-            ;;
-        *)
-            pf "Unknown option: $1"
-            ;;
-    esac
+  setup "$@"
+  ((verbose)) && pi "Running $recipe ${args[*]:-}"
+  [[ ${recipe:-} == "" ]] && pf "Missing recipe"
+  run_recipe "${args[@]:-}"
 }
 
-if [[ "${BASH_SOURCE[0]}" = "$0" ]]; then
-    trap cleanup EXIT INT
-    main "$@"
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+  trap cleanup EXIT INT
+  main "$@"
 fi
