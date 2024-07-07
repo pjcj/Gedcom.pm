@@ -468,7 +468,14 @@ sub write_xml {
 
     if (defined $value) {
         $p .= "$indent  " if $spaced || $sub_items;
-        $p .= $value;
+        my $enc = {
+            "&" => "&amp;",
+            "<" => "&lt;",
+            ">" => "&gt;",
+            '"' => "&quot;",
+            "'" => "&apos;",
+        };
+        $p .= $value =~ s/([&<>"'])/$enc->{$1}/egr;
         $p .= "\n"        if $spaced || $sub_items;
     }
 
