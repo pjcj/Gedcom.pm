@@ -181,7 +181,7 @@ Release 1.06 - 13th February 2000
      t/lines/lines.ll
      t/bias.t
      t/lines/bias.ll
- - Use "item" instaed of "child" to represent Gedcom hierarchies
+ - Use "item" instead of "child" to represent Gedcom hierarchies
  - Raname Gedcom::Item::add_children()      to Gedcom::Item::add_items()
           Gedcom::Item::skip_children()        Gedcom::Item::skip_items()
           Gedcom::Item::delete_child()         Gedcom::Item::delete_item()
