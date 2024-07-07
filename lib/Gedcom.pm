@@ -188,9 +188,9 @@ sub AUTOLOAD {
     $func =~ s/^.*:://;
     my $tag;
     croak "Undefined subroutine $func called"
-    if $func !~ /^(add|get)_(.*)$/ ||
-    !($tag = $Funcs{lc $2}) ||
-    !exists $Top_tag_order{$tag};
+        if $func !~ /^(add|get)_(.*)$/ ||
+            !($tag = $Funcs{lc $2}) ||
+            !exists $Top_tag_order{$tag};
     no strict "refs";
     if ($1 eq "add") {
         *$func = sub {
@@ -292,14 +292,14 @@ sub new {
 
     # now read in or create the GEDCOM file
     return undef unless
-    my $r = $self->{record} = Gedcom::Record->new(
-        defined $self->{gedcom_file} ? (file => $self->{gedcom_file}) : (),
-        line     => 0,
-        tag      => "GEDCOM",
-        grammar  => $grammar->structure("GEDCOM"),
-        gedcom   => $self,
-        callback => $self->{callback},
-    );
+        my $r = $self->{record} = Gedcom::Record->new(
+            defined $self->{gedcom_file} ? (file => $self->{gedcom_file}) : (),
+            line     => 0,
+            tag      => "GEDCOM",
+            grammar  => $grammar->structure("GEDCOM"),
+            gedcom   => $self,
+            callback => $self->{callback},
+        );
 
     unless (defined $self->{gedcom_file}) {
 
