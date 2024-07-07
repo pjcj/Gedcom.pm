@@ -27,7 +27,7 @@ sub main {
     my ($grammar_file, $version) = @ARGV;
     ($version) = $grammar_file =~ /(\d+(\.\d+)*)/ unless defined $version;
     die "version must be a gedcom version number\n" unless $version;
-    $| = 1;
+    local $| = 1;
     print "reading $grammar_file ...";
     my $grammar = Gedcom::Grammar->new(
         file     => $grammar_file,
@@ -38,13 +38,12 @@ sub main {
     delete $grammar->{callback};
     delete $grammar->{stored_record};
 
-    my $me = "Unknown user";
-    my $login = $me;
-    if ($login = getlogin || (getpwuid($<))[0] || $ENV{USER} || $ENV{LOGIN}) {
+    my $me = [getpwuid $<]->[6] || do {
+        my $login = [getpwuid $<]->[0] || $ENV{USER} || $ENV{LOGIN};
         my $name;
-        eval { $name = (getpwnam($login))[6] };
-        $me = $name || $login;
-    }
+        eval { $name = (getpwnam $login)[6] };
+        $name || $login
+    } || "Unknown user";
     my $date = localtime;
 
     (my $v = $version) =~ tr/./_/;
