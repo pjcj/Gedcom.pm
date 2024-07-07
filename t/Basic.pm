@@ -268,7 +268,10 @@ sub import {
         for sort keys %individuals;
 
         my $i = $ged->get_individual("I82");
-        ok $i->note, "Line 1\nLine 2\nLine 3\nLine 4";
+        my $gold = $ged->{add_conc_space}
+            ? "Line 1\nLine 2\nLin e 3\nLine 4"
+            : "Line 1\nLine 2\nLine 3\nLine 4";
+        ok $i->note, $gold;
         ok scalar $i->get_value("birth age"), 0;
 
         $i = $ged->get_individual("I83");
