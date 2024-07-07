@@ -1,0 +1,15 @@
+---
+extends: default
+
+rules:
+  braces: { min-spaces-inside: 1, max-spaces-inside: 1 }
+  brackets: { min-spaces-inside: 1, max-spaces-inside: 1 }
+  comments:
+    level: error
+  comments-indentation: disable
+  document-start:
+    level: error
+  truthy:
+    level: error
+  line-length:
+    max: 300  # try to improve this, but it's also checked in check-line-length
