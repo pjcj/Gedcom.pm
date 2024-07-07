@@ -35,6 +35,7 @@ usage() {
 $script --help
 $script --trace --verbose
 $script update-copyright
+$script install-perl gedcom_perl 5.40.0
 EOT
   exit 0
 }
@@ -104,6 +105,22 @@ install_dependencies() {
 
 recipe-install-dependencies() {
   install_dependencies
+}
+
+install_perl() {
+  local name="${1:?No name specified}"
+  local version="${2:?No version specified}"
+  yes | plenv uninstall "$name" || true
+  plenv install --as "$name" -j 32 -D usedevel --noman "$version"
+  export PLENV_VERSION="$name"
+  plenv install-cpanm
+  install_dependencies
+}
+
+recipe_install-perl() {
+  local name="${1:?No name specified}"
+  local version="${2:?No version specified}"
+  install_perl "$name" "$version"
 }
 
 recipe_all-versions() {
