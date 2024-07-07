@@ -269,9 +269,11 @@ sub next_item {
         my $line_number = $.;
         # print "line $line_number is <$line>";
         if (my ($structure) = $line =~ /^\s*(\w+): =\s*$/) {
-            $rec = $self->new(level     => -1,
+            $rec = $self->new(
+                level     => -1,
                 structure => $structure,
-                line      => $line_number);
+                line      => $line_number,
+            );
 #     print "found structure $structure\n";
         } elsif (my ($level, $xref, $tag, $value, $space, $min, $max, $star) =
             $line =~ /^\s*                       # optional whitespace at start
