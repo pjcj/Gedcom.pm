@@ -475,7 +475,8 @@ sub write_xml {
             '"' => "&quot;",
             "'" => "&apos;",
         };
-        $p .= $value =~ s/([&<>"'])/$enc->{$1}/egr;
+        $value =~ s/([&<>"'])/$enc->{$1}/eg;
+        $p .= $value;
         $p .= "\n"        if $spaced || $sub_items;
     }
 
