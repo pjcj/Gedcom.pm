@@ -28,7 +28,7 @@ Date_Init("DateFormat=UK") if $INC{"Date/Manip.pm"};
 sub ok {
     my @a = @_;
     s/[\r\n]+$/\n/ for @a;
-    &Test::ok(@a)
+    Test::ok(@a)
 }
 
 sub validate_ok {
@@ -76,13 +76,13 @@ EOW
 
 my @Ged_data = <DATA>;
 
-sub xrefs (@) { join " ", map { $_->xref =~ /(\d+)/; $1 } @_ }
-sub rins  (@) { join " ", map { $_->rin } @_                 }
-sub i     (@) { "@_"                                         }
+sub xrefs (@) { join " ", map { $_->xref =~ /(\d+)/ ? $1 : () } @_ }
+sub rins  (@) { join " ", map { $_->rin } @_                       }
+sub i     (@) { "@_"                                               }
 
 sub import {
     my $class = shift;
-    my %args = @_;
+    my %all_args = @_;
     my $basic_test = sub {
         my $ged = shift;
         my %args = @_;
@@ -124,18 +124,18 @@ sub import {
 
         ok xrefs($ged->individuals), i(1 .. $inds);
         ok rins ($ged->individuals),
-        join(" ", qw(2 3 4 5 6 8 29 55 63 82 7 9 10 25 11 12 16 20 24 13 14
+        join " ", qw(2 3 4 5 6 8 29 55 63 82 7 9 10 25 11 12 16 20 24 13 14
             15 17 18 19 21 22 23 26 27 28 30 31 49 32 47 33 39 43
             48 34 35 36 37 38 40 41 42 44 45 46 50 53 51 54 52 56
             57 58 59 60 61 62 64 65 71 78 66 67 69 70 68 72 73 75
             74 76 77 79 80 81 83 84 85 86 87 88 89 90 91 92 140
-            141));
+            141);
         ok xrefs($ged->families   ), i(1 .. $fams);
         ok rins ($ged->families   ),
-        join(" ", qw(94 93 116 95 111 104 106 107 115 96 112 98 108 100 118
+        join " ", qw(94 93 116 95 111 104 106 107 115 96 112 98 108 100 118
             99 132 113 114 97 136 102 119 121 139 126 127 128 138
             120 122 130 103 125 105 101 117 110 129 133 134 135
-            109 137 131 123 124));
+            109 137 131 123 124);
 
         ok $ged->next_xref("I"), "I" . ($inds + 1);
         ok $ged->next_xref("F"), "F" . ($fams + 1);
@@ -205,28 +205,28 @@ sub import {
         ok rins($ged->resolve_xref($ind_xref)), "17";
 
         ok xrefs($ged->individuals),
-        join(" ", qw(29 30 19 20 21 7 22 23 24 25 31 8 1 9 2 3 4 5 6 10 11
+        join " ", qw(29 30 19 20 21 7 22 23 24 25 31 8 1 9 2 3 4 5 6 10 11
             12 13 14 15 16 17 18 26 27 28 32 33 34 35 36 37 38 39
             40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57
             58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75
             76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92
-            93));
+            93);
         ok rins ($ged->individuals),
-        join(" ", qw(2 3 4 5 6 8 29 55 63 82 7 9 10 25 11 12 16 20 24 13 14
+        join " ", qw(2 3 4 5 6 8 29 55 63 82 7 9 10 25 11 12 16 20 24 13 14
             15 17 18 19 21 22 23 26 27 28 30 31 49 32 47 33 39 43
             48 34 35 36 37 38 40 41 42 44 45 46 50 53 51 54 52 56
             57 58 59 60 61 62 64 65 71 78 66 67 69 70 68 72 73 75
             74 76 77 79 80 81 83 84 85 86 87 88 89 90 91 92 140
-            141));
+            141);
         ok xrefs($ged->families),
-        join(" ", qw(14 46 47 10 15 16 17 18 19 2 11 1 3 4 5 6 7 8 9 12 13
+        join " ", qw(14 46 47 10 15 16 17 18 19 2 11 1 3 4 5 6 7 8 9 12 13
             20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37
-            38 39 40 41 42 43 44 45));
+            38 39 40 41 42 43 44 45);
         ok rins ($ged->families),
-        join(" ", qw(94 93 116 95 111 104 106 107 115 96 112 98 108 100 118
+        join " ", qw(94 93 116 95 111 104 106 107 115 96 112 98 108 100 118
             99 132 113 114 97 136 102 119 121 139 126 127 128 138
             120 122 130 103 125 105 101 117 110 129 133 134 135
-            109 137 131 123 124));
+            109 137 131 123 124);
 
         ok $ged->next_xref("I"), "I" . ($inds + 1);
         ok $ged->next_xref("F"), "F" . ($fams + 1);
@@ -308,18 +308,18 @@ sub import {
 
     my $tests = 1536;
     my $grammar;
-    if ($grammar = delete $args{create_grammar}) {
+    if ($grammar = delete $all_args{create_grammar}) {
         Test::plan tests => $tests + 3;
-        system ($^X, ((-d "t") ? "." : "..") . "/parse_grammar", $grammar, 0.1);
+        system $^X, ((-d "t") ? "." : "..") . "/parse_grammar", $grammar, 0.1;
         ok $?, 0;
         ok -e "lib/Gedcom/Grammar_0_1.pm";
-        $args{grammar_version} = 0.1;
+        $all_args{grammar_version} = 0.1;
     } else {
         Test::plan tests => $tests;
     }
 
-    my $g = _new_gedcom(\%args);
-    $basic_test->($g, %args);
+    my $g = _new_gedcom(\%all_args);
+    $basic_test->($g, %all_args);
 
     if ($grammar) {
         ok unlink ((-d "t") ? "." : "..") . "/lib/Gedcom/Grammar_0_1.pm";

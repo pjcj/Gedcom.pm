@@ -465,7 +465,7 @@ only_in_void_context = 1
 
 
 # Write `open my $fh, q{<}, $filename;' instead of `open FH, q{<}, $filename;'.
-[InputOutput::ProhibitBarewordFileHandles]
+[-InputOutput::ProhibitBarewordFileHandles]
 # set_themes                         = bugs certrec core pbp
 # add_themes                         =
 # severity                           = 5
@@ -1135,7 +1135,7 @@ allow_name_regex = ^(?:_build_\w+|_data_printer)$
 
 
 # Always unpack `@_' first.
-[Subroutines::RequireArgUnpacking]
+[-Subroutines::RequireArgUnpacking]
 # set_themes                         = core maintenance pbp
 # add_themes                         =
 # severity                           = 4
