@@ -204,7 +204,7 @@ README.md : lib/Gedcom.pm utils/makeh
 \t pod2markdown < lib/Gedcom.pm | \$(PERL) utils/makeh munge_readme > README.md
 
 t : pure_all
-\t exec make test HARNESS_OPTIONS=j8:c HARNESS_TIMER=1
+\t exec make test HARNESS_OPTIONS=j20:c HARNESS_TIMER=1
 
 # Webservies section
 
