@@ -33,9 +33,9 @@ sub main {  ## no critic (Subroutines::ProhibitExcessComplexity)
     local $| = 1;
     print "reading...";
     my $ged = Gedcom->new(
-        $gedcom_file,
-        # gedcom_file     => $gedcom_file,
-        # grammar_version => "5.5.1",
+        # $gedcom_file,
+        gedcom_file     => $gedcom_file,
+        grammar_version => "7.0.14",
         # grammar_file    => "gedcom-5.5.1.grammar",
         # callback        => sub { print "." },
         # read_only       => 1,
