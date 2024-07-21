@@ -10,42 +10,42 @@
 2     FORM LINEAGE-LINKED
 1   SUBM @SUBM1@
 1   NOTE This Gedcom file should only be used as part of the testsuite
-2     CONC for Gedcom.pm (http://www.pjcj.net).  I have removed a
-2     CONC lot of data from the original, and changed a few bits, so you
-2     CONC should use the original if you want royal genealogy.  Contact me
-2     CONC if you cannot locate the original.
-2     CONC
-2     CONC Paul Johnson (paul@pjcj.net)
-2     CONC
-2     CONC >> In a message to Cliff Manis (cmanis@csoftec.csf.com)
-2     CONC >> Denis Reid wrote the following:
-2     CONC >> Date: Fri, 25 Dec 92 14:12:32 -0500
-2     CONC >> From: ah189@cleveland.Freenet.Edu (Denis Reid)
-2     CONC >> Subject: THE ROYALS
-2     CONC >> First of all,  MERRY CHRISTMAS!
-2     CONC >>
-2     CONC >> You may make this Royal GEDCOM available available to whomever.
-2     CONC >> As you know this is a work in process and have received
-2     CONC >> suggestions, corrections and additions from all over the planet...
-2     CONC >> some even who claim to be descended from Charlemange, himself!
-2     CONC >>
-2     CONC >> The weakest part of the Royals is in the French and Spanish lines.
-2     CONC >> I found that many of the French Kings had multiple mistresses
-2     CONC >> whose descendants claimed noble titles, and the Throne itself in
-2     CONC >> some cases.  I have had the hardest time finding good published
-2     CONC >> sources for French and Spanish Royalty.
-2     CONC >>
-2     CONC >> If you do post it to a BBS or send it around, I would appreciate
-2     CONC >> it if you'd append a message to the effect that I would welcome
-2     CONC >> comments and suggestions and possible sources to improve the
-2     CONC >> database.
-2     CONC >>
-2     CONC >> Since the Royals had so many names and many titles it was
-2     CONC >> difficult to "fill in the blanks" with their name.  In the
-2     CONC >> previous version, I included all their titles, names, monikers in
-2     CONC >> the notes.
-2     CONC >>
-2     CONC >> Thanks for your interest.   Denis Reid
+2     CONT for Gedcom.pm (http://www.pjcj.net).  I have removed a
+2     CONT lot of data from the original, and changed a few bits, so you
+2     CONT should use the original if you want royal genealogy.  Contact me
+2     CONT if you cannot locate the original.
+2     CONT
+2     CONT Paul Johnson (paul@pjcj.net)
+2     CONT
+2     CONT >> In a message to Cliff Manis (cmanis@csoftec.csf.com)
+2     CONT >> Denis Reid wrote the following:
+2     CONT >> Date: Fri, 25 Dec 92 14:12:32 -0500
+2     CONT >> From: ah189@cleveland.Freenet.Edu (Denis Reid)
+2     CONT >> Subject: THE ROYALS
+2     CONT >> First of all,  MERRY CHRISTMAS!
+2     CONT >>
+2     CONT >> You may make this Royal GEDCOM available available to whomever.
+2     CONT >> As you know this is a work in process and have received
+2     CONT >> suggestions, corrections and additions from all over the planet...
+2     CONT >> some even who claim to be descended from Charlemange, himself!
+2     CONT >>
+2     CONT >> The weakest part of the Royals is in the French and Spanish lines.
+2     CONT >> I found that many of the French Kings had multiple mistresses
+2     CONT >> whose descendants claimed noble titles, and the Throne itself in
+2     CONT >> some cases.  I have had the hardest time finding good published
+2     CONT >> sources for French and Spanish Royalty.
+2     CONT >>
+2     CONT >> If you do post it to a BBS or send it around, I would appreciate
+2     CONT >> it if you'd append a message to the effect that I would welcome
+2     CONT >> comments and suggestions and possible sources to improve the
+2     CONT >> database.
+2     CONT >>
+2     CONT >> Since the Royals had so many names and many titles it was
+2     CONT >> difficult to "fill in the blanks" with their name.  In the
+2     CONT >> previous version, I included all their titles, names, monikers in
+2     CONT >> the notes.
+2     CONT >>
+2     CONT >> Thanks for your interest.   Denis Reid
 
 0 @SUBM1@ SUBM
 1   NAME Denis R. Reid
