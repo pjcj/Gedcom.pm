@@ -220,6 +220,11 @@ sub main {  ## no critic (Subroutines::ProhibitExcessComplexity)
             }
         }
     }
+    if (1) {
+        for my $i ($ged->individuals) {
+            print $i->name, "\n";
+        }
+    }
     if (0) {
         my $i = $ged->get_individual("I93");
         my $prim = $i->get_value("_PRIM");

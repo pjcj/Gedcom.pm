@@ -383,6 +383,7 @@ sub next_text_line {
     my $line = "";
     my $fh = $self->{fh};
     $line = <$fh> until !defined $line || $line =~ /\S/;
+    $line .= "\n" if defined $line && $line !~ /\n$/;
     $line;
 }
 
