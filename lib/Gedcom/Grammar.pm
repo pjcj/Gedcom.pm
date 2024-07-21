@@ -154,7 +154,7 @@ objects.
 
 =head1 METHODS
 
-=head2 structures
+=head2 structure
 
   my $st = $grammar->structure("GEDCOM");
 
