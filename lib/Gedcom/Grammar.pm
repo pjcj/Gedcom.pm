@@ -7,11 +7,10 @@
 
 # documentation at __END__
 
-use strict;
-
-require 5.005;
-
 package Gedcom::Grammar;
+
+use strict;
+require 5.005;
 
 use Data::Dumper;
 
