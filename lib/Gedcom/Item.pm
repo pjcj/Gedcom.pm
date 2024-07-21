@@ -29,7 +29,7 @@ sub new {
     };
     bless $self, $class;
     $self->read if $self->{file} && $self->{file} ne "*";
-    $self;
+    $self
 }
 
 sub copy {
@@ -186,7 +186,7 @@ sub read {
         }
     }
 
-    $self;
+    $self
 }
 
 sub add_items {
@@ -371,14 +371,14 @@ sub next_item {
     # print "with      "; $rec->print if $rec;
     $self->add_items($rec)
         if $rec && defined $rec->{level} && ($rec->{level} > $item->{level});
-    $rec;
+    $rec
 }
 
 sub next_line {
     my $self = shift;
     my $fh = $self->{fh};
     my $line = <$fh>;
-    $line;
+    $line
 }
 
 sub next_text_line {
@@ -387,7 +387,7 @@ sub next_text_line {
     my $fh = $self->{fh};
     $line = <$fh> until !defined $line || $line =~ /\S/;
     $line .= "\n" if defined $line && $line !~ /\n$/;
-    $line;
+    $line
 }
 
 sub write {
