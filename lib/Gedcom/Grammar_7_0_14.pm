@@ -16,11 +16,10 @@
 
 # Version 1.22 - Fri Jul 12 23:58:27 2024
 
-use strict;
-
-require 5.005;
-
 package Gedcom::Grammar_7_0_14;
+
+use strict;
+require 5.005;
 
 use vars qw($VERSION $grammar);
 $VERSION = 1.22;
