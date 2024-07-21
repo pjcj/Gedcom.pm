@@ -267,14 +267,14 @@ sub next_item {
         # TODO - tidy this up
         my $line_number = $.;
         # print "line $line_number is <$line>";
-        if (my ($structure) = $line =~ /^\s*(\w+): =\s*$/) {
+        if (my ($structure) = $line =~ /^\s*(\w+)\s*:\s*=\s*$/) {
             $rec = $self->new(
                 level     => -1,
                 structure => $structure,
                 line      => $line_number,
             );
 #     print "found structure $structure\n";
-        } elsif (my ($level, $xref, $tag, $value, $space, $min, $max, $star) =
+        } elsif (my ($level, $xref, $tag, $value, $space, $min, $max, $star, $g7) =
             $line =~ /^\s*                       # optional whitespace at start
                       ((?:\+?\d+)|n)             # start level
                       \s*                        # optional whitespace
@@ -302,7 +302,7 @@ sub next_item {
                         )                        #
                         (\s+)                    # whitespace
                       )??                        # optional - non greedy
-                      (?:                        # value
+                      (?:                        #
                         \{                       # open brace
                           (\d+)                  # min
                           :                      # :
@@ -310,7 +310,9 @@ sub next_item {
                           \*?                    # optional *
                         [\}\]]                   # close brace or bracket
                       )?                         # optional
-                      (\*?\s*)                   # optional * and ws at end
+                      (\*)?                      # optional *
+                      \s*(g7:.*)?                # optional g7 tag
+                      \s*                        # optional whitespace at end
                       $/x)
 #           $line =~ /^\s*                       # optional whitespace at start
 #                     (\d+)                      # start level
@@ -327,7 +329,7 @@ sub next_item {
 #                     )??                        # optional - non greedy
 #                     \s*$/x)                    # optional whitespace at end
         {
-            # print "found $level below $item->{level}\n";
+            # print "found $level below $item->{level} [$tag][$value]\n";
             if ($level eq "n" || $level > $item->{level}) {
                 unless ($rec) {
                     $rec = $self->new(line => $line_number);
