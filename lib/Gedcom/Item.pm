@@ -268,6 +268,7 @@ sub next_item {
         my $line_number = $.;
         # print "line $line_number is <$line>";
         if (my ($structure) = $line =~ /^\s*(\w+)\s*:\s*=\s*$/) {
+            $structure = "GEDCOM" if $structure eq "Dataset";
             $rec = $self->new(
                 level     => -1,
                 structure => $structure,
