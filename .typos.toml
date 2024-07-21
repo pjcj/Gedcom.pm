@@ -5,6 +5,7 @@
 [default.extend-words]
   thr = "thr"
   RELA = "RELA"
+  SCHMA = "SCHMA"
   STAE = "STAE"
   Monts = "Monts"
 
