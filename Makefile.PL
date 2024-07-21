@@ -8,7 +8,6 @@
 # http://www.pjcj.net
 
 use strict;
-
 require 5.005;
 
 use ExtUtils::MakeMaker;

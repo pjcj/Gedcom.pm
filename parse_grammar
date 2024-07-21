@@ -10,7 +10,6 @@
 # Version 1.22 - 15th November 2019
 
 use strict;
-
 require 5.005;
 
 use Data::Dumper;
@@ -72,11 +71,10 @@ sub main {
 
 # Version $VERSION - $date
 
-use strict;
-
-require 5.005;
-
 package Gedcom::$g;
+
+use strict;
+require 5.005;
 
 use vars qw(\$VERSION \$grammar);
 \$VERSION = $VERSION;
